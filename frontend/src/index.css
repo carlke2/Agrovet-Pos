@@ -19,6 +19,17 @@
     --danger: #C0392B;
     --info: #2B6CB0;
     --inactive: #8A9189;
+    --success-wash: #E7F6EE;
+    --success-ink: #0E5A32;
+    --warning-wash: #FFF3E0;
+    --warning-ink: #7A3E00;
+    --danger-wash: #FDECEA;
+    --danger-ink: #8E241C;
+    --info-wash: #E7F0FA;
+    --info-ink: #1A4578;
+    --inactive-wash: #F0F1EF;
+    --inactive-ink: #3F4642;
+    --scrim: rgb(18 53 36 / 0.4);
 
     --primary-50: #F3FAF6;
     --primary-100: #E3F1E8;
@@ -94,81 +105,4 @@ input[inputmode="numeric"] {
 .swal2-icon.swal2-warning {
   border-color: var(--warning);
   color: var(--warning);
-}
-
-/* Kept until shared Spinner replaces page loaders. */
-.agro-spinner {
-  --hop: -8px;
-  display: inline-flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 6px;
-  height: 32px;
-}
-
-.agro-spinner > div {
-  width: 18px;
-  height: 18px;
-  background-color: var(--primary);
-  border-radius: 5px;
-  display: inline-block;
-  animation: agro-bouncedelay 1.4s infinite ease-in-out both;
-}
-
-.agro-spinner .bounce1 {
-  animation-delay: -0.32s;
-}
-
-.agro-spinner .bounce2 {
-  animation-delay: -0.16s;
-}
-
-.agro-spinner-light > div {
-  background-color: currentColor;
-}
-
-.agro-spinner-xs {
-  --hop: -3px;
-  height: 14px;
-  gap: 3px;
-}
-
-.agro-spinner-xs > div {
-  width: 6px;
-  height: 6px;
-  border-radius: 2px;
-  background-color: currentColor;
-}
-
-.agro-spinner-sm {
-  --hop: -6px;
-  height: 26px;
-  gap: 5px;
-}
-
-.agro-spinner-sm > div {
-  width: 12px;
-  height: 12px;
-  border-radius: 4px;
-}
-
-.agro-spinner-lg {
-  --hop: -10px;
-  height: 40px;
-  gap: 8px;
-}
-
-.agro-spinner-lg > div {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-}
-
-@keyframes agro-bouncedelay {
-  0%, 80%, 100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1) translateY(var(--hop));
-  }
 }

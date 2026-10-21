@@ -1,8 +1,10 @@
-import React from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider, landingPathFor, useAuth } from "@/context/AuthContext";
 import type { Permission } from "@/services/authStorage";
 import Loader from "@/components/ui/loader";
+import PageLoader from "@/components/ui/PageLoader";
+import { ToastProvider } from "@/components/ui/Toast";
 import PermissionProtectedRoute from "@/components/PermissionProtectedRoute";
 import GuestRoute from "@/components/GuestRoute";
 import Sidebar from "@/components/Sidebar";
@@ -34,6 +36,8 @@ import CollectionsPage from "@/pages/finance/CollectionsPage";
 import NoAccess from "@/pages/NoAccess";
 import StaffAttendanceTerminal from "@/pages/attendance/StaffAttendanceTerminal";
 import StaffAttendanceReport from "@/pages/attendance/StaffAttendanceReport";
+
+const DevUi = import.meta.env.DEV ? lazy(() => import("@/pages/dev/UiKit")) : null;
 
 const R = (permission: Permission | undefined, element: JSX.Element) => (
   <PermissionProtectedRoute permission={permission}>{element}</PermissionProtectedRoute>
@@ -108,6 +112,17 @@ function AppShell() {
 
           <Route path="/user-profile" element={R("legacy_pos_access", <UserProfile />)} />
           <Route path="/no-access" element={<NoAccess />} />
+          {DevUi ? (
+            <Route
+              path="/dev/ui"
+              element={R(
+                "manage_settings",
+                <Suspense fallback={<PageLoader label="Loading gallery" />}>
+                  <DevUi />
+                </Suspense>,
+              )}
+            />
+          ) : null}
 
           <Route
             path="*"
@@ -127,7 +142,9 @@ function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <AppShell />
+        <ToastProvider>
+          <AppShell />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

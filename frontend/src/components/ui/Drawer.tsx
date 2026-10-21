@@ -1,0 +1,54 @@
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { cn } from "@/lib/cn";
+import { useFocusTrap } from "@/lib/useFocusTrap";
+
+type DrawerProps = {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  side?: "left" | "right";
+};
+
+export default function Drawer({ open, title, onClose, children, side = "left" }: DrawerProps) {
+  const titleId = useId();
+  const panelRef = useRef<HTMLElement>(null);
+  useFocusTrap(open, panelRef, onClose);
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[70]">
+      <button type="button" aria-label="Close panel" className="absolute inset-0 bg-scrim" onClick={onClose} />
+      <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={cn(
+          "absolute top-0 flex h-full w-[min(100%,20rem)] flex-col bg-surface shadow-md outline-none",
+          side === "left" ? "left-0" : "right-0",
+        )}
+      >
+        <div className="border-b border-sand px-4 py-3">
+          <h2 id={titleId} className="text-base font-bold text-ink">
+            {title}
+          </h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+      </aside>
+    </div>,
+    document.body,
+  );
+}

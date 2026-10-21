@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   LogIn,
   LogOut,
-  Loader2,
   RefreshCw,
   Search,
   ArrowLeft,
@@ -10,6 +9,7 @@ import {
   Clock,
 } from "lucide-react";
 import API from "@/services/api";
+import Loader from "@/components/ui/loader";
 import { toast } from "@/services/toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -141,7 +141,7 @@ const StaffAttendanceTerminal = () => {
 
             {loadingStaff ? (
               <div className="flex justify-center py-16">
-                <Loader2 className="animate-spin text-white/80" size={32} />
+                <Loader size="lg" showText={false} tone="light" className="text-white/80" />
               </div>
             ) : filteredStaff.length === 0 ? (
               <p className="text-center text-white/80 py-12">No staff found</p>
@@ -233,7 +233,7 @@ const StaffAttendanceTerminal = () => {
                   disabled={clocking}
                   className="w-full py-5 rounded-2xl bg-white text-[#334155] font-bold text-lg flex items-center justify-center gap-3 hover:bg-[#f8fafc] disabled:opacity-50 transition"
                 >
-                  {clocking ? <Loader2 className="animate-spin" size={28} /> : <Clock size={28} />}
+                  {clocking ? <Loader size="sm" showText={false} /> : <Clock size={28} />}
                   {clocking
                     ? "Recording…"
                     : selected.nextAction === "check_out"

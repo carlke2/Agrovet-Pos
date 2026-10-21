@@ -6,7 +6,6 @@ import {
   Plus,
   Minus,
   X,
-  Loader2,
   TrendingUp,
   Receipt,
   Package,
@@ -831,7 +830,7 @@ const PosTerminal = () => {
                 disabled={mpesaLoading}
                 className="w-full py-4 bg-[#334155] text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {mpesaLoading ? <Loader2 className="animate-spin" size={18} /> : <Smartphone size={18} />}
+                {mpesaLoading ? <Loader size="xs" showText={false} /> : <Smartphone size={18} />}
                 {mpesaLoading ? "Awaiting M-Pesa PIN..." : `Send STK · KES ${total.toLocaleString()}`}
               </button>
             </div>

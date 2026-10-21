@@ -9,10 +9,10 @@ import {
   List,
   ImagePlus,
   X,
-  Loader2,
   Tags,
 } from "lucide-react";
 import API from "@/services/api";
+import Loader from "@/components/ui/loader";
 import { toast } from "@/services/toast";
 
 export type Tab = "list" | "add" | "edit" | "update" | "delete" | "categories";
@@ -148,7 +148,7 @@ const ImageUploader = ({ value, onChange, disabled }: ImageUploaderProps) => {
         >
           {uploading ? (
             <>
-              <Loader2 size={24} className="text-[#334155] animate-spin" />
+              <Loader size="sm" showText={false} />
               <span className="text-xs text-[#0f172a] font-semibold">Uploading...</span>
             </>
           ) : (
