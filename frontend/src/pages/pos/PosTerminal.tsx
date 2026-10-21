@@ -30,7 +30,6 @@ import {
   type OrderReceiptData,
 } from "@/lib/orderReceipt";
 import OrderReceiptCard from "@/components/OrderReceiptCard";
-import logo from "@/assets/icon.png";
 import { initiateStkPushAndWait } from "@/services/kopokopoPayment";
 import { useAuth } from "@/context/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -128,7 +127,7 @@ const PosTerminal = () => {
 
   const handlePrintReceipt = async (r: ReceiptItem) => {
     try {
-      await printOrderReceipt(toReceiptData(r), logo);
+      await printOrderReceipt(toReceiptData(r));
     } catch (e: any) {
       toast.error("Print failed", e.message);
     }
@@ -136,7 +135,7 @@ const PosTerminal = () => {
 
   const handleDownloadReceipt = async (r: ReceiptItem) => {
     try {
-      await downloadOrderReceipt(toReceiptData(r), logo);
+      await downloadOrderReceipt(toReceiptData(r));
       toast.success("Receipt downloaded", "Saved as PDF");
     } catch (e: any) {
       toast.error("Download failed", e.message);
@@ -279,7 +278,7 @@ const PosTerminal = () => {
       const result = await initiateStkPushAndWait({
         phone: mpesaPhone.trim(),
         amount: total,
-        description: "Slow Rise Co Bakery Sale",
+        description: "Agrovet POS sale",
         purpose: "pos_sale",
         items: cart.map((c) => ({ menuItemId: c.menuItemId, quantity: c.quantity })),
         useAuth: true,
@@ -354,16 +353,16 @@ const PosTerminal = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#FBF4D0] min-h-screen font-sans">
-      <div className="bg-[#B91D2D] text-white rounded-2xl p-6 mb-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 md:p-6 bg-[#f8fafc] min-h-screen font-sans">
+      <div className="bg-[#334155] text-white rounded-2xl p-6 mb-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black flex items-center gap-2">
-            <ShoppingCart className="text-white" /> Slow Rise Co · POS
+            <ShoppingCart className="text-white" /> Agrovet POS · POS
           </h2>
           <p className="text-white/80 text-sm mt-1">
             {view === "checkout"
-              ? "Walk-in cash & M-Pesa bakery sales"
-              : "Track bakery sales and receipts by day"}
+              ? "Walk-in cash and M-Pesa sales"
+              : "Track sales and receipts by day"}
           </p>
         </div>
         <div className="flex gap-2 bg-white/10 p-1 rounded-xl">
@@ -371,7 +370,7 @@ const PosTerminal = () => {
             type="button"
             onClick={() => setView("checkout")}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              view === "checkout" ? "bg-white text-[#B91D2D]" : "text-white/70 hover:bg-white/10"
+              view === "checkout" ? "bg-white text-[#334155]" : "text-white/70 hover:bg-white/10"
             }`}
           >
             Checkout
@@ -380,7 +379,7 @@ const PosTerminal = () => {
             type="button"
             onClick={() => setView("sales")}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              view === "sales" ? "bg-white text-[#B91D2D]" : "text-white/70 hover:bg-white/10"
+              view === "sales" ? "bg-white text-[#334155]" : "text-white/70 hover:bg-white/10"
             }`}
           >
             Sales Tracker
@@ -393,7 +392,7 @@ const PosTerminal = () => {
           <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Filter by day</p>
-              <p className="text-sm font-semibold text-[#B91D2D] mt-1">View sales for a specific date</p>
+              <p className="text-sm font-semibold text-[#334155] mt-1">View sales for a specific date</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -403,13 +402,13 @@ const PosTerminal = () => {
                   value={salesDate}
                   max={todayDateString()}
                   onChange={(e) => setSalesDate(e.target.value)}
-                  className="pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+                  className="pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => setSalesDate(todayDateString())}
-                className="px-3 py-2.5 text-xs font-bold text-[#B91D2D] border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                className="px-3 py-2.5 text-xs font-bold text-[#334155] border border-slate-200 rounded-xl hover:bg-slate-50 transition"
               >
                 Today
               </button>
@@ -425,11 +424,11 @@ const PosTerminal = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Total Collected</p>
-                      <p className="text-2xl font-bold text-[#5C0101] mt-1">
+                      <p className="text-2xl font-bold text-[#0f172a] mt-1">
                         KES {(salesSummary?.totalSales ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#FBF4D0] rounded-xl text-[#5C0101]">
+                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]">
                       <TrendingUp size={22} />
                     </div>
                   </div>
@@ -439,11 +438,11 @@ const PosTerminal = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Till M-Pesa</p>
-                      <p className="text-2xl font-bold text-[#B91D2D] mt-1">
+                      <p className="text-2xl font-bold text-[#334155] mt-1">
                         KES {(salesSummary?.tillInflow ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#FBF4D0] rounded-xl text-[#B91D2D]">
+                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#334155]">
                       <Smartphone size={22} />
                     </div>
                   </div>
@@ -456,11 +455,11 @@ const PosTerminal = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">POS Sales</p>
-                      <p className="text-2xl font-bold text-[#B91D2D] mt-1">
+                      <p className="text-2xl font-bold text-[#334155] mt-1">
                         KES {(salesSummary?.posSales ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#FBF4D0] rounded-xl text-[#5C0101]">
+                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]">
                       <Receipt size={22} />
                     </div>
                   </div>
@@ -473,7 +472,7 @@ const PosTerminal = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Items Sold</p>
-                      <p className="text-2xl font-bold text-[#5C0101] mt-1">
+                      <p className="text-2xl font-bold text-[#0f172a] mt-1">
                         {salesSummary?.itemsSold ?? 0}
                       </p>
                     </div>
@@ -486,7 +485,7 @@ const PosTerminal = () => {
               </div>
 
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <h3 className="font-bold text-[#B91D2D] mb-4 flex items-center gap-2">
+                <h3 className="font-bold text-[#334155] mb-4 flex items-center gap-2">
                   <BarChart3 size={18} /> Hourly Sales
                 </h3>
                 {hourlyChartData.length === 0 ? (
@@ -499,7 +498,7 @@ const PosTerminal = () => {
                         <XAxis dataKey="hour" />
                         <YAxis />
                         <Tooltip formatter={(v: number) => `KES ${v.toLocaleString()}`} />
-                        <Bar dataKey="amount" fill="#B91D2D" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="amount" fill="#334155" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -508,7 +507,7 @@ const PosTerminal = () => {
 
               <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-[#B91D2D] flex items-center gap-2">
+                  <h3 className="font-bold text-[#334155] flex items-center gap-2">
                     <Receipt size={18} /> Day Activity
                   </h3>
                   <p className="text-xs text-gray-400">
@@ -532,10 +531,10 @@ const PosTerminal = () => {
                           className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition text-left"
                         >
                           <div>
-                            <p className="font-semibold text-[#B91D2D]">
+                            <p className="font-semibold text-[#334155]">
                               {receiptLabel(r)}
                               {r.source === "till" && (
-                                <span className="ml-2 text-[10px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#FFA29D] text-[#5C0101]">
+                                <span className="ml-2 text-[10px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#e2e8f0] text-[#0f172a]">
                                   Till
                                 </span>
                               )}
@@ -548,13 +547,13 @@ const PosTerminal = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-[#5C0101]">KES {r.totalAmount.toLocaleString()}</p>
+                            <p className="font-bold text-[#0f172a]">KES {r.totalAmount.toLocaleString()}</p>
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
                                 r.source === "till"
-                                  ? "bg-[#FFA29D] text-[#5C0101]"
+                                  ? "bg-[#e2e8f0] text-[#0f172a]"
                                   : r.status === "completed"
-                                    ? "bg-[#FFA29D] text-[#5C0101]"
+                                    ? "bg-[#e2e8f0] text-[#0f172a]"
                                     : "bg-gray-100 text-gray-600"
                               }`}
                             >
@@ -579,14 +578,14 @@ const PosTerminal = () => {
                                 <button
                                   type="button"
                                   onClick={() => handlePrintReceipt(r)}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#B91D2D] border border-[#B91D2D]/20 rounded-lg hover:bg-[#B91D2D]/5"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#334155] border border-[#334155]/20 rounded-lg hover:bg-[#334155]/5"
                                 >
                                   <Printer size={14} /> Print
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDownloadReceipt(r)}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#B91D2D] rounded-lg hover:bg-[#B91D2D]/90"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#334155] rounded-lg hover:bg-[#334155]/90"
                                 >
                                   <Download size={14} /> Download PDF
                                 </button>
@@ -613,7 +612,7 @@ const PosTerminal = () => {
                     onClick={() => setCategory(c)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                       category === c
-                        ? "bg-[#B91D2D] text-white shadow-sm"
+                        ? "bg-[#334155] text-white shadow-sm"
                         : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                     }`}
                   >
@@ -630,7 +629,7 @@ const PosTerminal = () => {
                   placeholder="Search menu..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
                 />
               </div>
             </div>
@@ -676,13 +675,13 @@ const PosTerminal = () => {
                         </span>
                       )}
                       <div className="p-3 flex flex-col gap-1">
-                        <p className="font-extrabold text-[#B91D2D] text-xs leading-tight line-clamp-2">
+                        <p className="font-extrabold text-[#334155] text-xs leading-tight line-clamp-2">
                           {item.name}
                         </p>
                         <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">
                           {item.category}
                         </p>
-                        <p className="text-[#B91D2D] font-black text-sm mt-1">
+                        <p className="text-[#334155] font-black text-sm mt-1">
                           KES {item.price.toLocaleString()}
                         </p>
                         {item.stockLevel != null ? (
@@ -725,7 +724,7 @@ const PosTerminal = () => {
                       className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-100 rounded-xl select-none"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-extrabold text-[#B91D2D] text-xs truncate leading-tight">
+                        <p className="font-extrabold text-[#334155] text-xs truncate leading-tight">
                           {item.name}
                         </p>
                         <p className="text-[9px] text-gray-400 font-semibold mt-0.5">
@@ -739,7 +738,7 @@ const PosTerminal = () => {
                         >
                           <Minus size={10} />
                         </button>
-                        <span className="w-4 text-center font-black text-[11px] text-[#B91D2D]">
+                        <span className="w-4 text-center font-black text-[11px] text-[#334155]">
                           {item.quantity}
                         </span>
                         <button
@@ -749,7 +748,7 @@ const PosTerminal = () => {
                           <Plus size={10} />
                         </button>
                       </div>
-                      <div className="w-16 text-right font-black text-[#B91D2D] text-xs shrink-0">
+                      <div className="w-16 text-right font-black text-[#334155] text-xs shrink-0">
                         KES {(item.price * item.quantity).toLocaleString()}
                       </div>
                       <button
@@ -768,7 +767,7 @@ const PosTerminal = () => {
             <div className="border-t border-gray-100 pt-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-gray-500">Checkout Total</span>
-                <span className="font-black text-lg text-[#B91D2D]">KES {total.toLocaleString()}</span>
+                <span className="font-black text-lg text-[#334155]">KES {total.toLocaleString()}</span>
               </div>
 
               <button
@@ -785,7 +784,7 @@ const PosTerminal = () => {
                 type="button"
                 onClick={() => setShowMpesa(true)}
                 disabled={mpesaLoading || cashLoading || cart.length === 0}
-                className="w-full py-3 bg-[#B91D2D] text-white rounded-xl font-extrabold hover:bg-[#5C0101] disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-3 bg-[#334155] text-white rounded-xl font-extrabold hover:bg-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
               >
                 <Smartphone size={16} />
                 <span>M-Pesa STK</span>
@@ -798,10 +797,10 @@ const PosTerminal = () => {
       {showMpesa && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 bg-[#B91D2D] text-white flex items-center justify-between">
+            <div className="px-6 py-5 bg-[#334155] text-white flex items-center justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-wider">M-Pesa Payment</p>
-                <p className="text-xs text-[#FBF4D0] mt-0.5">Safaricom Daraja · KES {total.toLocaleString()}</p>
+                <p className="text-xs text-[#f8fafc] mt-0.5">Safaricom Daraja · KES {total.toLocaleString()}</p>
               </div>
               <button
                 type="button"
@@ -830,7 +829,7 @@ const PosTerminal = () => {
                 type="button"
                 onClick={payWithMpesa}
                 disabled={mpesaLoading}
-                className="w-full py-4 bg-[#B91D2D] text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#334155] text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {mpesaLoading ? <Loader2 className="animate-spin" size={18} /> : <Smartphone size={18} />}
                 {mpesaLoading ? "Awaiting M-Pesa PIN..." : `Send STK · KES ${total.toLocaleString()}`}
@@ -844,9 +843,9 @@ const PosTerminal = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-[#B91D2D]">
+              <div className="flex items-center gap-2 text-[#334155]">
                 <CheckCircle2 size={22} />
-                <h3 className="font-bold text-[#B91D2D]">Sale Complete</h3>
+                <h3 className="font-bold text-[#334155]">Sale Complete</h3>
               </div>
               <button
                 type="button"
@@ -860,7 +859,7 @@ const PosTerminal = () => {
             <button
               type="button"
               onClick={closeReceipt}
-              className="mt-4 w-full py-3 bg-[#B91D2D] text-white rounded-xl font-bold text-sm hover:bg-[#B91D2D]/90"
+              className="mt-4 w-full py-3 bg-[#334155] text-white rounded-xl font-bold text-sm hover:bg-[#334155]/90"
             >
               New Sale
             </button>

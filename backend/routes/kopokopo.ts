@@ -14,7 +14,7 @@ import { ensureAuthenticated, canManageOps, ensureOwner } from '@/middlewares/au
 import 'dotenv/config';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'slowrise-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 type PosCartLine = { menuItemId: string; quantity: number };
 
@@ -478,7 +478,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
   }
 
   if (!user || !canManageOps(user.role)) {
-    res.status(403).json({ error: 'Only bakery staff can initiate POS M-Pesa sales' });
+    res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }
 
@@ -516,7 +516,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
         phone,
         purpose,
         posCart,
-        description: description || 'Slow Rise Co bakery sale',
+        description: description || 'Agrovet POS sale',
       },
     });
 
@@ -756,7 +756,7 @@ async function handlePaymentCallback(req: Request, res: Response) {
           transactionReference: parsed.transactionReference,
           originationTime: parsed.originationTime || undefined,
           purpose: 'pos_sale',
-          description: 'Slow Rise Co bakery sale',
+          description: 'Agrovet POS sale',
           rawPayload: payload,
         },
       });
@@ -850,7 +850,7 @@ router.post('/webhooks', async (req: Request, res: Response) => {
                 eventType,
                 transactionReference: parsed.transactionReference,
                 purpose: 'pos_sale',
-                description: 'Slow Rise Co till payment',
+                description: 'Agrovet POS till payment',
                 rawPayload: payload,
               },
             });

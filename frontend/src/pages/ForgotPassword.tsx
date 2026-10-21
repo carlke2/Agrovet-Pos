@@ -4,13 +4,12 @@ import { ArrowLeft, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
 import Loader from "@/components/ui/loader";
-import logo from "@/assets/LOGO.png";
 
 type Step = "email" | "code" | "password" | "done";
 
-const BRAND = "#B91D2D";
+const BRAND = "#334155";
 const inputCls =
-  "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-[#B91D2D]/30 focus:bg-white rounded-xl outline-none text-sm transition";
+  "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-[#334155]/30 focus:bg-white rounded-xl outline-none text-sm transition";
 
 function maskEmail(email: string): string {
   const [local, domain] = email.trim().split("@");
@@ -105,11 +104,11 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF4D0] p-4 font-sans flex items-center justify-center">
+    <div className="min-h-screen bg-[#f8fafc] p-4 font-sans flex items-center justify-center">
       <div className="w-full max-w-[400px] bg-white rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100">
         <div className="flex flex-col items-center mb-6 text-center">
-          <img src={logo} alt="Slow Rise Co" className="w-56 h-auto mb-3" draggable={false} />
-          <h1 className="text-xl font-bold text-[#B91D2D] flex items-center gap-2">
+          <h1 className="text-xl font-bold text-[#334155] mb-3">Agrovet POS</h1>
+          <h1 className="text-xl font-bold text-[#334155] flex items-center gap-2">
             <KeyRound size={20} /> Forgot Password
           </h1>
           <p className="text-xs text-gray-500 mt-1">
@@ -123,7 +122,7 @@ const ForgotPassword = () => {
         {step === "email" && (
           <form onSubmit={requestCode} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-[#B91D2D] ml-1 mb-1 block">Staff email</label>
+              <label className="text-xs font-bold text-[#334155] ml-1 mb-1 block">Staff email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
@@ -131,7 +130,7 @@ const ForgotPassword = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@slowriseco.com"
+                  placeholder="you@example.com"
                   className={`${inputCls} pl-9`}
                 />
               </div>
@@ -180,7 +179,7 @@ const ForgotPassword = () => {
                 setCode("");
                 void requestCode();
               }}
-              className="w-full text-xs text-gray-500 hover:text-[#B91D2D] disabled:opacity-50"
+              className="w-full text-xs text-gray-500 hover:text-[#334155] disabled:opacity-50"
             >
               {loading ? "Sending..." : "Resend code"}
             </button>
@@ -236,7 +235,7 @@ const ForgotPassword = () => {
         )}
 
         <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-          <Link to="/login" className="text-xs text-[#B91D2D] font-semibold inline-flex items-center gap-1 hover:underline">
+          <Link to="/login" className="text-xs text-[#334155] font-semibold inline-flex items-center gap-1 hover:underline">
             <ArrowLeft size={14} /> Back to login
           </Link>
         </div>

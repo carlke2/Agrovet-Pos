@@ -1,5 +1,5 @@
 {
-  "name": "slowrise-backend",
+  "name": "agrovet-pos-backend",
   "version": "2.0.0",
   "main": "index.ts",
   "scripts": {
@@ -14,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Slow Rise Co bakery POS backend - Supabase + Prisma",
+  "description": "Agrovet POS backend",
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@supabase/supabase-js": "^2.108.2",

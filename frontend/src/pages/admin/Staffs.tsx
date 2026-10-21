@@ -27,7 +27,7 @@ const emptyStaff = {
 };
 
 const inputCls =
-  "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none";
+  "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#334155] outline-none";
 
 const roleLabel = (role: string) =>
   role === "owner" || role === "admin"
@@ -161,28 +161,28 @@ const Staffs = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-[#FBF4D0] min-h-screen font-sans">
+    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-[#B91D2D] text-white rounded-2xl p-6">
+        <div className="bg-[#334155] text-white rounded-2xl p-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users size={28} /> Staff
           </h1>
           <p className="text-white/80 text-sm mt-1">
-            Manage Slow Rise Co owners and cashiers
+            Manage Agrovet POS owners and cashiers
           </p>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="text-[#B91D2D]" />
-              <span className="font-semibold text-[#B91D2D]">Search & filters</span>
+              <Filter size={18} className="text-[#334155]" />
+              <span className="font-semibold text-[#334155]">Search & filters</span>
             </div>
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs font-semibold text-gray-500 hover:text-[#B91D2D]"
+                className="text-xs font-semibold text-gray-500 hover:text-[#334155]"
               >
                 Clear all
               </button>
@@ -195,7 +195,7 @@ const Staffs = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search name, email, phone…"
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#B91D2D] outline-none"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#334155] outline-none"
               />
             </div>
             <select
@@ -227,11 +227,11 @@ const Staffs = () => {
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-gray-100">
-            <h2 className="font-bold text-[#B91D2D]">All staff</h2>
+            <h2 className="font-bold text-[#334155]">All staff</h2>
             <button
               type="button"
               onClick={openAdd}
-              className="flex items-center gap-2 bg-[#B91D2D] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#B91D2D]/90"
+              className="flex items-center gap-2 bg-[#334155] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#334155]/90"
             >
               <Plus size={16} /> Add staff
             </button>
@@ -267,7 +267,7 @@ const Staffs = () => {
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
                             u.status === "approved"
-                              ? "bg-[#FFA29D] text-[#5C0101]"
+                              ? "bg-[#e2e8f0] text-[#0f172a]"
                               : u.status === "pending"
                                 ? "bg-yellow-100 text-yellow-700"
                                 : "bg-red-100 text-red-700"
@@ -309,7 +309,7 @@ const Staffs = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-[#B91D2D]">{editId ? "Edit staff" : "Add staff"}</h3>
+              <h3 className="font-bold text-[#334155]">{editId ? "Edit staff" : "Add staff"}</h3>
               <button type="button" onClick={closeForm} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
               </button>
@@ -364,7 +364,7 @@ const Staffs = () => {
                 minLength={7}
               />
 
-              <button type="submit" className="w-full py-2.5 bg-[#B91D2D] text-white rounded-xl font-semibold">
+              <button type="submit" className="w-full py-2.5 bg-[#334155] text-white rounded-xl font-semibold">
                 {editId ? "Save changes" : "Add staff"}
               </button>
             </form>

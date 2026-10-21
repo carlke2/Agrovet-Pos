@@ -22,8 +22,8 @@ const FinanceDashboard = () => {
   ];
 
   return (
-    <div className="p-4 md:p-8 bg-[#FBF4D0] min-h-screen font-sans space-y-6">
-      <div className="bg-[#B91D2D] text-white rounded-2xl p-6">
+    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
+      <div className="bg-[#334155] text-white rounded-2xl p-6">
         <h2 className="text-2xl font-bold flex items-center gap-2"><PieChart /> Finance Dashboard</h2>
         <p className="text-white/80 text-sm mt-1">Revenue, expenses, and profitability overview</p>
       </div>
@@ -37,11 +37,11 @@ const FinanceDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Total Revenue</p>
-                  <p className="text-3xl font-bold text-[#5C0101] mt-1">KES {summary.revenue.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-[#0f172a] mt-1">KES {summary.revenue.toLocaleString()}</p>
                 </div>
-                <div className="p-3 bg-[#FBF4D0] rounded-xl text-[#5C0101]"><TrendingUp size={24} /></div>
+                <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]"><TrendingUp size={24} /></div>
               </div>
-              <p className="text-xs text-gray-400 mt-2">From bakery POS sales</p>
+              <p className="text-xs text-gray-400 mt-2">From POS sales</p>
             </div>
             <div className="bg-white rounded-2xl p-6 border border-gray-100">
               <div className="flex items-center justify-between">
@@ -57,18 +57,18 @@ const FinanceDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Net Profit</p>
-                  <p className={`text-3xl font-bold mt-1 ${summary.netProfit >= 0 ? "text-[#B91D2D]" : "text-red-600"}`}>
+                  <p className={`text-3xl font-bold mt-1 ${summary.netProfit >= 0 ? "text-[#334155]" : "text-red-600"}`}>
                     KES {summary.netProfit.toLocaleString()}
                   </p>
                 </div>
-                <div className="p-3 bg-[#FBF4D0] rounded-xl text-[#5C0101]"><DollarSign size={24} /></div>
+                <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]"><DollarSign size={24} /></div>
               </div>
               <p className="text-xs text-gray-400 mt-2">Revenue minus expenses</p>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h3 className="font-bold text-[#B91D2D] mb-4">Financial Overview</h3>
+            <h3 className="font-bold text-[#334155] mb-4">Financial Overview</h3>
             <div className="w-full min-w-0" style={{ height: 256 }}>
               <ResponsiveContainer width="100%" height={256} minWidth={0}>
                 <BarChart data={chartData}>
@@ -76,7 +76,7 @@ const FinanceDashboard = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip formatter={(v: number) => `KES ${v.toLocaleString()}`} />
-                  <Bar dataKey="amount" fill="#B91D2D" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="amount" fill="#334155" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

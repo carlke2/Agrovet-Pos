@@ -115,7 +115,7 @@ export async function initiateDarajaStk(opts: {
       PhoneNumber: phone,
       CallBackURL: callbackUrl(),
       AccountReference: opts.accountReference.slice(0, 12),
-      TransactionDesc: (opts.description || 'Slow Rise Co').slice(0, 13),
+      TransactionDesc: (opts.description || 'Agrovet POS').slice(0, 13),
     },
     {
       headers: { Authorization: `Bearer ${token}` },

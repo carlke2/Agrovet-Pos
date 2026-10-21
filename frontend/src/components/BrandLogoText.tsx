@@ -23,10 +23,10 @@ export function BrandLogoText({ size = "md", variant = "default", className = ""
   }
 
   const isDefault = variant === "default";
-  const arcColor = isDefault ? "text-[#B91D2D]" : "text-white";
-  const brandColor = isDefault ? "text-[#5C0101]" : "text-white";
-  const dividerBg = isDefault ? "bg-[#B91D2D]" : "bg-white/50";
-  const subtextColor = isDefault ? "text-[#5C0101]" : "text-white/80";
+  const arcColor = isDefault ? "text-[#334155]" : "text-white";
+  const brandColor = isDefault ? "text-[#0f172a]" : "text-white";
+  const dividerBg = isDefault ? "bg-[#334155]" : "bg-white/50";
+  const subtextColor = isDefault ? "text-[#0f172a]" : "text-white/80";
 
   return (
     <div className={`flex flex-col items-center select-none font-sans ${className}`}>
@@ -35,13 +35,13 @@ export function BrandLogoText({ size = "md", variant = "default", className = ""
       </svg>
 
       <div className={`flex font-black uppercase leading-none ${brandClass} tracking-tight ${brandColor}`}>
-        Slow Rise Co
+        Agrovet POS
       </div>
 
       <div className={`w-full ${dividerBg} ${dividerClass} rounded-full`} />
 
       <div className={`font-bold uppercase whitespace-nowrap ${subtextColor} ${subtextClass}`}>
-        Bakery
+        POS
       </div>
     </div>
   );

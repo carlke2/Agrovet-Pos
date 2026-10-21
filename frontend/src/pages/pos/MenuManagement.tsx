@@ -142,18 +142,18 @@ const ImageUploader = ({ value, onChange, disabled }: ImageUploaderProps) => {
             disabled
               ? "border-gray-100 bg-gray-50 cursor-not-allowed"
               : dragging
-              ? "border-[#B91D2D] bg-[#FBF4D0]"
-              : "border-slate-200 bg-gray-50/50 hover:border-[#B91D2D] hover:bg-[#FBF4D0]/30"
+              ? "border-[#334155] bg-[#f8fafc]"
+              : "border-slate-200 bg-gray-50/50 hover:border-[#334155] hover:bg-[#f8fafc]/30"
           }`}
         >
           {uploading ? (
             <>
-              <Loader2 size={24} className="text-[#B91D2D] animate-spin" />
-              <span className="text-xs text-[#5C0101] font-semibold">Uploading...</span>
+              <Loader2 size={24} className="text-[#334155] animate-spin" />
+              <span className="text-xs text-[#0f172a] font-semibold">Uploading...</span>
             </>
           ) : (
             <>
-              <ImagePlus size={24} className={dragging ? "text-[#B91D2D]" : "text-gray-300"} />
+              <ImagePlus size={24} className={dragging ? "text-[#334155]" : "text-gray-300"} />
               <div className="text-center">
                 <p className="text-xs font-bold text-gray-500">
                   {dragging ? "Drop to upload" : "Click or drag image here"}
@@ -418,8 +418,8 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
   }, [showTabs, tab]);
 
   return (
-    <div className="p-4 md:p-8 bg-[#FBF4D0] min-h-screen font-sans space-y-6">
-      <div className="bg-[#B91D2D] text-white rounded-2xl p-6">
+    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
+      <div className="bg-[#334155] text-white rounded-2xl p-6">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <ClipboardList /> Menu Management
         </h2>
@@ -449,7 +449,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               onClick={() => setTab(id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
                 tab === id
-                  ? "bg-[#B91D2D] text-white shadow-sm"
+                  ? "bg-[#334155] text-white shadow-sm"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
             >
@@ -503,7 +503,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                           </div>
                         )}
                         <div>
-                          <p className="font-extrabold text-[#B91D2D]">{item.name}</p>
+                          <p className="font-extrabold text-[#334155]">{item.name}</p>
                           {item.description && (
                             <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{item.description}</p>
                           )}
@@ -513,7 +513,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                     <td className="px-5 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">{item.category}</span>
                     </td>
-                    <td className="px-5 py-4 text-right font-black text-[#B91D2D]">
+                    <td className="px-5 py-4 text-right font-black text-[#334155]">
                       KES {item.price.toLocaleString()}
                     </td>
                     <td className="px-5 py-4 text-center">
@@ -531,11 +531,11 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                         onClick={() => toggleAvailability(item)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition ${
                           item.isAvailable
-                            ? "bg-[#FBF4D0] text-[#5C0101] border-[#E5C48D]/50 hover:bg-[#FFA29D]"
+                            ? "bg-[#f8fafc] text-[#0f172a] border-[#cbd5e1]/50 hover:bg-[#e2e8f0]"
                             : "bg-amber-50 text-amber-700 border-amber-100/50 hover:bg-amber-100"
                         }`}
                       >
-                        <span className={`h-1.5 w-1.5 rounded-full ${item.isAvailable ? "bg-[#B91D2D]" : "bg-amber-600"}`} />
+                        <span className={`h-1.5 w-1.5 rounded-full ${item.isAvailable ? "bg-[#334155]" : "bg-amber-600"}`} />
                         {item.isAvailable ? "Available" : "Unavailable"}
                       </button>
                     </td>
@@ -544,7 +544,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                         <button
                           type="button"
                           onClick={() => goToEdit(item)}
-                          className="px-2.5 py-1 text-xs font-bold text-[#5C0101] hover:bg-[#FBF4D0] border border-[#E5C48D] rounded-lg transition duration-150"
+                          className="px-2.5 py-1 text-xs font-bold text-[#0f172a] hover:bg-[#f8fafc] border border-[#cbd5e1] rounded-lg transition duration-150"
                         >
                           Edit
                         </button>
@@ -569,7 +569,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-              <h3 className="font-extrabold text-[#B91D2D]">All Categories</h3>
+              <h3 className="font-extrabold text-[#334155]">All Categories</h3>
               <p className="text-xs text-gray-400 mt-1">Categories appear in POS filters and menu item forms.</p>
             </div>
             <table className="w-full text-sm">
@@ -593,7 +593,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                     const itemCount = items.filter((i) => i.category === category.name).length;
                     return (
                       <tr key={category.id} className="hover:bg-slate-50/40 transition">
-                        <td className="px-5 py-4 font-bold text-[#B91D2D]">{category.name}</td>
+                        <td className="px-5 py-4 font-bold text-[#334155]">{category.name}</td>
                         <td className="px-5 py-4 text-gray-500">{category.sortOrder}</td>
                         <td className="px-5 py-4 text-gray-500">{itemCount}</td>
                         <td className="px-5 py-4 text-right">
@@ -601,7 +601,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                             <button
                               type="button"
                               onClick={() => loadCategoryIntoDraft(category)}
-                              className="px-2.5 py-1 text-xs font-bold text-[#5C0101] hover:bg-[#FBF4D0] border border-[#E5C48D] rounded-lg transition"
+                              className="px-2.5 py-1 text-xs font-bold text-[#0f172a] hover:bg-[#f8fafc] border border-[#cbd5e1] rounded-lg transition"
                             >
                               Edit
                             </button>
@@ -627,14 +627,14 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               onSubmit={handleAddCategory}
               className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm"
             >
-              <h3 className="font-extrabold text-[#B91D2D] text-lg">Add Category</h3>
+              <h3 className="font-extrabold text-[#334155] text-lg">Add Category</h3>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Name</label>
                 <input
                   placeholder="e.g. Breakfast"
                   value={categoryForm.name}
                   onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
                   required
                 />
               </div>
@@ -645,14 +645,14 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   placeholder="0"
                   value={categoryForm.sortOrder}
                   onChange={(e) => setCategoryForm({ ...categoryForm, sortOrder: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
                   min="0"
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 bg-[#B91D2D] hover:bg-[#B91D2D]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
+                className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
               >
                 {submitting ? "Adding..." : "Add Category"}
               </button>
@@ -662,7 +662,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               onSubmit={handleUpdateCategory}
               className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm"
             >
-              <h3 className="font-extrabold text-[#B91D2D] text-lg">Update Category</h3>
+              <h3 className="font-extrabold text-[#334155] text-lg">Update Category</h3>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Category</label>
                 <select
@@ -675,7 +675,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                       setCategoryDraft({ name: "", sortOrder: "" });
                     }
                   }}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
                 >
                   <option value="">Select category</option>
                   {categories.map((c) => (
@@ -691,7 +691,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   placeholder="Category name"
                   value={categoryDraft.name}
                   onChange={(e) => setCategoryDraft({ ...categoryDraft, name: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
                   disabled={!editingCategoryId}
                   required
                 />
@@ -703,7 +703,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   placeholder="0"
                   value={categoryDraft.sortOrder}
                   onChange={(e) => setCategoryDraft({ ...categoryDraft, sortOrder: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
                   disabled={!editingCategoryId}
                   min="0"
                 />
@@ -716,7 +716,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <button
                 type="submit"
                 disabled={!editingCategoryId || submitting}
-                className="w-full py-3 bg-[#B91D2D] hover:bg-[#5C0101] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 transition duration-200 shadow-sm"
+                className="w-full py-3 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 transition duration-200 shadow-sm"
               >
                 {submitting ? "Saving..." : "Save Category"}
               </button>
@@ -729,7 +729,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 <select
                   value={deleteCategoryId}
                   onChange={(e) => setDeleteCategoryId(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
                 >
                   <option value="">Select category</option>
                   {categories.map((c) => (
@@ -768,7 +768,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           onSubmit={handleAdd}
           className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm"
         >
-          <h3 className="font-extrabold text-[#B91D2D] text-lg">Add new menu item</h3>
+          <h3 className="font-extrabold text-[#334155] text-lg">Add new menu item</h3>
 
           <ImageUploader
             value={addForm.imageUrl}
@@ -781,7 +781,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="e.g. Country sourdough"
               value={addForm.name}
               onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
               required
             />
           </div>
@@ -792,7 +792,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="e.g. Served with fresh vinaigrette dressing"
               value={addForm.description}
               onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
             />
           </div>
 
@@ -804,7 +804,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 placeholder="0.00"
                 value={addForm.price}
                 onChange={(e) => setAddForm({ ...addForm, price: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
                 required
                 min="0"
               />
@@ -814,7 +814,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <select
                 value={addForm.category}
                 onChange={(e) => setAddForm({ ...addForm, category: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
                 required
               >
                 {categoryNames.length === 0 ? (
@@ -838,7 +838,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="Leave blank for unlimited"
               value={addForm.stockLevel}
               onChange={(e) => setAddForm({ ...addForm, stockLevel: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
             />
             <p className="text-[10px] text-gray-400">Decreases by 1 each time this item is sold. Restock here or in Update.</p>
           </div>
@@ -846,7 +846,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#B91D2D] hover:bg-[#B91D2D]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
+            className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
           >
             {submitting ? "Adding Item..." : "Add Menu Item"}
           </button>
@@ -855,7 +855,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
 
       {tab === "edit" && (
         <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm">
-          <h3 className="font-extrabold text-[#B91D2D] text-lg">Edit Menu Item</h3>
+          <h3 className="font-extrabold text-[#334155] text-lg">Edit Menu Item</h3>
           <p className="text-xs text-gray-400 leading-normal">
             Choose an item to load its details. You can make and save adjustments in the <strong>Update</strong> tab.
           </p>
@@ -872,7 +872,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   setDraft(EMPTY_FORM);
                 }
               }}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
             >
               <option value="">Select menu item</option>
               {items.map((i) => (
@@ -884,22 +884,22 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           </div>
 
           {selectedItem && (
-            <div className="rounded-2xl border border-[#E5C48D] bg-[#FBF4D0]/50 p-5 space-y-3.5 text-xs text-slate-700 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc]/50 p-5 space-y-3.5 text-xs text-slate-700 animate-in fade-in slide-in-from-top-1 duration-200">
               {selectedItem.imageUrl && (
                 <img
                   src={selectedItem.imageUrl}
                   alt={selectedItem.name}
-                  className="w-full h-36 object-cover rounded-xl border border-[#E5C48D]"
+                  className="w-full h-36 object-cover rounded-xl border border-[#cbd5e1]"
                 />
               )}
-              <div className="flex justify-between items-start border-b border-[#E5C48D]/40 pb-2">
-                <span className="font-bold text-[#5C0101] text-sm">{selectedItem.name}</span>
-                <span className="px-2 py-0.5 bg-[#E5C48D] text-[#5C0101] rounded-md font-bold uppercase tracking-wider text-[9px]">{selectedItem.category}</span>
+              <div className="flex justify-between items-start border-b border-[#cbd5e1]/40 pb-2">
+                <span className="font-bold text-[#0f172a] text-sm">{selectedItem.name}</span>
+                <span className="px-2 py-0.5 bg-[#cbd5e1] text-[#0f172a] rounded-md font-bold uppercase tracking-wider text-[9px]">{selectedItem.category}</span>
               </div>
               <div className="space-y-2">
                 <p className="flex justify-between">
                   <span className="text-slate-400">Current Price:</span>
-                  <span className="font-bold text-[#B91D2D]">KES {selectedItem.price.toLocaleString()}</span>
+                  <span className="font-bold text-[#334155]">KES {selectedItem.price.toLocaleString()}</span>
                 </p>
                 {selectedItem.description && (
                   <p className="flex flex-col gap-1">
@@ -911,7 +911,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <button
                  type="button"
                  onClick={() => setTab("update")}
-                 className="w-full py-2.5 bg-[#B91D2D] hover:bg-[#5C0101] text-white rounded-xl font-bold text-xs transition duration-200 shadow-sm"
+                 className="w-full py-2.5 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-bold text-xs transition duration-200 shadow-sm"
                >
                  Proceed to Update Details →
                </button>
@@ -925,7 +925,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           onSubmit={handleUpdate}
           className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm"
         >
-          <h3 className="font-extrabold text-[#B91D2D] text-lg">Update Menu Item</h3>
+          <h3 className="font-extrabold text-[#334155] text-lg">Update Menu Item</h3>
 
           {!selectedId && (
             <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200/50 rounded-xl p-3 leading-normal font-semibold">
@@ -945,7 +945,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   setDraft(EMPTY_FORM);
                 }
               }}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
             >
               <option value="">Select menu item</option>
               {items.map((i) => (
@@ -968,7 +968,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="Item name"
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
               required
             />
@@ -980,7 +980,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="Description (optional)"
               value={draft.description}
               onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
             />
           </div>
@@ -993,7 +993,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 placeholder="Price"
                 value={draft.price}
                 onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
                 disabled={!selectedId}
                 required
                 min="0"
@@ -1004,7 +1004,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <select
                 value={draft.category}
                 onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
                 disabled={!selectedId}
                 required
               >
@@ -1029,7 +1029,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               placeholder="Leave blank for unlimited"
               value={draft.stockLevel}
               onChange={(e) => setDraft({ ...draft, stockLevel: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
             />
             <p className="text-[10px] text-gray-400">Increase to restock. Stock decreases automatically when orders are placed.</p>
@@ -1038,7 +1038,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           <button
             type="submit"
             disabled={!selectedId || submitting}
-            className="w-full py-3 bg-[#B91D2D] hover:bg-[#5C0101] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 shadow-sm"
+            className="w-full py-3 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 shadow-sm"
           >
             {submitting ? "Updating Item..." : "Save Changes"}
           </button>
@@ -1057,7 +1057,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
             <select
               value={deleteId}
               onChange={(e) => setDeleteId(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
             >
               <option value="">Select menu item</option>
               {items.map((i) => (

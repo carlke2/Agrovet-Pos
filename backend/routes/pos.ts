@@ -160,7 +160,7 @@ function respondSaleError(res: Response, error: unknown, logLabel: string) {
 // ─── POST /api/pos/sale ───────────────────────────────────────────────────────
 router.post('/sale', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
   if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Only bakery staff can process sales' });
+    res.status(403).json({ message: 'Only staff can process sales' });
     return;
   }
 
@@ -209,7 +209,7 @@ router.post('/sale', ensureAuthenticated, async (req: Request, res: Response): P
 // ─── POST /api/pos/cash-sale ──────────────────────────────────────────────────
 router.post('/cash-sale', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
   if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Only bakery staff can process sales' });
+    res.status(403).json({ message: 'Only staff can process sales' });
     return;
   }
 

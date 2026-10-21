@@ -49,7 +49,7 @@ function AppShell() {
     return (
       <Loader
         size="sm"
-        title="Loading Slow Rise Co..."
+        title="Loading Agrovet POS..."
         subtitle="Verifying your session"
         className="min-h-screen py-24"
       />

@@ -57,7 +57,7 @@ export async function sendSimpleMail(params: {
   }
 
   const transport = getTransport();
-  const fromName = MAIL_FROM_NAME || 'Slow Rise Co';
+  const fromName = MAIL_FROM_NAME || 'Agrovet POS';
   const { fromAddress, replyTo } = resolveFromAddress();
 
   await transport.sendMail({

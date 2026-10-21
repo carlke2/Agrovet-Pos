@@ -118,7 +118,7 @@ app.use((_req: Request, res: Response) => {
 });
 
 server.listen(PORT, async () => {
-  console.log(`\nSlow Rise Co backend running on http://localhost:${PORT}`);
+  console.log(`\nAgrovet POS backend running on http://localhost:${PORT}`);
   console.log(`Allowed origins: ${ALLOWED_ORIGINS.join(', ')}\n`);
   try {
     await connectDatabase();

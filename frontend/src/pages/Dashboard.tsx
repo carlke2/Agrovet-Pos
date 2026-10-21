@@ -14,7 +14,7 @@ import API from "@/services/api";
 import Loader from "@/components/ui/loader";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 
-const COLORS = ["#B91D2D", "#5C0101", "#E5C48D", "#FFA29D"];
+const COLORS = ["#334155", "#0f172a", "#cbd5e1", "#e2e8f0"];
 
 type CollectionRow = {
   id?: string;
@@ -98,7 +98,7 @@ const DashboardCard = ({
   title,
   value,
   icon,
-  color = "#B91D2D",
+  color = "#334155",
   prefix = "",
 }: {
   title: string;
@@ -131,7 +131,7 @@ const DashboardCard = ({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm text-gray-500 font-medium">{title}</h3>
-          <p className="text-3xl font-bold text-[#B91D2D] mt-2">
+          <p className="text-3xl font-bold text-[#334155] mt-2">
             {prefix}
             {count.toLocaleString()}
           </p>
@@ -278,13 +278,13 @@ const Dashboard = () => {
       : `/collections?source=${encodeURIComponent(financeFilter)}`;
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-[#FBF4D0] min-h-screen font-sans">
-      <div className="bg-[#B91D2D] text-white rounded-3xl shadow-xl p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
+    <div className="p-4 md:p-8 space-y-8 bg-[#f8fafc] min-h-screen font-sans">
+      <div className="bg-[#334155] text-white rounded-3xl shadow-xl p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
         <div className="relative z-10">
           <h2 className="text-3xl font-bold tracking-tight">Owner Dashboard</h2>
-          <p className="text-sm text-white/80 mt-2 font-medium">Slow Rise Co bakery overview</p>
+          <p className="text-sm text-white/80 mt-2 font-medium">Agrovet POS overview</p>
         </div>
-        <div className="mt-6 sm:mt-0 w-14 h-14 rounded-full bg-white text-[#B91D2D] flex items-center justify-center font-bold text-xl">
+        <div className="mt-6 sm:mt-0 w-14 h-14 rounded-full bg-white text-[#334155] flex items-center justify-center font-bold text-xl">
           AD
         </div>
       </div>
@@ -300,13 +300,13 @@ const Dashboard = () => {
         <Loader size="sm" title="Loading dashboard..." subtitle="Fetching platform statistics" className="py-8" />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <DashboardCard title="Staff" value={staffCount} icon={<Users size={24} />} color="#B91D2D" />
-          <DashboardCard title="Menu Items" value={menuCount} icon={<UtensilsCrossed size={24} />} color="#B91D2D" />
+          <DashboardCard title="Staff" value={staffCount} icon={<Users size={24} />} color="#334155" />
+          <DashboardCard title="Menu Items" value={menuCount} icon={<UtensilsCrossed size={24} />} color="#334155" />
           <DashboardCard
             title="Sales"
             value={revenue}
             icon={<DollarSign size={24} />}
-            color="#B91D2D"
+            color="#334155"
             prefix="KES "
           />
         </div>
@@ -315,7 +315,7 @@ const Dashboard = () => {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-xl font-bold text-[#B91D2D] flex items-center gap-2">
+            <h3 className="text-xl font-bold text-[#334155] flex items-center gap-2">
               <Filter size={18} /> Collections overview
             </h3>
             <p className="text-sm text-gray-500 mt-1">
@@ -324,7 +324,7 @@ const Dashboard = () => {
           </div>
           <Link
             to={collectionsPath}
-            className="text-sm font-semibold text-[#B91D2D] hover:underline"
+            className="text-sm font-semibold text-[#334155] hover:underline"
           >
             Open full collections →
           </Link>
@@ -344,8 +344,8 @@ const Dashboard = () => {
                 onClick={() => setFinanceFilter(opt.value)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   active
-                    ? "bg-[#B91D2D] text-white border-[#B91D2D]"
-                    : "bg-white text-[#B91D2D] border-gray-200 hover:border-[#B91D2D]/40"
+                    ? "bg-[#334155] text-white border-[#334155]"
+                    : "bg-white text-[#334155] border-gray-200 hover:border-[#334155]/40"
                 }`}
               >
                 {opt.label}
@@ -360,14 +360,14 @@ const Dashboard = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#334155] outline-none"
             title="From date"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#334155] outline-none"
             title="To date"
           />
         </div>
@@ -376,23 +376,23 @@ const Dashboard = () => {
           <Loader size="sm" title="Loading collections..." subtitle="Fetching till and cash totals" className="py-6" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-[#E5C48D] bg-[#FBF4D0]/60 p-4">
-              <div className="flex items-center gap-2 text-[#5C0101] text-sm font-semibold">
+            <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc]/60 p-4">
+              <div className="flex items-center gap-2 text-[#0f172a] text-sm font-semibold">
                 <Receipt size={16} /> Till inflow
               </div>
-              <p className="text-2xl font-bold text-[#5C0101] mt-2">{formatKes(financeTotals.till)}</p>
+              <p className="text-2xl font-bold text-[#0f172a] mt-2">{formatKes(financeTotals.till)}</p>
             </div>
-            <div className="rounded-2xl border border-[#E5C48D] bg-[#FBF4D0]/60 p-4">
-              <div className="flex items-center gap-2 text-[#5C0101] text-sm font-semibold">
+            <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc]/60 p-4">
+              <div className="flex items-center gap-2 text-[#0f172a] text-sm font-semibold">
                 <Smartphone size={16} /> STK Push
               </div>
-              <p className="text-2xl font-bold text-[#5C0101] mt-2">{formatKes(financeTotals.stk)}</p>
+              <p className="text-2xl font-bold text-[#0f172a] mt-2">{formatKes(financeTotals.stk)}</p>
             </div>
-            <div className="rounded-2xl border border-[#E5C48D] bg-[#FBF4D0]/60 p-4">
-              <div className="flex items-center gap-2 text-[#5C0101] text-sm font-semibold">
+            <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc]/60 p-4">
+              <div className="flex items-center gap-2 text-[#0f172a] text-sm font-semibold">
                 <Wallet size={16} /> Cash sales
               </div>
-              <p className="text-2xl font-bold text-[#5C0101] mt-2">{formatKes(financeTotals.cash)}</p>
+              <p className="text-2xl font-bold text-[#0f172a] mt-2">{formatKes(financeTotals.cash)}</p>
             </div>
           </div>
         )}
@@ -405,7 +405,7 @@ const Dashboard = () => {
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-        <h3 className="text-xl font-bold text-[#B91D2D] mb-6">Platform Statistics</h3>
+        <h3 className="text-xl font-bold text-[#334155] mb-6">Platform Statistics</h3>
         {showChart ? (
           <div className="w-full min-w-0" style={{ height: 350 }}>
             <ResponsiveContainer width="100%" height={350} minWidth={0}>
@@ -430,7 +430,7 @@ const Dashboard = () => {
       </div>
 
       <p className="text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Slow Rise Co
+        © {new Date().getFullYear()} Agrovet POS
       </p>
     </div>
   );

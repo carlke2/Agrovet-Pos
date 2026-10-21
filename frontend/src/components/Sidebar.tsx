@@ -126,7 +126,7 @@ const Sidebar = () => {
     <aside
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`h-screen bg-[#B91D2D] text-white flex flex-col border-r border-white/10 transition-all duration-300 select-none
+      className={`h-screen bg-[#334155] text-white flex flex-col border-r border-white/10 transition-all duration-300 select-none
         ${collapsed ? "w-20" : "w-64"}
         ${collapsed && hovered ? "w-64 shadow-2xl z-50 absolute" : ""}
       `}
@@ -134,10 +134,10 @@ const Sidebar = () => {
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/15">
         {isExpanded ? (
           <span className="text-base font-extrabold tracking-wide text-white">
-            Slow Rise Co
+            Agrovet POS
           </span>
         ) : (
-          <span className="text-base font-black text-white">SR</span>
+          <span className="text-base font-black text-white">AP</span>
         )}
 
         <button
@@ -167,14 +167,14 @@ const Sidebar = () => {
                   to={path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group ${
                     active
-                      ? "bg-white text-[#5C0101] font-semibold shadow-sm"
+                      ? "bg-white text-[#0f172a] font-semibold shadow-sm"
                       : "text-white/85 hover:bg-white/15 hover:text-white"
                   }`}
                 >
                   <Icon
                     size={18}
                     className={`transition-colors duration-200 ${
-                      active ? "text-[#5C0101]" : "text-white/80 group-hover:text-white"
+                      active ? "text-[#0f172a]" : "text-white/80 group-hover:text-white"
                     }`}
                   />
 
@@ -188,9 +188,9 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-white/15 flex flex-col gap-2 bg-[#5C0101]">
+      <div className="p-3 border-t border-white/15 flex flex-col gap-2 bg-[#0f172a]">
         <div className={`flex items-center gap-3 ${!isExpanded ? "justify-center" : ""}`}>
-          <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-[#5C0101] font-extrabold text-sm shrink-0">
+          <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-[#0f172a] font-extrabold text-sm shrink-0">
             {displayName.charAt(0).toUpperCase()}
           </div>
           {isExpanded && (
@@ -205,7 +205,7 @@ const Sidebar = () => {
         {isExpanded ? (
           <button
             onClick={handleLogout}
-            className="mt-1 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#FBF4D0]/15 hover:bg-[#FBF4D0]/25 text-[#FBF4D0] text-xs font-bold transition duration-200"
+            className="mt-1 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#f8fafc]/15 hover:bg-[#f8fafc]/25 text-[#f8fafc] text-xs font-bold transition duration-200"
           >
             <LogOut size={14} />
             <span>Logout</span>
@@ -214,7 +214,7 @@ const Sidebar = () => {
           <button
             onClick={handleLogout}
             title="Logout"
-            className="mt-1 w-full flex items-center justify-center p-2 rounded-lg text-[#FBF4D0] hover:bg-[#FBF4D0]/15 transition duration-200"
+            className="mt-1 w-full flex items-center justify-center p-2 rounded-lg text-[#f8fafc] hover:bg-[#f8fafc]/15 transition duration-200"
           >
             <LogOut size={16} />
           </button>

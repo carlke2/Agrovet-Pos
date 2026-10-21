@@ -1,4 +1,4 @@
-// Slow Rise Co — Bakery POS schema
+// Agrovet POS schema
 
 generator client {
   provider = "prisma-client-js"

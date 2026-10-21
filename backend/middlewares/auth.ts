@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'slowrise-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 export type StaffRole = 'owner' | 'cashier';
 
@@ -48,7 +48,7 @@ export const ensureAuthenticated = (req: Request, res: Response, next: NextFunct
   }
 };
 
-/** Owner-only (full bakery management). */
+/** Owner-only. */
 export const ensureOwner = (req: Request, res: Response, next: NextFunction): any => {
   ensureAuthenticated(req, res, () => {
     if (req.user?.role !== 'owner') {

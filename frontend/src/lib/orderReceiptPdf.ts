@@ -50,13 +50,13 @@ export async function buildReceiptPdf(data: OrderReceiptData, logoUrl?: string):
   doc.setTextColor(92, 1, 1);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("Bakery Receipt", centerX, y, { align: "center" });
+  doc.text("Receipt", centerX, y, { align: "center" });
   y += 5;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(107, 114, 128);
-  doc.text("Slow Rise Co", centerX, y, { align: "center" });
+  doc.text("Agrovet POS", centerX, y, { align: "center" });
   y += 8;
 
   doc.setFillColor(251, 244, 208);

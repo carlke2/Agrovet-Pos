@@ -1,7 +1,7 @@
 ﻿import Swal from "sweetalert2";
 
-const SUCCESS = "#5C0101";
-const PROGRESS = "#B91D2D";
+const SUCCESS = "#0f172a";
+const PROGRESS = "#334155";
 
 const fire = (
   icon: "success" | "error" | "warning" | "info",
@@ -26,10 +26,10 @@ const fire = (
 
   return Swal.fire({
     icon,
-    iconColor: icon === "warning" ? "#B91D2D" : icon === "info" ? "#5C0101" : undefined,
+    iconColor: icon === "warning" ? "#334155" : icon === "info" ? "#0f172a" : undefined,
     title: message,
     text: description,
-    confirmButtonColor: "#B91D2D",
+    confirmButtonColor: "#334155",
   });
 };
 
@@ -55,10 +55,10 @@ export const toast = {
       title: message,
       text: options?.description,
       icon: "warning",
-      iconColor: "#B91D2D",
+      iconColor: "#334155",
       showCancelButton: true,
-      confirmButtonColor: "#B91D2D",
-      cancelButtonColor: "#5C0101",
+      confirmButtonColor: "#334155",
+      cancelButtonColor: "#0f172a",
       confirmButtonText: options?.confirmLabel ?? "Confirm",
       cancelButtonText: options?.cancelLabel ?? "Cancel",
     }).then((result) => result.isConfirmed),

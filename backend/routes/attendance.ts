@@ -4,7 +4,7 @@ import prisma from '@/services/prisma';
 import { ensureAuthenticated, canManageOps, AuthPayload } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'slowrise-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 function optionalUser(req: Request): AuthPayload | null {
   const authHeader = req.headers.authorization;

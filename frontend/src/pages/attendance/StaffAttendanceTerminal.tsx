@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
-import logo from "@/assets/icon.png";
 import { useAuth } from "@/context/AuthContext";
 
 type StaffOption = {
@@ -116,10 +115,10 @@ const StaffAttendanceTerminal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#B91D2D] text-white font-sans">
+    <div className="min-h-screen bg-[#334155] text-white font-sans">
       <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
         <div className="text-center space-y-3 pt-4">
-          <img src={logo} alt="Slow Rise Co" className="h-16 w-16 rounded-2xl mx-auto" />
+          <p className="text-sm font-black tracking-wide">Agrovet POS</p>
           <h1 className="text-2xl font-black tracking-wide">Staff Attendance</h1>
           <p className="text-white/80 text-sm">
             {selected
@@ -218,7 +217,7 @@ const StaffAttendanceTerminal = () => {
                 <p
                   className={`text-sm font-semibold px-3 py-2 rounded-xl inline-flex items-center gap-2 ${
                     selected.nextAction === "check_in"
-                      ? "bg-[#FFA29D]/25 text-[#FBF4D0]"
+                      ? "bg-[#e2e8f0]/25 text-[#f8fafc]"
                       : "bg-amber-500/20 text-amber-100"
                   }`}
                 >
@@ -232,7 +231,7 @@ const StaffAttendanceTerminal = () => {
                   type="button"
                   onClick={clock}
                   disabled={clocking}
-                  className="w-full py-5 rounded-2xl bg-white text-[#B91D2D] font-bold text-lg flex items-center justify-center gap-3 hover:bg-[#FBF4D0] disabled:opacity-50 transition"
+                  className="w-full py-5 rounded-2xl bg-white text-[#334155] font-bold text-lg flex items-center justify-center gap-3 hover:bg-[#f8fafc] disabled:opacity-50 transition"
                 >
                   {clocking ? <Loader2 className="animate-spin" size={28} /> : <Clock size={28} />}
                   {clocking
@@ -247,7 +246,7 @@ const StaffAttendanceTerminal = () => {
                 <div
                   className={`rounded-2xl p-5 border ${
                     lastResult.type === "check_in"
-                      ? "bg-[#FFA29D]/20 border-[#E5C48D]/60"
+                      ? "bg-[#e2e8f0]/20 border-[#cbd5e1]/60"
                       : "bg-amber-500/15 border-amber-400/30"
                   }`}
                 >

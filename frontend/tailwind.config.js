@@ -6,11 +6,11 @@ export default {
     extend: {
       colors: {
         velvet: {
-          DEFAULT: "#B91D2D",
-          dark: "#5C0101",
-          coral: "#FFA29D",
-          cream: "#FBF4D0",
-          tan: "#E5C48D",
+          DEFAULT: "#334155",
+          dark: "#0f172a",
+          coral: "#e2e8f0",
+          cream: "#f8fafc",
+          tan: "#cbd5e1",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

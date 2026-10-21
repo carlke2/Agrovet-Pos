@@ -14,7 +14,7 @@ import type { AuthPayload } from '@/middlewares/auth';
 import { canManageOps } from '@/middlewares/auth';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'slowrise-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 type PosCartLine = { menuItemId: string; quantity: number };
 type PosCartPayload = { cashierId: string; items: PosCartLine[] };
@@ -154,7 +154,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
     return;
   }
   if (!user || !canManageOps(user.role)) {
-    res.status(403).json({ error: 'Only bakery staff can initiate POS M-Pesa sales' });
+    res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }
   if (!Array.isArray(items) || items.length === 0) {
@@ -184,7 +184,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
         phone: msisdn,
         purpose: 'pos_sale',
         posCart,
-        description: description || 'Slow Rise Co bakery sale',
+        description: description || 'Agrovet POS sale',
         eventType: 'daraja_stk',
         tillNumber: process.env.MPESA_SHORTCODE || '',
       },
@@ -195,7 +195,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
       stk = await initiateDarajaStk({
         phone: msisdn,
         amount: numericAmount,
-        accountReference: pending.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12) || 'SLOWRISE',
+        accountReference: pending.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12) || 'AGROVET',
         description: pending.description,
       });
     } catch (stkErr: any) {
