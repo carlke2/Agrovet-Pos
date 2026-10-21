@@ -17,6 +17,7 @@ import financeRoutes from '@/routes/finance';
 import kopokopoRoutes from '@/routes/kopokopo';
 import mpesaRoutes from '@/routes/mpesa';
 import attendanceRoutes from '@/routes/attendance';
+import categoryRoutes from '@/routes/categories';
 import { isSupabaseConfigured } from '@/services/supabase';
 import { checkDatabase, connectDatabase } from '@/services/prisma';
 
@@ -112,6 +113,7 @@ app.use('/api/finance', financeRoutes);
 app.use('/api/kopokopo', kopokopoRoutes);
 app.use('/api/mpesa', mpesaRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/categories', categoryRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
