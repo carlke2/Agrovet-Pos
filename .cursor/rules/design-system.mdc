@@ -1,0 +1,16 @@
+---
+description: Agrovet POS visual system. All UI uses the shared components and color tokens.
+alwaysApply: true
+---
+
+# Design system
+
+All UI must use components from `frontend/src/components/ui` and the color tokens in `frontend/src/index.css`. Never use raw hex colors or one-off button, table, or modal styles.
+
+- Money always goes through `Money` or `formatMoney`.
+- Status always goes through `StatusBadge` (icon plus text).
+- Every async action uses `Button` with `loading`, which disables the control and blocks a second click.
+- Every list shows `TableSkeleton` while loading and `EmptyState` when empty.
+- Every destructive action uses `ConfirmDialog`.
+- New pages go inside the app shell and appear in the sidebar only if the user has the permission.
+- No mock or hardcoded business data.
