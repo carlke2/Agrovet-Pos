@@ -12,31 +12,39 @@ function ask(rl: readline.Interface, question: string): Promise<string> {
 async function main() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
-    const name = (process.env.ADMIN_NAME || '').trim() || (await ask(rl, 'Owner name: '));
-    const email = (process.env.ADMIN_EMAIL || '').trim().toLowerCase() || (await ask(rl, 'Owner email: ')).toLowerCase();
-    const password = process.env.ADMIN_PASSWORD || (await ask(rl, 'Owner password: '));
+    const name = (process.env.ADMIN_NAME || '').trim() || (await ask(rl, 'Admin name: '));
+    const email = (process.env.ADMIN_EMAIL || '').trim().toLowerCase() || (await ask(rl, 'Admin email: ')).toLowerCase();
+    const password = process.env.ADMIN_PASSWORD || (await ask(rl, 'Admin password: '));
 
     if (!name || !email || !password) {
-      throw new Error('Owner name, email, and password are required. Set ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD, or enter them when prompted.');
+      throw new Error('Admin name, email, and password are required. Set ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD, or enter them when prompted.');
     }
 
-    const existingOwner = await prisma.user.findFirst({ where: { role: 'owner' }, select: { email: true } });
-    if (existingOwner) {
-      throw new Error(`An owner already exists (${existingOwner.email}). Refusing to create another.`);
+    const adminRole = await prisma.role.findUnique({ where: { name: 'Admin' }, select: { id: true } });
+    if (!adminRole) {
+      throw new Error('The Admin role does not exist yet. Run npm run db:sync-roles first.');
+    }
+
+    const existingAdmin = await prisma.user.findFirst({
+      where: { roleId: adminRole.id, status: 'active' },
+      select: { email: true },
+    });
+    if (existingAdmin) {
+      throw new Error(`An active Admin already exists (${existingAdmin.email}). Refusing to create another.`);
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const owner = await prisma.user.create({
+    const admin = await prisma.user.create({
       data: {
         name,
         email,
         password: passwordHash,
-        role: 'owner',
+        roleId: adminRole.id,
         status: 'active',
       },
       select: { id: true, email: true },
     });
-    console.log(`Owner created in Supabase: ${owner.email}`);
+    console.log(`Admin created in Supabase: ${admin.email}`);
   } finally {
     rl.close();
     await prisma.$disconnect();

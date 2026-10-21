@@ -7,6 +7,7 @@
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register index.ts",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:sync-roles": "ts-node -r tsconfig-paths/register scripts/sync-roles.ts",
     "db:create-admin": "ts-node -r tsconfig-paths/register scripts/create-admin.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
