@@ -48,11 +48,11 @@ Sign-in uses this app's users table and a JWT. These are the five system roles:
 
 | Role | Access |
 |------|--------|
-| Admin | Every permission: users, roles, settings, the audit log, back office, and point of sale |
-| Manager | Back office and point of sale |
-| Cashier | Point of sale, starting an M-Pesa sale, own attendance clock, and own profile |
-| Stock keeper | No pages yet |
-| Accountant | Audit log only |
+| Admin | Every permission: users, roles, settings, the audit log, the catalog, back office, and point of sale |
+| Manager | Back office, point of sale, and the catalog |
+| Cashier | Point of sale, starting an M-Pesa sale, own attendance clock, own profile, and a read-only catalog |
+| Stock keeper | Read and manage product categories |
+| Accountant | Audit log, and a read-only catalog |
 
 Back office is the temporary `legacy_full_access` permission (item changes, inventory, suppliers, finance, expenses, reports, and the dashboard). Point of sale is `legacy_pos_access`. A role with nothing to open sees "No access yet".
 

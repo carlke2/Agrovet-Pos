@@ -3,6 +3,8 @@ export type Permission =
   | "manage_roles"
   | "manage_settings"
   | "view_audit_log"
+  | "view_catalog"
+  | "manage_catalog"
   | "legacy_full_access"
   | "legacy_pos_access";
 

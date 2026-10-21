@@ -8,6 +8,7 @@ import {
   Menu,
   Monitor,
   Package,
+  Tags,
   PieChart,
   Plus,
   Receipt,
@@ -51,6 +52,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "Inventory",
     items: [
+      { name: "Categories", path: "/categories", icon: Tags, permission: "view_catalog" },
       { name: "Items", path: "/menu-management", icon: Package, permission: "legacy_full_access" },
       { name: "Inventory", path: "/inventory", icon: ClipboardList, permission: "legacy_full_access" },
       { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "legacy_full_access" },
@@ -112,6 +114,7 @@ function greeting() {
 function pageMeta(pathname: string) {
   if (pathname === "/") return { title: "Dashboard", subtitle: "Shop overview" };
   if (pathname.startsWith("/pos")) return { title: "Point of Sale", subtitle: "Counter sales" };
+  if (pathname.startsWith("/categories")) return { title: "Categories", subtitle: "Product groups" };
   if (pathname.startsWith("/menu-management")) return { title: "Items", subtitle: "Products and categories" };
   if (pathname.startsWith("/inventory")) return { title: "Inventory", subtitle: "Stock on hand" };
   if (pathname.startsWith("/suppliers")) return { title: "Suppliers" };

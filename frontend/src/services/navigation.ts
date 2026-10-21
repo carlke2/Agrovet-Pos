@@ -24,6 +24,7 @@ export const APP_PAGES: AppPage[] = [
   { name: "Reports", path: "/reports", permission: "legacy_full_access" },
   { name: "Staff Attendance", path: "/staff-attendance", permission: "legacy_full_access" },
   { name: "Audit Logs", path: "/audit-logs", permission: "view_audit_log" },
+  { name: "Categories", path: "/categories", permission: "view_catalog" },
   { name: "Settings", path: "/settings", permission: "manage_settings" },
   { name: "My Attendance", path: "/my-attendance", permission: "legacy_pos_access" },
   { name: "Profile", path: "/user-profile", permission: "legacy_pos_access" },

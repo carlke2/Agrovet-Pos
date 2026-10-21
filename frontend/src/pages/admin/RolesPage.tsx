@@ -18,6 +18,8 @@ const PERMISSION_OPTIONS: { key: Permission; label: string }[] = [
   { key: "manage_roles", label: "Manage roles" },
   { key: "manage_settings", label: "Manage settings" },
   { key: "view_audit_log", label: "View audit log" },
+  { key: "view_catalog", label: "View catalog" },
+  { key: "manage_catalog", label: "Manage catalog" },
   { key: "legacy_full_access", label: "Back office (menu, inventory, finance, reports)" },
   { key: "legacy_pos_access", label: "Point of sale" },
 ];
