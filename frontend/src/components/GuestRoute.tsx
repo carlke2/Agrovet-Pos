@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import Loader from "@/components/ui/loader";
-import { getDashboardPath, useAuth } from "@/context/AuthContext";
+import { landingPathFor, useAuth } from "@/context/AuthContext";
 
 const GuestRoute = ({ children }: { children: JSX.Element }) => {
   const { status, user } = useAuth();
@@ -17,7 +17,7 @@ const GuestRoute = ({ children }: { children: JSX.Element }) => {
   }
 
   if (status === "authenticated" && user) {
-    return <Navigate to={getDashboardPath(user.role)} replace />;
+    return <Navigate to={landingPathFor(user)} replace />;
   }
 
   return children;

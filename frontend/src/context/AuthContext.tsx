@@ -3,27 +3,29 @@ import API from "@/services/api";
 import {
   AuthUser,
   clearAuthSession,
-  getStoredRole,
+  getStoredUser,
   getToken,
-  getTokenRole,
   hasValidStoredSession,
   isTokenExpired,
   persistAuthSession,
-  UserRole,
+  Permission,
 } from "@/services/authStorage";
+import { getLandingPath } from "@/services/navigation";
 
 function normalizeAuthUser(raw: any): AuthUser | null {
-  if (!raw?.id && !raw?._id) return null;
-  const roleRaw = String(raw.role || "").toLowerCase();
-  let role: UserRole | null = null;
-  if (roleRaw === "owner" || roleRaw === "admin") role = "owner";
-  else if (roleRaw === "cashier" || roleRaw === "restaurant" || roleRaw === "finance") role = "cashier";
-  if (!role) return null;
+  const source = raw?.user?.id ? raw.user : raw;
+  if (!source?.id || typeof source.role !== "string") return null;
+  const permissions = Array.isArray(source.permissions)
+    ? source.permissions.filter((item: unknown): item is Permission => typeof item === "string")
+    : [];
   return {
-    id: raw.id || raw._id,
-    name: raw.name,
-    role,
-    email: raw.email,
+    id: source.id,
+    name: source.name,
+    email: source.email,
+    phone: source.phone,
+    role: source.role,
+    permissions,
+    mustChangePassword: Boolean(source.mustChangePassword),
   };
 }
 
@@ -39,13 +41,8 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const DASHBOARD_PATHS: Record<UserRole, string> = {
-  owner: "/",
-  cashier: "/pos",
-};
-
-export function getDashboardPath(role: UserRole) {
-  return DASHBOARD_PATHS[role];
+export function landingPathFor(user: Pick<AuthUser, "role" | "permissions">) {
+  return getLandingPath(user.role, user.permissions);
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -59,7 +56,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = useCallback((nextUser: AuthUser, token: string) => {
-    const normalized = normalizeAuthUser(nextUser) || nextUser;
+    const normalized = normalizeAuthUser(nextUser);
+    if (!normalized) {
+      clearAuthSession();
+      setUser(null);
+      setStatus("unauthenticated");
+      return;
+    }
     persistAuthSession(normalized, token);
     if (!hasValidStoredSession()) {
       clearAuthSession();
@@ -73,15 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshSession = useCallback(async (): Promise<boolean> => {
     const token = getToken();
-    const role = getStoredRole();
-
-    if (!token || !role || isTokenExpired(token)) {
-      logout();
-      return false;
-    }
-
-    const tokenRole = getTokenRole(token);
-    if (!tokenRole || tokenRole !== role) {
+    if (!token || isTokenExpired(token) || !getStoredUser()) {
       logout();
       return false;
     }
@@ -91,8 +86,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         skipAuthRedirect: true,
         timeout: 10000,
       } as any);
-      const sessionUser = normalizeAuthUser(data.user);
-      if (!sessionUser?.id || sessionUser.role !== role) {
+      const sessionUser = normalizeAuthUser(data);
+      if (!sessionUser?.id) {
         logout();
         return false;
       }

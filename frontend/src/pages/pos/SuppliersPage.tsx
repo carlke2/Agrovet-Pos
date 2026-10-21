@@ -53,8 +53,8 @@ const inputCls =
 
 const SuppliersPage = () => {
   const { user } = useAuth();
-  const canEdit = user?.role === "owner";
-  const canDelete = user?.role === "owner";
+  const canEdit = user?.permissions.includes("legacy_full_access") ?? false;
+  const canDelete = canEdit;
 
   const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
   const [loading, setLoading] = useState(true);

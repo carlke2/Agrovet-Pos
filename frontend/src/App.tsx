@@ -1,14 +1,15 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { AuthProvider, getDashboardPath, useAuth } from "@/context/AuthContext";
-import type { UserRole } from "@/services/authStorage";
+import { AuthProvider, landingPathFor, useAuth } from "@/context/AuthContext";
+import type { Permission } from "@/services/authStorage";
 import Loader from "@/components/ui/loader";
-import RoleProtectedRoute from "@/components/RoleProtectedRoute";
+import PermissionProtectedRoute from "@/components/PermissionProtectedRoute";
 import GuestRoute from "@/components/GuestRoute";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import Dashboard from "@/pages/Dashboard";
 import Staffs from "@/pages/admin/Staffs";
+import RolesPage from "@/pages/admin/RolesPage";
 import Settings from "@/pages/settings";
 import Login from "@/pages/Login";
 import ForgotPassword from "@/pages/ForgotPassword";
@@ -33,8 +34,8 @@ import CollectionsPage from "@/pages/finance/CollectionsPage";
 import StaffAttendanceTerminal from "@/pages/attendance/StaffAttendanceTerminal";
 import StaffAttendanceReport from "@/pages/attendance/StaffAttendanceReport";
 
-const R = (roles: UserRole[], element: JSX.Element) => (
-  <RoleProtectedRoute roles={roles}>{element}</RoleProtectedRoute>
+const R = (permission: Permission | undefined, element: JSX.Element) => (
+  <PermissionProtectedRoute permission={permission}>{element}</PermissionProtectedRoute>
 );
 
 function AppShell() {
@@ -77,43 +78,40 @@ function AppShell() {
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
 
-          {/* Owner */}
-          <Route path="/" element={R(["owner"], <Dashboard />)} />
+          <Route path="/" element={R("legacy_full_access", <Dashboard />)} />
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/staffs" element={R(["owner"], <Staffs />)} />
-          <Route path="/reports" element={R(["owner"], <Reports />)} />
-          <Route path="/audit-logs" element={R(["owner"], <AuditLogs />)} />
-          <Route path="/staff-attendance" element={R(["owner"], <StaffAttendanceReport />)} />
-          <Route path="/admin-profile" element={R(["owner"], <AdminProfile />)} />
-          <Route path="/settings" element={R(["owner"], <Settings />)} />
+          <Route path="/staffs" element={R("manage_users", <Staffs />)} />
+          <Route path="/roles" element={R("manage_roles", <RolesPage />)} />
+          <Route path="/reports" element={R("legacy_full_access", <Reports />)} />
+          <Route path="/audit-logs" element={R("view_audit_log", <AuditLogs />)} />
+          <Route path="/staff-attendance" element={R("legacy_full_access", <StaffAttendanceReport />)} />
+          <Route path="/admin-profile" element={R("legacy_full_access", <AdminProfile />)} />
+          <Route path="/settings" element={R("manage_settings", <Settings />)} />
 
-          {/* POS — owner + cashier */}
-          <Route path="/pos" element={R(["owner", "cashier"], <PosTerminal />)} />
-          <Route path="/menu-management" element={R(["owner"], <MenuManagement />)} />
-          <Route path="/menu-management/list" element={R(["owner"], <MenuListPage />)} />
-          <Route path="/menu-management/add" element={R(["owner"], <MenuAddPage />)} />
-          <Route path="/menu-management/edit" element={R(["owner"], <MenuEditPage />)} />
-          <Route path="/menu-management/update" element={R(["owner"], <MenuUpdatePage />)} />
-          <Route path="/menu-management/delete" element={R(["owner"], <MenuDeletePage />)} />
-          <Route path="/menu-management/categories" element={R(["owner"], <MenuCategoriesPage />)} />
-          <Route path="/inventory" element={R(["owner"], <InventoryPage />)} />
-          <Route path="/suppliers" element={R(["owner"], <SuppliersPage />)} />
-          <Route path="/my-attendance" element={R(["owner", "cashier"], <StaffAttendanceReport />)} />
+          <Route path="/pos" element={R("legacy_full_access", <PosTerminal />)} />
+          <Route path="/menu-management" element={R("legacy_full_access", <MenuManagement />)} />
+          <Route path="/menu-management/list" element={R("legacy_full_access", <MenuListPage />)} />
+          <Route path="/menu-management/add" element={R("legacy_full_access", <MenuAddPage />)} />
+          <Route path="/menu-management/edit" element={R("legacy_full_access", <MenuEditPage />)} />
+          <Route path="/menu-management/update" element={R("legacy_full_access", <MenuUpdatePage />)} />
+          <Route path="/menu-management/delete" element={R("legacy_full_access", <MenuDeletePage />)} />
+          <Route path="/menu-management/categories" element={R("legacy_full_access", <MenuCategoriesPage />)} />
+          <Route path="/inventory" element={R("legacy_full_access", <InventoryPage />)} />
+          <Route path="/suppliers" element={R("legacy_full_access", <SuppliersPage />)} />
+          <Route path="/my-attendance" element={R(undefined, <StaffAttendanceReport />)} />
 
-          {/* Finance — owner only */}
-          <Route path="/finance" element={R(["owner"], <FinanceDashboard />)} />
-          <Route path="/expenses" element={R(["owner"], <ExpensesPage />)} />
-          <Route path="/receipts" element={R(["owner"], <ReceiptsPage />)} />
-          <Route path="/collections" element={R(["owner"], <CollectionsPage />)} />
+          <Route path="/finance" element={R("legacy_full_access", <FinanceDashboard />)} />
+          <Route path="/expenses" element={R("legacy_full_access", <ExpensesPage />)} />
+          <Route path="/receipts" element={R("legacy_full_access", <ReceiptsPage />)} />
+          <Route path="/collections" element={R("legacy_full_access", <CollectionsPage />)} />
 
-          {/* Shared profile */}
-          <Route path="/user-profile" element={R(["owner", "cashier"], <UserProfile />)} />
+          <Route path="/user-profile" element={R(undefined, <UserProfile />)} />
 
           <Route
             path="*"
             element={
               status === "authenticated" && user
-                ? <Navigate to={getDashboardPath(user.role)} replace />
+                ? <Navigate to={landingPathFor(user)} replace />
                 : <Navigate to="/login" replace />
             }
           />

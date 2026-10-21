@@ -1,4 +1,4 @@
-import { LogOut, Shield, Monitor } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import { toast } from "@/services/toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -8,7 +8,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const name = user?.name || "User";
-  const role = user?.role;
 
   const handleLogout = async () => {
     const confirmed = await toast.confirm("Logout?", {
@@ -22,9 +21,8 @@ const Navbar = () => {
     }
   };
 
-  const title =
-    role === "owner" ? "Owner Dashboard" : role === "cashier" ? "POS Terminal" : "Dashboard";
-  const TitleIcon = role === "cashier" ? Monitor : Shield;
+  const title = user?.role || "Agrovet POS";
+  const TitleIcon = Shield;
 
   return (
     <motion.nav

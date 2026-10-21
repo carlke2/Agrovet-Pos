@@ -7,15 +7,15 @@ import { useAuth } from "@/context/AuthContext";
 
 const Settings = () => {
   const { user } = useAuth();
-  const isAdmin = user?.role === "owner";
+  const canManageSettings = user?.permissions.includes("manage_settings") ?? false;
 
-  const [loading, setLoading] = useState(isAdmin);
+  const [loading, setLoading] = useState(canManageSettings);
   const [saving, setSaving] = useState(false);
   const [smsDisabled, setSmsDisabled] = useState(false);
   const [smsConfigured, setSmsConfigured] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!canManageSettings) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -33,7 +33,7 @@ const Settings = () => {
     return () => {
       cancelled = true;
     };
-  }, [isAdmin]);
+  }, [canManageSettings]);
 
   const save = async () => {
     setSaving(true);
@@ -54,11 +54,11 @@ const Settings = () => {
     }
   };
 
-  if (!isAdmin) {
+  if (!canManageSettings) {
     return (
       <div className="p-6 max-w-2xl mx-auto">
         <h2 className="text-2xl font-bold text-[#334155]">Settings</h2>
-        <p className="text-sm text-gray-500 mt-2">Admin only.</p>
+        <p className="text-sm text-gray-500 mt-2">You do not have permission to change settings.</p>
       </div>
     );
   }

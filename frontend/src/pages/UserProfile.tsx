@@ -12,13 +12,8 @@ const UserProfile = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        if (role === "owner") {
-          const { data } = await API.get("/admin/profile");
-          setProfile(data);
-        } else {
-          const { data } = await API.get("/auth/session");
-          if (data?.user) setProfile(data.user);
-        }
+        const { data } = await API.get("/auth/session");
+        if (data?.user) setProfile(data.user);
       } catch {
         /* profile endpoint may not exist for all roles */
       }
@@ -33,7 +28,7 @@ const UserProfile = () => {
       : []),
     {
       label: "Role",
-      value: role === "owner" ? "Owner" : role === "cashier" ? "Cashier" : role,
+      value: role,
     },
     ...(profile.phone ? [{ label: "Phone", value: profile.phone }] : []),
   ];

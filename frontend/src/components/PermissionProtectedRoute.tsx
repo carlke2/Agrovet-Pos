@@ -1,14 +1,14 @@
 import { Navigate, useLocation } from "react-router-dom";
 import Loader from "@/components/ui/loader";
-import { getDashboardPath, useAuth } from "@/context/AuthContext";
-import type { UserRole } from "@/services/authStorage";
+import { landingPathFor, useAuth } from "@/context/AuthContext";
+import type { Permission } from "@/services/authStorage";
 
 type Props = {
   children: JSX.Element;
-  roles: UserRole[];
+  permission?: Permission;
 };
 
-const RoleProtectedRoute = ({ children, roles }: Props) => {
+const PermissionProtectedRoute = ({ children, permission }: Props) => {
   const { status, user } = useAuth();
   const location = useLocation();
 
@@ -27,11 +27,11 @@ const RoleProtectedRoute = ({ children, roles }: Props) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!roles.includes(user.role)) {
-    return <Navigate to={getDashboardPath(user.role)} replace />;
+  if (permission && !user.permissions.includes(permission)) {
+    return <Navigate to={landingPathFor(user)} replace />;
   }
 
   return children;
 };
 
-export default RoleProtectedRoute;
+export default PermissionProtectedRoute;

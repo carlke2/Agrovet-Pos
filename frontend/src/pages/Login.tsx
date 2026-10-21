@@ -4,8 +4,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "@/services/toast";
 import API from "@/services/api";
 import Loader from "@/components/ui/loader";
-import { getDashboardPath, useAuth } from "@/context/AuthContext";
-import type { AuthUser, UserRole } from "@/services/authStorage";
+import { landingPathFor, useAuth } from "@/context/AuthContext";
+import type { AuthUser } from "@/services/authStorage";
 
 const BRAND = "#334155";
 
@@ -19,7 +19,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (status === "authenticated" && user) {
-      navigate(getDashboardPath(user.role), { replace: true });
+      navigate(landingPathFor(user), { replace: true });
     }
   }, [status, user, navigate]);
 
@@ -29,17 +29,17 @@ const Login: React.FC = () => {
     );
   }
 
-  const toAuthUser = (data: any): AuthUser => {
-    const roleRaw = String(data.role || "").toLowerCase();
-    const role: UserRole =
-      roleRaw === "owner" || roleRaw === "admin"
-        ? "owner"
-        : "cashier";
+  const toAuthUser = (data: any): AuthUser | null => {
+    const source = data?.user?.id ? data.user : data;
+    if (!source?.id || typeof source.role !== "string" || !Array.isArray(source.permissions)) return null;
     return {
-      id: data.id || data._id,
-      name: data.name,
-      role,
-      email: data.email,
+      id: source.id,
+      name: source.name,
+      email: source.email,
+      phone: source.phone,
+      role: source.role,
+      permissions: source.permissions,
+      mustChangePassword: Boolean(source.mustChangePassword),
     };
   };
 
@@ -56,16 +56,20 @@ const Login: React.FC = () => {
       });
       const data = res.data;
 
-      if (!data?.role || !data?.token) {
+      if (!data?.token || !data?.user?.role) {
         toast.error("Login failed", "Unexpected response from server");
         return;
       }
 
       const authUser = toAuthUser(data);
+      if (!authUser) {
+        toast.error("Login failed", "Unexpected response from server");
+        return;
+      }
       login(authUser, data.token);
       void refreshSession();
-      toast.success(`Welcome, ${data.name || "user"}!`);
-      navigate(getDashboardPath(authUser.role));
+      toast.success(`Welcome, ${authUser.name || "user"}!`);
+      navigate(landingPathFor(authUser));
     } catch (error: any) {
       toast.error("Login failed", error.response?.data?.message || "Invalid email or password");
     } finally {
@@ -89,7 +93,7 @@ const Login: React.FC = () => {
             <div className="flex flex-col items-center mb-6">
               <h2 className="text-xl font-bold text-[#334155]">Agrovet POS</h2>
               <p className="text-slate-500 text-xs mt-1 text-center">
-                Staff login · Owner & cashier email and password
+                Staff login with your email and password
               </p>
             </div>
 

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Users, Plus, Edit, Trash2, X, Search, Filter } from "lucide-react";
+import { Users, Plus, Edit, UserX, UserCheck, X, Search, Filter } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
 import Loader from "@/components/ui/loader";
 
-type StaffRole = "owner" | "cashier";
-type StaffStatus = "approved" | "pending" | "rejected";
+type RoleOption = { id: string; name: string };
+type StaffStatus = "active" | "inactive";
 
 type StaffRow = {
   id: string;
@@ -13,7 +13,8 @@ type StaffRow = {
   name: string;
   email: string;
   phone?: string | null;
-  role: StaffRole;
+  role: string;
+  roleId: string;
   status: StaffStatus;
 };
 
@@ -22,44 +23,34 @@ const emptyStaff = {
   email: "",
   phone: "",
   password: "",
-  role: "cashier" as StaffRole,
-  status: "approved" as StaffStatus,
+  roleId: "",
+  status: "active" as StaffStatus,
 };
 
 const inputCls =
   "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#334155] outline-none";
 
-const roleLabel = (role: string) =>
-  role === "owner" || role === "admin"
-    ? "Owner"
-    : role === "cashier" || role === "restaurant" || role === "finance"
-      ? "Cashier"
-      : role;
-
-const normalizeRole = (role: string): StaffRole =>
-  role === "owner" || role === "admin" ? "owner" : "cashier";
-
 const Staffs = () => {
   const [staff, setStaff] = useState<StaffRow[]>([]);
+  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [staffForm, setStaffForm] = useState(emptyStaff);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | StaffRole>("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | StaffStatus>("all");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data } = await API.get<any[]>("/users");
-      setStaff(
-        (data || []).map((u) => ({
-          ...u,
-          role: normalizeRole(u.role),
-        })),
-      );
+      const [usersRes, rolesRes] = await Promise.all([
+        API.get<StaffRow[]>("/users"),
+        API.get<RoleOption[]>("/roles"),
+      ]);
+      setStaff(usersRes.data || []);
+      setRoles(rolesRes.data || []);
     } catch (e: any) {
       toast.error("Failed to load staff", e.response?.data?.message);
     } finally {
@@ -74,10 +65,10 @@ const Staffs = () => {
   const filteredStaff = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return staff.filter((u) => {
-      if (roleFilter !== "all" && u.role !== roleFilter) return false;
+      if (roleFilter !== "all" && u.roleId !== roleFilter) return false;
       if (statusFilter !== "all" && u.status !== statusFilter) return false;
       if (!q) return true;
-      return [u.name, u.email, u.phone, u.role, roleLabel(u.role), u.status]
+      return [u.name, u.email, u.phone, u.role, u.status]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -85,8 +76,7 @@ const Staffs = () => {
     });
   }, [staff, searchQuery, roleFilter, statusFilter]);
 
-  const hasActiveFilters =
-    searchQuery !== "" || roleFilter !== "all" || statusFilter !== "all";
+  const hasActiveFilters = searchQuery !== "" || roleFilter !== "all" || statusFilter !== "all";
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -97,7 +87,7 @@ const Staffs = () => {
   const closeForm = () => {
     setShowForm(false);
     setEditId(null);
-    setStaffForm(emptyStaff);
+    setStaffForm({ ...emptyStaff, roleId: roles[0]?.id || "" });
   };
 
   const saveStaff = async (e: React.FormEvent) => {
@@ -107,7 +97,7 @@ const Staffs = () => {
         name: staffForm.name,
         email: staffForm.email,
         phone: staffForm.phone,
-        role: staffForm.role,
+        roleId: staffForm.roleId,
         status: staffForm.status,
         ...(staffForm.password ? { password: staffForm.password } : {}),
       };
@@ -126,12 +116,13 @@ const Staffs = () => {
       closeForm();
       fetchData();
     } catch (e: any) {
-      toast.error("Operation failed", e.response?.data?.message);
+      toast.error("Operation failed", e.response?.data?.message || e.response?.data?.error);
     }
   };
 
   const openAdd = () => {
-    closeForm();
+    setEditId(null);
+    setStaffForm({ ...emptyStaff, roleId: roles[0]?.id || "" });
     setShowForm(true);
   };
 
@@ -142,21 +133,25 @@ const Staffs = () => {
       email: u.email,
       phone: u.phone || "",
       password: "",
-      role: normalizeRole(u.role),
-      status: u.status,
+      roleId: u.roleId,
+      status: u.status === "inactive" ? "inactive" : "active",
     });
     setShowForm(true);
   };
 
-  const deleteStaff = async (id: string) => {
-    const r = await toast.confirm("Delete this staff member?", { confirmLabel: "Delete" });
-    if (!r) return;
+  const toggleStatus = async (u: StaffRow) => {
+    const next = u.status === "active" ? "inactive" : "active";
+    const confirmed = await toast.confirm(
+      next === "inactive" ? `Deactivate ${u.name}?` : `Activate ${u.name}?`,
+      { confirmLabel: next === "inactive" ? "Deactivate" : "Activate" },
+    );
+    if (!confirmed) return;
     try {
-      await API.delete(`/users/${id}`);
-      toast.success("Staff deleted");
+      await API.patch(`/users/${u.id}/status`, { status: next });
+      toast.success(next === "inactive" ? "Staff deactivated" : "Staff activated");
       fetchData();
     } catch (e: any) {
-      toast.error("Delete failed", e.response?.data?.message);
+      toast.error("Could not update status", e.response?.data?.message || e.response?.data?.error);
     }
   };
 
@@ -167,9 +162,7 @@ const Staffs = () => {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users size={28} /> Staff
           </h1>
-          <p className="text-white/80 text-sm mt-1">
-            Manage Agrovet POS owners and cashiers
-          </p>
+          <p className="text-white/80 text-sm mt-1">Create staff accounts and assign a role</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
@@ -198,14 +191,11 @@ const Staffs = () => {
                 className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#334155] outline-none"
               />
             </div>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
-              className={inputCls}
-            >
+            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className={inputCls}>
               <option value="all">All roles</option>
-              <option value="owner">Owner</option>
-              <option value="cashier">Cashier</option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
             </select>
             <select
               value={statusFilter}
@@ -213,9 +203,8 @@ const Staffs = () => {
               className={inputCls}
             >
               <option value="all">All statuses</option>
-              <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
             </select>
           </div>
           {!loading && (
@@ -258,19 +247,17 @@ const Staffs = () => {
                 </thead>
                 <tbody>
                   {filteredStaff.map((u) => (
-                    <tr key={u._id || u.id} className="border-t border-gray-50 hover:bg-gray-50/50">
+                    <tr key={u.id} className="border-t border-gray-50 hover:bg-gray-50/50">
                       <td className="px-4 py-3 font-semibold">{u.name}</td>
-                      <td className="px-4 py-3 capitalize text-gray-600">{roleLabel(u.role)}</td>
+                      <td className="px-4 py-3 text-gray-600">{u.role}</td>
                       <td className="px-4 py-3">{u.email}</td>
                       <td className="px-4 py-3 text-gray-500">{u.phone || "—"}</td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            u.status === "approved"
+                            u.status === "active"
                               ? "bg-[#e2e8f0] text-[#0f172a]"
-                              : u.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
+                              : "bg-red-100 text-red-700"
                           }`}
                         >
                           {u.status}
@@ -288,11 +275,11 @@ const Staffs = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => deleteStaff(u._id || u.id)}
-                            className="p-2 text-gray-400 hover:text-red-600"
-                            title="Delete"
+                            onClick={() => toggleStatus(u)}
+                            className="p-2 text-gray-400 hover:text-[#334155]"
+                            title={u.status === "active" ? "Deactivate" : "Activate"}
                           >
-                            <Trash2 size={16} />
+                            {u.status === "active" ? <UserX size={16} /> : <UserCheck size={16} />}
                           </button>
                         </div>
                       </td>
@@ -338,21 +325,22 @@ const Staffs = () => {
               />
               <select
                 className={inputCls}
-                value={staffForm.role}
-                onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value as StaffRole })}
+                value={staffForm.roleId}
+                onChange={(e) => setStaffForm({ ...staffForm, roleId: e.target.value })}
                 required
               >
-                <option value="cashier">Cashier</option>
-                <option value="owner">Owner</option>
+                <option value="" disabled>Select a role</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>{role.name}</option>
+                ))}
               </select>
               <select
                 className={inputCls}
                 value={staffForm.status}
                 onChange={(e) => setStaffForm({ ...staffForm, status: e.target.value as StaffStatus })}
               >
-                <option value="approved">Approved (active)</option>
-                <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
               <input
                 type="password"

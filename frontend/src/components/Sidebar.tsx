@@ -10,7 +10,7 @@ import {
   Package,
   PieChart,
   Receipt,
-  Settings,
+  Shield,
   Sliders,
   TrendingUp,
   Truck,
@@ -23,74 +23,62 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "@/services/toast";
 import { useAuth } from "@/context/AuthContext";
-import type { UserRole } from "@/services/authStorage";
+import type { Permission } from "@/services/authStorage";
+import { canAccess } from "@/services/navigation";
 
 type MenuItem = {
   name: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   path: string;
+  permission?: Permission;
 };
 
 type MenuSection = { title?: string; items: MenuItem[] };
 
-const OWNER_SECTIONS: MenuSection[] = [
+const SECTIONS: MenuSection[] = [
   {
-    items: [{ name: "Dashboard", icon: Compass, path: "/" }],
+    items: [{ name: "Dashboard", icon: Compass, path: "/", permission: "legacy_full_access" }],
   },
   {
     title: "Operations",
     items: [
-      { name: "Staff", icon: Users, path: "/staffs" },
-      { name: "Menu", icon: UtensilsCrossed, path: "/menu-management" },
-      { name: "Inventory", icon: Package, path: "/inventory" },
-      { name: "Suppliers", icon: Truck, path: "/suppliers" },
-      { name: "POS", icon: Monitor, path: "/pos" },
+      { name: "POS", icon: Monitor, path: "/pos", permission: "legacy_full_access" },
+      { name: "Staff", icon: Users, path: "/staffs", permission: "manage_users" },
+      { name: "Roles", icon: Shield, path: "/roles", permission: "manage_roles" },
+      { name: "Menu", icon: UtensilsCrossed, path: "/menu-management", permission: "legacy_full_access" },
+      { name: "Inventory", icon: Package, path: "/inventory", permission: "legacy_full_access" },
+      { name: "Suppliers", icon: Truck, path: "/suppliers", permission: "legacy_full_access" },
     ],
   },
   {
     title: "Finance",
     items: [
-      { name: "Finance Dashboard", icon: LayoutDashboard, path: "/finance" },
-      { name: "Expenses", icon: Wallet, path: "/expenses" },
-      { name: "Receipts", icon: Receipt, path: "/receipts" },
-      { name: "Collections", icon: PieChart, path: "/collections" },
+      { name: "Finance Dashboard", icon: LayoutDashboard, path: "/finance", permission: "legacy_full_access" },
+      { name: "Expenses", icon: Wallet, path: "/expenses", permission: "legacy_full_access" },
+      { name: "Receipts", icon: Receipt, path: "/receipts", permission: "legacy_full_access" },
+      { name: "Collections", icon: PieChart, path: "/collections", permission: "legacy_full_access" },
     ],
   },
   {
     title: "System",
     items: [
-      { name: "Reports", icon: TrendingUp, path: "/reports" },
-      { name: "Staff Attendance", icon: Clock, path: "/staff-attendance" },
-      { name: "Audit Logs", icon: Activity, path: "/audit-logs" },
-      { name: "Settings", icon: Sliders, path: "/settings" },
+      { name: "Reports", icon: TrendingUp, path: "/reports", permission: "legacy_full_access" },
+      { name: "Staff Attendance", icon: Clock, path: "/staff-attendance", permission: "legacy_full_access" },
+      { name: "My Attendance", icon: Clock, path: "/my-attendance" },
+      { name: "Audit Logs", icon: Activity, path: "/audit-logs", permission: "view_audit_log" },
+      { name: "Settings", icon: Sliders, path: "/settings", permission: "manage_settings" },
     ],
   },
   {
     title: "Account",
-    items: [{ name: "Profile", icon: UserCircle2, path: "/admin-profile" }],
+    items: [{ name: "Profile", icon: UserCircle2, path: "/user-profile" }],
   },
 ];
-
-const CASHIER_SECTIONS: MenuSection[] = [
-  {
-    items: [
-      { name: "POS Terminal", icon: Monitor, path: "/pos" },
-      { name: "My Attendance", icon: Clock, path: "/my-attendance" },
-      { name: "Profile", icon: UserCircle2, path: "/user-profile" },
-    ],
-  },
-];
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  owner: "Owner",
-  cashier: "Cashier",
-};
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const role = user?.role;
 
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem("sidebar_collapsed") === "true";
@@ -103,7 +91,10 @@ const Sidebar = () => {
 
   const isExpanded = !collapsed || hovered;
   const displayName = user?.name || "User";
-  const sections = role === "cashier" ? CASHIER_SECTIONS : OWNER_SECTIONS;
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => canAccess(user?.permissions || [], item.permission)),
+  })).filter((section) => section.items.length > 0);
 
   const isActive = (path: string) =>
     path === "/"
@@ -197,7 +188,7 @@ const Sidebar = () => {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-white truncate leading-none">{displayName}</p>
               <p className="text-[10px] text-white/70 uppercase tracking-wider font-bold mt-1">
-                {role ? ROLE_LABELS[role] : "Staff"}
+                {user?.role || "Staff"}
               </p>
             </div>
           )}

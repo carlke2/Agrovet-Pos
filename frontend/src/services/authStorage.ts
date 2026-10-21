@@ -1,36 +1,28 @@
-export type UserRole = "owner" | "cashier";
+export type Permission =
+  | "manage_users"
+  | "manage_roles"
+  | "manage_settings"
+  | "view_audit_log"
+  | "legacy_full_access";
 
 export type AuthUser = {
   id: string;
   name: string;
-  role: UserRole;
   email?: string;
+  phone?: string | null;
+  role: string;
+  permissions: Permission[];
+  mustChangePassword?: boolean;
 };
 
-const AUTH_KEYS = ["token", "role", "userName", "adminName", "studentName", "regNo"] as const;
-
-const VALID_ROLES: UserRole[] = ["owner", "cashier"];
-
-/** Map legacy role names from older sessions/tokens */
-function normalizeRole(role: string | undefined | null): UserRole | null {
-  if (!role) return null;
-  const normalized = role.toLowerCase();
-  if (VALID_ROLES.includes(normalized as UserRole)) return normalized as UserRole;
-  if (normalized === "admin") return "owner";
-  if (normalized === "restaurant" || normalized === "finance") return "cashier";
-  return null;
-}
+const AUTH_KEYS = ["token", "role", "auth_session", "userName", "adminName", "studentName", "regNo"] as const;
 
 export function getToken(): string | null {
   const token = localStorage.getItem("token");
   return token && token.trim() ? token.trim() : null;
 }
 
-export function getStoredRole(): UserRole | null {
-  return normalizeRole(localStorage.getItem("role"));
-}
-
-function decodeTokenPayload(token: string): { role?: string; exp?: number } | null {
+function decodeTokenPayload(token: string): { exp?: number } | null {
   try {
     const base64 = token.split(".")[1]?.replace(/-/g, "+").replace(/_/g, "/");
     if (!base64) return null;
@@ -40,35 +32,39 @@ function decodeTokenPayload(token: string): { role?: string; exp?: number } | nu
   }
 }
 
-export function getTokenRole(token: string): UserRole | null {
-  return normalizeRole(decodeTokenPayload(token)?.role);
-}
-
 export function isTokenExpired(token: string): boolean {
   const exp = decodeTokenPayload(token)?.exp;
   if (!exp) return true;
   return Date.now() >= exp * 1000;
 }
 
+export function getStoredUser(): AuthUser | null {
+  const raw = localStorage.getItem("auth_session");
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as AuthUser;
+    if (!parsed?.id || typeof parsed.role !== "string" || !Array.isArray(parsed.permissions)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export function hasValidStoredSession(): boolean {
   const token = getToken();
-  const role = getStoredRole();
-  if (!token || !role || isTokenExpired(token)) return false;
-  const tokenRole = getTokenRole(token);
-  return tokenRole === role;
+  const user = getStoredUser();
+  if (!token || !user || isTokenExpired(token)) return false;
+  return true;
 }
 
 export function persistAuthSession(user: AuthUser, token: string) {
   localStorage.setItem("token", token);
-  localStorage.setItem("role", user.role);
+  localStorage.setItem("auth_session", JSON.stringify(user));
+  localStorage.removeItem("role");
 }
 
 export function clearAuthSession() {
   for (const key of AUTH_KEYS) {
     localStorage.removeItem(key);
   }
-}
-
-export function syncUserToStorage(user: AuthUser) {
-  persistAuthSession(user, getToken() || "");
 }

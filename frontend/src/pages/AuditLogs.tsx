@@ -115,10 +115,7 @@ const AuditLogs: React.FC = () => {
   };
 
   const getUserTypeBadge = (userType: string) => {
-    const colors: Record<string, string> = {
-      owner: "bg-[#cbd5e1] text-[#0f172a]",
-      cashier: "bg-[#f8fafc] text-[#0f172a]",
-    };
+    const colors: Record<string, string> = {};
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${colors[userType as keyof typeof colors] || "bg-gray-100 text-gray-700"}`}>
         {userType}
@@ -202,8 +199,11 @@ const AuditLogs: React.FC = () => {
             className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#334155]"
           >
             <option value="">All User Types</option>
-            <option value="owner">Owner</option>
-            <option value="cashier">Cashier</option>
+            <option value="Admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Cashier">Cashier</option>
+            <option value="Stock keeper">Stock keeper</option>
+            <option value="Accountant">Accountant</option>
           </select>
           <input
             type="date"
