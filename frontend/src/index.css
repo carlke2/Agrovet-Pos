@@ -4,92 +4,171 @@
 
 @layer base {
   :root {
-    --background: 48 86% 90%;
-    --foreground: 0 98% 18%;
+    --background: #F6F2E7;
+    --surface: #FFFDF8;
+    --border: #E4DDCB;
+    --primary: #1F5C3E;
+    --primary-hover: #17452F;
+    --primary-tint: #E3F1E8;
+    --accent: #D9A441;
+    --accent-ink: #123524;
+    --text: #1B2A21;
+    --muted: #5F6B63;
+    --success: #2F9E5B;
+    --warning: #E07B00;
+    --danger: #C0392B;
+    --info: #2B6CB0;
+    --inactive: #8A9189;
 
-    --card: 48 86% 96%;
-    --card-foreground: 0 98% 18%;
+    --primary-50: #F3FAF6;
+    --primary-100: #E3F1E8;
+    --primary-200: #C5E2D1;
+    --primary-300: #96C9AB;
+    --primary-400: #5FA67E;
+    --primary-500: #3D8660;
+    --primary-600: #2A6E4C;
+    --primary-700: #1F5C3E;
+    --primary-800: #17452F;
+    --primary-900: #123524;
 
-    --popover: 48 86% 96%;
-    --popover-foreground: 0 98% 18%;
-
-    --primary: 354 73% 42%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 36 62% 73%;
-    --secondary-foreground: 0 98% 18%;
-
-    --muted: 48 60% 94%;
-    --muted-foreground: 0 30% 30%;
-
-    --accent: 3 100% 81%;
-    --accent-foreground: 0 98% 18%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 36 62% 73%;
-    --input: 36 62% 73%;
-    --ring: 354 73% 42%;
-
-    --radius: 0.5rem;
+    --radius: 12px;
+    --shadow-sm: 0 1px 2px rgba(27, 42, 33, 0.05), 0 1px 3px rgba(27, 42, 33, 0.04);
+    --shadow-md: 0 10px 28px rgba(27, 42, 33, 0.08), 0 2px 8px rgba(27, 42, 33, 0.04);
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 354 60% 55%;
-    --primary-foreground: 48 86% 96%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 354 60% 55%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
+
+  html {
+    font-family: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 560px 460px at 6% 8%, rgba(31, 92, 62, 0.16), transparent 70%),
+      radial-gradient(ellipse 420px 340px at 22% 36%, rgba(31, 92, 62, 0.07), transparent 68%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  :where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 }
 
-/* SweetAlert2 success icon defaults to #a5dc86. Use maroon so it stays in the palette and stays distinct from the red error icon. */
+/* Money, quantities, and dates stay aligned in columns. */
+.tabular,
+input[type="number"],
+input[inputmode="decimal"],
+input[inputmode="numeric"] {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .swal2-icon.swal2-success {
-  border-color: #5c0101;
-  color: #5c0101;
+  border-color: var(--success);
+  color: var(--success);
 }
 .swal2-icon.swal2-success [class^="swal2-success-line"] {
-  background-color: #5c0101;
+  background-color: var(--success);
 }
 .swal2-icon.swal2-success .swal2-success-ring {
-  border: 0.25em solid rgba(92, 1, 1, 0.3);
+  border: 0.25em solid rgba(47, 158, 91, 0.3);
 }
 .swal2-timer-progress-bar {
-  background: #b91d2d;
+  background: var(--primary);
 }
 .swal2-icon.swal2-warning {
-  border-color: #b91d2d;
-  color: #b91d2d;
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+/* Kept until shared Spinner replaces page loaders. */
+.agro-spinner {
+  --hop: -8px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+}
+
+.agro-spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: var(--primary);
+  border-radius: 5px;
+  display: inline-block;
+  animation: agro-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.agro-spinner .bounce1 {
+  animation-delay: -0.32s;
+}
+
+.agro-spinner .bounce2 {
+  animation-delay: -0.16s;
+}
+
+.agro-spinner-light > div {
+  background-color: currentColor;
+}
+
+.agro-spinner-xs {
+  --hop: -3px;
+  height: 14px;
+  gap: 3px;
+}
+
+.agro-spinner-xs > div {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background-color: currentColor;
+}
+
+.agro-spinner-sm {
+  --hop: -6px;
+  height: 26px;
+  gap: 5px;
+}
+
+.agro-spinner-sm > div {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.agro-spinner-lg {
+  --hop: -10px;
+  height: 40px;
+  gap: 8px;
+}
+
+.agro-spinner-lg > div {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+@keyframes agro-bouncedelay {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1) translateY(var(--hop));
+  }
 }
