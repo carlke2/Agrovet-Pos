@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Package, AlertTriangle, ArrowDownCircle, ArrowUpCircle, Boxes, TrendingUp, ChefHat } from "lucide-react";
+import { Package, AlertTriangle, ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
-import KitchenPanel from "@/components/KitchenPanel";
 
 interface InventoryItem {
   id: string; name: string; category: string; unit: string;
@@ -16,9 +14,6 @@ interface SupplierOption {
 }
 
 const InventoryPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get("tab") === "stock" ? "stock" : "kitchen";
-
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierOption[]>([]);
   const [newItem, setNewItem] = useState({ name: "", category: "Grains", unit: "kg", reorderLevel: "10", unitCost: "0" });
@@ -114,34 +109,11 @@ const InventoryPage = () => {
     <div className="p-4 md:p-8 bg-[#FBF4D0] min-h-screen font-sans space-y-6">
       <div className="bg-[#B91D2D] text-white rounded-2xl p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black flex items-center gap-2"><Package className="text-[#B91D2D]" /> Inventory & Kitchen</h2>
-          <p className="text-white/80 text-sm mt-1">Raw stock, cook batches, and track expected sales from each batch</p>
+          <h2 className="text-2xl font-black flex items-center gap-2"><Package className="text-[#B91D2D]" /> Inventory</h2>
+          <p className="text-white/80 text-sm mt-1">Stock levels, reorder thresholds, and stock movements</p>
         </div>
       </div>
 
-      <div className="flex gap-2 p-1 bg-white rounded-xl border border-slate-100 w-fit shadow-sm">
-        <button
-          onClick={() => setSearchParams({ tab: "kitchen" })}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-extrabold transition ${
-            tab === "kitchen" ? "bg-[#B91D2D] text-white" : "text-gray-500 hover:bg-slate-50"
-          }`}
-        >
-          <ChefHat size={16} /> Cook & Track Sales
-        </button>
-        <button
-          onClick={() => setSearchParams({ tab: "stock" })}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-extrabold transition ${
-            tab === "stock" ? "bg-[#B91D2D] text-white" : "text-gray-500 hover:bg-slate-50"
-          }`}
-        >
-          <Boxes size={16} /> Raw Stock
-        </button>
-      </div>
-
-      {tab === "kitchen" ? (
-        <KitchenPanel onProductionRecorded={fetchItems} />
-      ) : (
-        <>
       {/* Low Stock Banner */}
       {lowStock.length > 0 && (
         <div className="bg-amber-50 border border-amber-250 rounded-2xl p-4 flex items-start gap-3 animate-in fade-in duration-200">
@@ -412,8 +384,6 @@ const InventoryPage = () => {
           </tbody>
         </table>
       </div>
-        </>
-      )}
     </div>
   );
 };

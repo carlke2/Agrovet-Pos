@@ -118,7 +118,6 @@ const AuditLogs: React.FC = () => {
     const colors: Record<string, string> = {
       owner: "bg-[#E5C48D] text-[#5C0101]",
       cashier: "bg-[#FBF4D0] text-[#5C0101]",
-      delivery: "bg-[#FFA29D] text-[#5C0101]",
     };
     return (
       <span className={`px-2 py-1 rounded text-xs font-medium ${colors[userType as keyof typeof colors] || "bg-gray-100 text-gray-700"}`}>
@@ -193,7 +192,6 @@ const AuditLogs: React.FC = () => {
             <option value="login">Login</option>
             <option value="pos_sale">POS M-Pesa sale</option>
             <option value="pos_cash_sale">POS cash sale</option>
-            <option value="production_batch">Production batch</option>
             <option value="stock_movement">Stock movement</option>
             <option value="expense_recorded">Expense</option>
             <option value="user_created">Staff created</option>
@@ -206,7 +204,6 @@ const AuditLogs: React.FC = () => {
             <option value="">All User Types</option>
             <option value="owner">Owner</option>
             <option value="cashier">Cashier</option>
-            <option value="delivery">Delivery</option>
           </select>
           <input
             type="date"

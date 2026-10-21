@@ -43,13 +43,6 @@ interface MenuItem {
   isAvailable: boolean;
   imageUrl?: string;
   stockLevel?: number | null;
-  batchYield?: number;
-  kitchenStats?: {
-    portionsReady: number;
-    activeRemaining: number;
-    activeSold: number;
-    expectedPerBatch: number;
-  };
 }
 interface CartItem {
   menuItemId: string;
@@ -692,18 +685,7 @@ const PosTerminal = () => {
                         <p className="text-[#B91D2D] font-black text-sm mt-1">
                           KES {item.price.toLocaleString()}
                         </p>
-                        {item.kitchenStats ? (
-                          <div className="mt-1 space-y-0.5">
-                            <p className="text-[9px] font-bold text-[#5C0101]">
-                              {item.kitchenStats.portionsReady} ready to sell
-                            </p>
-                            {item.kitchenStats.activeRemaining > 0 && (
-                              <p className="text-[8px] text-amber-700 font-semibold">
-                                KES {item.kitchenStats.activeRemaining.toLocaleString()} still expected
-                              </p>
-                            )}
-                          </div>
-                        ) : item.stockLevel != null ? (
+                        {item.stockLevel != null ? (
                           <p className="text-[9px] text-gray-400 font-semibold">{item.stockLevel} left</p>
                         ) : null}
                       </div>

@@ -23,20 +23,15 @@ import MenuAddPage from "@/pages/pos/MenuAddPage";
 import MenuEditPage from "@/pages/pos/MenuEditPage";
 import MenuUpdatePage from "@/pages/pos/MenuUpdatePage";
 import MenuDeletePage from "@/pages/pos/MenuDeletePage";
-import MenuRecipesPage from "@/pages/pos/MenuRecipesPage";
 import MenuCategoriesPage from "@/pages/pos/MenuCategoriesPage";
 import InventoryPage from "@/pages/pos/InventoryPage";
 import SuppliersPage from "@/pages/pos/SuppliersPage";
-import ProductionPage from "@/pages/pos/ProductionPage";
 import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
 import ReceiptsPage from "@/pages/finance/ReceiptsPage";
 import CollectionsPage from "@/pages/finance/CollectionsPage";
 import StaffAttendanceTerminal from "@/pages/attendance/StaffAttendanceTerminal";
 import StaffAttendanceReport from "@/pages/attendance/StaffAttendanceReport";
-import ShopShell from "@/shop/ShopShell";
-import ShopOrdersAdminPage from "@/pages/ShopOrdersAdminPage";
-import DeliveryBoard from "@/pages/DeliveryBoard";
 
 const R = (roles: UserRole[], element: JSX.Element) => (
   <RoleProtectedRoute roles={roles}>{element}</RoleProtectedRoute>
@@ -45,9 +40,6 @@ const R = (roles: UserRole[], element: JSX.Element) => (
 function AppShell() {
   const location = useLocation();
   const { status, user } = useAuth();
-  if (location.pathname === "/shop" || location.pathname.startsWith("/shop/")) {
-    return <ShopShell />;
-  }
   const publicPages = ["/login", "/forgot-password", "/attendance"];
   const isAuthPage = publicPages.includes(location.pathname);
   const isAttendancePage = location.pathname === "/attendance";
@@ -76,15 +68,6 @@ function AppShell() {
     );
   }
 
-  if (status === "authenticated" && user?.role === "delivery") {
-    return (
-      <Routes>
-        <Route path="/delivery" element={<DeliveryBoard />} />
-        <Route path="*" element={<Navigate to="/delivery" replace />} />
-      </Routes>
-    );
-  }
-
   return (
     <div className="flex">
       {showShell && <Sidebar />}
@@ -98,14 +81,13 @@ function AppShell() {
           <Route path="/" element={R(["owner"], <Dashboard />)} />
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/staffs" element={R(["owner"], <Staffs />)} />
-          <Route path="/shop-orders" element={R(["owner"], <ShopOrdersAdminPage />)} />
           <Route path="/reports" element={R(["owner"], <Reports />)} />
           <Route path="/audit-logs" element={R(["owner"], <AuditLogs />)} />
           <Route path="/staff-attendance" element={R(["owner"], <StaffAttendanceReport />)} />
           <Route path="/admin-profile" element={R(["owner"], <AdminProfile />)} />
           <Route path="/settings" element={R(["owner"], <Settings />)} />
 
-          {/* POS & bakery ops — owner + cashier */}
+          {/* POS — owner + cashier */}
           <Route path="/pos" element={R(["owner", "cashier"], <PosTerminal />)} />
           <Route path="/menu-management" element={R(["owner"], <MenuManagement />)} />
           <Route path="/menu-management/list" element={R(["owner"], <MenuListPage />)} />
@@ -113,11 +95,9 @@ function AppShell() {
           <Route path="/menu-management/edit" element={R(["owner"], <MenuEditPage />)} />
           <Route path="/menu-management/update" element={R(["owner"], <MenuUpdatePage />)} />
           <Route path="/menu-management/delete" element={R(["owner"], <MenuDeletePage />)} />
-          <Route path="/menu-management/recipes" element={R(["owner"], <MenuRecipesPage />)} />
           <Route path="/menu-management/categories" element={R(["owner"], <MenuCategoriesPage />)} />
           <Route path="/inventory" element={R(["owner"], <InventoryPage />)} />
           <Route path="/suppliers" element={R(["owner"], <SuppliersPage />)} />
-          <Route path="/production" element={R(["owner"], <ProductionPage />)} />
           <Route path="/my-attendance" element={R(["owner", "cashier"], <StaffAttendanceReport />)} />
 
           {/* Finance — owner only */}

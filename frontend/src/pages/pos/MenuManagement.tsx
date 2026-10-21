@@ -7,7 +7,6 @@ import {
   Save,
   Trash2,
   List,
-  Link2,
   ImagePlus,
   X,
   Loader2,
@@ -16,25 +15,7 @@ import {
 import API from "@/services/api";
 import { toast } from "@/services/toast";
 
-export type Tab = "list" | "add" | "edit" | "update" | "delete" | "recipes" | "categories";
-
-interface InventoryOption {
-  id: string;
-  name: string;
-  unit: string;
-  stockLevel: number;
-}
-
-interface RecipeRow {
-  inventoryItemId: string;
-  quantity: string;
-}
-
-interface MenuIngredient {
-  id: string;
-  quantity: number;
-  inventoryItem: InventoryOption;
-}
+export type Tab = "list" | "add" | "edit" | "update" | "delete" | "categories";
 
 interface MenuCategory {
   id: string;
@@ -51,8 +32,6 @@ interface MenuItem {
   isAvailable: boolean;
   imageUrl?: string;
   stockLevel?: number | null;
-  batchYield?: number | null;
-  ingredients?: MenuIngredient[];
 }
 
 const EMPTY_FORM = { name: "", description: "", price: "", category: "", imageUrl: "", stockLevel: "" };
@@ -64,7 +43,6 @@ const TABS: { id: Tab; label: string; icon: React.FC<{ size?: number }> }[] = [
   { id: "edit", label: "Edit", icon: Pencil },
   { id: "update", label: "Update", icon: Save },
   { id: "delete", label: "Delete", icon: Trash2 },
-  { id: "recipes", label: "Recipes", icon: Link2 },
 ];
 
 type Props = {
@@ -204,7 +182,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
-  const [inventory, setInventory] = useState<InventoryOption[]>([]);
 
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [selectedId, setSelectedId] = useState("");
@@ -215,11 +192,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
   const [editingCategoryId, setEditingCategoryId] = useState("");
   const [categoryDraft, setCategoryDraft] = useState({ name: "", sortOrder: "" });
   const [deleteCategoryId, setDeleteCategoryId] = useState("");
-
-  const [recipeMenuId, setRecipeMenuId] = useState("");
-  const [recipeRows, setRecipeRows] = useState<RecipeRow[]>([]);
-  const [batchYield, setBatchYield] = useState("");
-  const [savingRecipe, setSavingRecipe] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -244,19 +216,9 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
     }
   };
 
-  const fetchInventory = async () => {
-    try {
-      const { data } = await API.get("/inventory/items");
-      setInventory(data);
-    } catch {
-      /* optional */
-    }
-  };
-
   useEffect(() => {
     fetchItems();
     fetchCategories();
-    fetchInventory();
   }, []);
 
   useEffect(() => {
@@ -279,30 +241,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       imageUrl: item.imageUrl || "",
       stockLevel: item.stockLevel == null ? "" : String(item.stockLevel),
     });
-  };
-
-  const loadRecipe = async (menuItemId: string) => {
-    setRecipeMenuId(menuItemId);
-    if (!menuItemId) {
-      setRecipeRows([]);
-      setBatchYield("");
-      return;
-    }
-    const item = items.find((i) => i.id === menuItemId);
-    setBatchYield(item?.batchYield ? String(item.batchYield) : "");
-    try {
-      const { data } = await API.get(`/menu/${menuItemId}/ingredients`);
-      setRecipeRows(
-        data.length > 0
-          ? data.map((r: MenuIngredient) => ({
-              inventoryItemId: r.inventoryItem.id,
-              quantity: String(r.quantity),
-            }))
-          : [{ inventoryItemId: "", quantity: "" }],
-      );
-    } catch (e: any) {
-      toast.error("Error", e.response?.data?.message);
-    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -368,10 +306,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
         setSelectedId("");
         setDraft(EMPTY_FORM);
       }
-      if (recipeMenuId === deleteId) {
-        setRecipeMenuId("");
-        setRecipeRows([]);
-      }
       setDeleteId("");
       await fetchItems();
       toast.success("Menu item deleted");
@@ -380,30 +314,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       toast.error("Error", e.response?.data?.message);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const saveRecipe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!recipeMenuId) return;
-    const ingredients = recipeRows
-      .filter((r) => r.inventoryItemId && Number(r.quantity) > 0)
-      .map((r) => ({
-        inventoryItemId: r.inventoryItemId,
-        quantity: Number(r.quantity),
-      }));
-    setSavingRecipe(true);
-    try {
-      await API.put(`/menu/${recipeMenuId}/ingredients`, { ingredients });
-      await API.put(`/menu/${recipeMenuId}`, {
-        batchYield: batchYield === "" ? null : Math.max(1, Math.floor(Number(batchYield))),
-      });
-      toast.success("Recipe saved");
-      fetchItems();
-    } catch (e: any) {
-      toast.error("Error", e.response?.data?.message);
-    } finally {
-      setSavingRecipe(false);
     }
   };
 
@@ -501,7 +411,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
   };
 
   const unavailable = items.filter((i) => !i.isAvailable);
-  const recipeMenu = items.find((i) => i.id === recipeMenuId);
 
   const tabsToShow = useMemo(() => {
     if (showTabs) return TABS;
@@ -515,7 +424,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           <ClipboardList /> Menu Management
         </h2>
         <p className="text-white/80 text-sm mt-1">
-          Use separate tabs to add, edit, update, delete items, and manage recipes
+          Use separate tabs to add, edit, update, and delete items
         </p>
       </div>
 
@@ -558,7 +467,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <tr>
                 <th className="px-5 py-4 text-left font-extrabold tracking-wider">Item</th>
                 <th className="px-5 py-4 text-left font-extrabold tracking-wider">Category</th>
-                <th className="px-5 py-4 text-left font-extrabold tracking-wider">Recipe</th>
                 <th className="px-5 py-4 text-right font-extrabold tracking-wider">Price</th>
                 <th className="px-5 py-4 text-center font-extrabold tracking-wider">Stock</th>
                 <th className="px-5 py-4 text-center font-extrabold tracking-wider">Status</th>
@@ -568,7 +476,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
             <tbody className="divide-y divide-slate-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={6} className="px-5 py-12 text-center text-gray-400">
                     No menu items yet. Use the <strong>Add</strong> tab.
                   </td>
                 </tr>
@@ -605,19 +513,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                     <td className="px-5 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">{item.category}</span>
                     </td>
-                    <td className="px-5 py-4 text-xs text-gray-500">
-                      {item.ingredients?.length ? (
-                        <div className="flex flex-col gap-0.5">
-                          {item.ingredients.map((ing) => (
-                            <span key={ing.id} className="text-gray-650 font-medium">
-                              • {ing.quantity} {ing.inventoryItem.unit} {ing.inventoryItem.name}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 italic">No ingredients linked</span>
-                      )}
-                    </td>
                     <td className="px-5 py-4 text-right font-black text-[#B91D2D]">
                       KES {item.price.toLocaleString()}
                     </td>
@@ -652,16 +547,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                           className="px-2.5 py-1 text-xs font-bold text-[#5C0101] hover:bg-[#FBF4D0] border border-[#E5C48D] rounded-lg transition duration-150"
                         >
                           Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            loadRecipe(item.id);
-                            setTab("recipes");
-                          }}
-                          className="px-2.5 py-1 text-xs font-bold text-[#B91D2D] hover:bg-[#B91D2D]/5 border border-slate-200 rounded-lg transition duration-150"
-                        >
-                          Recipe
                         </button>
                         <button
                           type="button"
@@ -1164,7 +1049,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
         <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm">
           <h3 className="font-extrabold text-red-750 text-lg">Delete Menu Item</h3>
           <p className="text-xs text-gray-400 leading-normal">
-            Select a dish to remove from the system. Linked recipes will also be cleaned up.
+            Select an item to remove from the system.
           </p>
 
           <div className="space-y-1">
@@ -1214,142 +1099,6 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
         </div>
       )}
 
-      {tab === "recipes" && (
-        <form
-          onSubmit={saveRecipe}
-          className="bg-white rounded-2xl p-6 border border-slate-100 space-y-5 shadow-sm"
-        >
-          <div>
-            <h3 className="font-extrabold text-[#B91D2D] text-lg">Recipe / Batch Production</h3>
-            <p className="text-xs text-gray-400 mt-1 leading-normal">
-              Ingredients are used once per cooking batch (not per sale). Set batch yield — e.g. 1 kg flour makes 60 mandazis.
-              Record batches on the Production page; POS sales track progress toward expected revenue.
-            </p>
-          </div>
-
-          <div className="space-y-1 max-w-md">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Dish</label>
-            <select
-              value={recipeMenuId}
-              onChange={(e) => loadRecipe(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#B91D2D] focus:bg-white transition-all duration-200 font-semibold"
-            >
-              <option value="">Select menu item</option>
-              {items.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.name} - {i.ingredients?.length ?? 0} ingredient(s) linked
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {recipeMenuId && (
-            <div className="space-y-3.5 border-t border-slate-100 pt-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    Batch yield (portions per cook)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    placeholder="e.g. 60 mandazis"
-                    value={batchYield}
-                    onChange={(e) => setBatchYield(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold"
-                  />
-                </div>
-                {recipeMenu && batchYield && Number(batchYield) > 0 && (
-                  <div className="rounded-xl bg-[#FBF4D0] border border-[#E5C48D] p-3 flex flex-col justify-center">
-                    <p className="text-[10px] text-[#5C0101] font-bold uppercase">Expected per batch</p>
-                    <p className="text-lg font-black text-[#5C0101]">
-                      KES {(Number(batchYield) * recipeMenu.price).toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-[#B91D2D]">
-                      {batchYield} × KES {recipeMenu.price}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Ingredients per batch</label>
-              <div className="space-y-3">
-                {recipeRows.map((row, idx) => (
-                  <div
-                    key={idx}
-                    className="grid grid-cols-1 sm:grid-cols-[1fr_140px_auto] gap-3 items-center bg-gray-50 border border-slate-100 p-3 rounded-2xl"
-                  >
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block">Ingredient Item</label>
-                      <select
-                        value={row.inventoryItemId}
-                        onChange={(e) => {
-                          const next = [...recipeRows];
-                          next[idx] = { ...next[idx], inventoryItemId: e.target.value };
-                          setRecipeRows(next);
-                        }}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#B91D2D] font-semibold"
-                        required
-                      >
-                        <option value="">Choose Inventory item</option>
-                        {inventory.map((inv) => (
-                          <option key={inv.id} value={inv.id}>
-                            {inv.name} ({inv.stockLevel} {inv.unit} in stock)
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider block">Qty per batch</label>
-                      <input
-                        type="number"
-                        step="any"
-                        min="0.001"
-                        placeholder="e.g. 1 kg"
-                        value={row.quantity}
-                        onChange={(e) => {
-                          const next = [...recipeRows];
-                          next[idx] = { ...next[idx], quantity: e.target.value };
-                          setRecipeRows(next);
-                        }}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#B91D2D] font-semibold"
-                        required
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setRecipeRows(recipeRows.filter((_, i) => i !== idx))}
-                      className="p-2 text-gray-400 hover:text-red-650 hover:bg-red-50 rounded-xl mt-4 sm:mt-0 transition self-end"
-                      title="Remove ingredient row"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setRecipeRows([...recipeRows, { inventoryItemId: "", quantity: "" }])
-                  }
-                  className="flex items-center gap-1.5 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-gray-700"
-                >
-                  <Plus size={14} /> Add Ingredient Row
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingRecipe}
-                  className="px-6 py-2.5 bg-[#B91D2D] hover:bg-[#5C0101] text-white rounded-xl font-extrabold text-xs disabled:opacity-40 transition shadow-sm"
-                >
-                  {savingRecipe ? "Saving..." : `Save Recipe ${recipeMenu ? `for ${recipeMenu.name}` : ""}`}
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-      )}
     </div>
   );
 };
