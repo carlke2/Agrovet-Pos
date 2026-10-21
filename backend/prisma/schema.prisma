@@ -10,15 +10,42 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Staff users: owner (full access) | cashier (POS + attendance)
+// Named roles and the permission keys granted to each role.
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id         String @id @default(cuid())
+  roleId     String
+  role       Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission String
+
+  @@unique([roleId, permission])
+  @@map("role_permissions")
+}
+
+// Staff users. Access is granted through Role.
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  phone     String?
-  role      String // owner | cashier
-  status    String   @default("active") // active | inactive
-  password  String
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  phone              String?
+  roleId             String
+  role               Role      @relation(fields: [roleId], references: [id])
+  status             String    @default("active") // active | inactive
+  password           String
+  lastLoginAt        DateTime?
+  mustChangePassword Boolean   @default(false)
 
   attendanceRecords StaffAttendance[]
 
