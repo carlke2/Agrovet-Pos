@@ -21,7 +21,6 @@ model User {
   password  String
 
   attendanceRecords StaffAttendance[]
-  deliveryOrders    ShopOrder[]       @relation("DeliveryAssignments")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -60,48 +59,13 @@ model MenuItem {
   imageUrl        String?
   isAvailable     Boolean @default(true)
   stockLevel      Int? // null = unlimited; when set, decrements on each sale
-  batchYield      Int?    @map("batch_yield") // portions produced per recipe batch
-  unitType        String  @default("piece") // piece | loaf | kg | dozen
-  bestBeforeHours Int? // hours after production batch before flagged stale
 
-  receiptItems      PosTransactionItem[]
-  ingredients       MenuItemIngredient[]
-  productionBatches ProductionBatch[]
+  receiptItems PosTransactionItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("menu_items")
-}
-
-model ProductionBatch {
-  id              String   @id @default(cuid())
-  menuItemId      String   @map("menu_item_id")
-  menuItem        MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  yieldQuantity   Int      @map("yield_quantity")
-  unitPrice       Float    @map("unit_price")
-  expectedRevenue Float    @map("expected_revenue")
-  soldQuantity    Int      @default(0) @map("sold_quantity")
-  soldAmount      Float    @default(0) @map("sold_amount")
-  status          String   @default("active") // active | depleted
-  notes           String?
-  userId          String   @map("user_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-
-  @@index([menuItemId, status, createdAt])
-  @@map("production_batches")
-}
-
-model MenuItemIngredient {
-  id              String        @id @default(cuid())
-  menuItemId      String
-  menuItem        MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  inventoryItemId String
-  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  quantity        Float
-
-  @@unique([menuItemId, inventoryItemId])
-  @@map("menu_item_ingredients")
 }
 
 model PosTransaction {
@@ -155,12 +119,9 @@ model InventoryItem {
   unit         String // kg, liters, pieces
   stockLevel   Float  @default(0)
   reorderLevel Float  @default(0)
-  unitCost         Float @default(0)
-  reservedQuantity Float @default(0) @map("reserved_quantity")
+  unitCost     Float @default(0)
 
-  movements        StockMovement[]
-  menuIngredients  MenuItemIngredient[]
-  reservationHolds StockReservationHold[]
+  movements StockMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -235,129 +196,8 @@ model KopoPayment {
   posCart              Json?    @map("pos_cart")
   posCompleted         Boolean  @default(false) @map("pos_completed")
   posTransactionId     String?  @unique @map("pos_transaction_id")
-  reservationId        String?  @unique @map("reservation_id")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
   @@map("kopo_payments")
-}
-
-// Ingredient hold for an order that is not yet paid or in production.
-// stockLevel stays unchanged until the reservation is committed.
-model StockReservation {
-  id            String    @id @default(cuid())
-  status        String    @default("active") // active | committed | released
-  expiresAt     DateTime  @map("expires_at")
-  customerRef   String?   @map("customer_ref")
-  paymentId     String?   @unique @map("payment_id")
-  releaseReason String?   @map("release_reason")
-  committedAt   DateTime? @map("committed_at")
-  releasedAt    DateTime? @map("released_at")
-
-  items StockReservationItem[]
-  holds StockReservationHold[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status, expiresAt])
-  @@map("stock_reservations")
-}
-
-model StockReservationItem {
-  id            String           @id @default(cuid())
-  reservationId String           @map("reservation_id")
-  reservation   StockReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  menuItemId    String           @map("menu_item_id")
-  quantity      Float
-
-  @@index([reservationId])
-  @@map("stock_reservation_items")
-}
-
-model StockReservationHold {
-  id              String           @id @default(cuid())
-  reservationId   String           @map("reservation_id")
-  reservation     StockReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  inventoryItemId String           @map("inventory_item_id")
-  inventoryItem   InventoryItem    @relation(fields: [inventoryItemId], references: [id])
-  quantity        Float
-
-  @@index([reservationId])
-  @@index([inventoryItemId])
-  @@map("stock_reservation_holds")
-}
-
-// Shop customer. Separate from staff User (email/password). Login is phone + OTP.
-model Customer {
-  id     String      @id @default(cuid())
-  name   String
-  phone  String      @unique
-  orders ShopOrder[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("customers")
-}
-
-// One-time login code. codeHash is never the raw digits.
-model PhoneOtp {
-  id        String    @id @default(cuid())
-  phone     String
-  codeHash  String    @map("code_hash")
-  expiresAt DateTime  @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  createdAt DateTime  @default(now())
-
-  @@index([phone, createdAt])
-  @@map("phone_otps")
-}
-
-// Customer order. StockReservation covers the ingredient hold until payment.
-// This status continues through pickup or delivery after the reservation is committed.
-model ShopOrder {
-  id              String  @id @default(cuid())
-  customerId      String  @map("customer_id")
-  customer        Customer @relation(fields: [customerId], references: [id])
-  fulfillmentType String  @map("fulfillment_type") // pickup | delivery
-  // placed | confirmed | ready_for_pickup | picked_up | out_for_delivery | delivered | cancelled
-  status          String  @default("placed")
-  reservationId   String? @unique @map("reservation_id")
-  paymentId       String? @unique @map("payment_id")
-  deliveryUserId  String? @map("delivery_user_id")
-  deliveryUser    User?   @relation("DeliveryAssignments", fields: [deliveryUserId], references: [id])
-  receiptNo       String? @unique @map("receipt_no")
-
-  buildingName String? @map("building_name")
-  street       String?
-  area         String?
-  floor        String?
-  unit         String?
-  latitude     Float?
-  longitude    Float?
-
-  items ShopOrderItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([customerId, createdAt])
-  @@index([deliveryUserId, status])
-  @@index([status, createdAt])
-  @@map("shop_orders")
-}
-
-model ShopOrderItem {
-  id         String    @id @default(cuid())
-  orderId    String    @map("order_id")
-  order      ShopOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItemId String    @map("menu_item_id")
-  name       String
-  unitType   String    @map("unit_type")
-  quantity   Float
-  unitPrice  Float     @map("unit_price")
-
-  @@index([orderId])
-  @@map("shop_order_items")
 }

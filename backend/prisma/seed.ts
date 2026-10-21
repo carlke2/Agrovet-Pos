@@ -27,9 +27,6 @@ async function upsertMenuItem(data: {
   name: string;
   category: string;
   price: number;
-  unitType: string;
-  bestBeforeHours?: number | null;
-  batchYield?: number | null;
   stockLevel?: number | null;
   description?: string;
 }) {
@@ -40,9 +37,6 @@ async function upsertMenuItem(data: {
       data: {
         category: data.category,
         price: data.price,
-        unitType: data.unitType,
-        bestBeforeHours: data.bestBeforeHours ?? null,
-        batchYield: data.batchYield ?? null,
         stockLevel: data.stockLevel ?? existing.stockLevel,
         description: data.description,
         isAvailable: true,
@@ -54,23 +48,10 @@ async function upsertMenuItem(data: {
       name: data.name,
       category: data.category,
       price: data.price,
-      unitType: data.unitType,
-      bestBeforeHours: data.bestBeforeHours ?? null,
-      batchYield: data.batchYield ?? null,
       stockLevel: data.stockLevel ?? null,
       description: data.description,
       isAvailable: true,
     },
-  });
-}
-
-async function linkIngredient(menuItemId: string, inventoryItemId: string, quantity: number) {
-  await prisma.menuItemIngredient.upsert({
-    where: {
-      menuItemId_inventoryItemId: { menuItemId, inventoryItemId },
-    },
-    update: { quantity },
-    create: { menuItemId, inventoryItemId, quantity },
   });
 }
 
@@ -162,19 +143,14 @@ async function main() {
     name: 'Brown Loaf',
     category: 'Bread',
     price: 120,
-    unitType: 'loaf',
-    bestBeforeHours: 48,
     description: 'Wholemeal sandwich loaf',
     stockLevel: 20,
   });
 
-  const mandazi = await upsertMenuItem({
+  await upsertMenuItem({
     name: 'Mandazi',
     category: 'Pastries',
     price: 30,
-    unitType: 'piece',
-    bestBeforeHours: 12,
-    batchYield: 24,
     stockLevel: 24,
     description: 'Soft spiced fried dough',
   });
@@ -183,8 +159,6 @@ async function main() {
     name: 'Birthday Cake 1kg',
     category: 'Cakes',
     price: 2500,
-    unitType: 'kg',
-    bestBeforeHours: 72,
     description: 'Vanilla sponge with buttercream',
     stockLevel: 3,
   });
@@ -193,36 +167,9 @@ async function main() {
     name: 'Coffee',
     category: 'Beverages',
     price: 150,
-    unitType: 'piece',
     description: 'Fresh brew',
     stockLevel: null,
   });
-
-  await linkIngredient(brownLoaf.id, flour.id, 0.5);
-  await linkIngredient(brownLoaf.id, yeast.id, 0.01);
-  await linkIngredient(mandazi.id, flour.id, 0.04);
-  await linkIngredient(mandazi.id, sugar.id, 0.01);
-
-  const existingBatch = await prisma.productionBatch.findFirst({
-    where: { menuItemId: mandazi.id, status: 'active' },
-  });
-
-  if (!existingBatch && mandazi.batchYield) {
-    const yieldQty = mandazi.batchYield;
-    await prisma.productionBatch.create({
-      data: {
-        menuItemId: mandazi.id,
-        yieldQuantity: yieldQty,
-        unitPrice: mandazi.price,
-        expectedRevenue: yieldQty * mandazi.price,
-        soldQuantity: 0,
-        soldAmount: 0,
-        status: 'active',
-        notes: 'Seed batch',
-        userId: owner.id,
-      },
-    });
-  }
 
   console.log('Seed complete.');
   console.log(`  Owner:   ${owner.email}`);
