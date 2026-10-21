@@ -231,7 +231,7 @@ export default function Shell({ children }: { children: ReactNode }) {
 
       {!rail && <p className="px-4 pb-1 pt-4 text-[11px] font-bold uppercase tracking-wide text-muted">Agrovet POS</p>}
 
-      <nav className="mt-2 flex-1 space-y-4 overflow-y-auto px-2" aria-label="Main">
+      <nav className="mt-2 min-h-0 flex-1 space-y-4 overflow-y-auto px-2 pb-4" aria-label="Main">
         {groups.map((group) => (
           <div key={group.label}>
             {!rail && (
@@ -269,7 +269,7 @@ export default function Shell({ children }: { children: ReactNode }) {
       </nav>
 
       {canSell && (
-        <div className="p-3">
+        <div className="shrink-0 p-3">
           <Link to="/pos" title="New sale" aria-label="New sale" className={cn("block", rail && "flex justify-center")}>
             {rail ? (
               <span className="flex h-12 w-12 items-center justify-center rounded-control bg-accent text-accent-foreground">

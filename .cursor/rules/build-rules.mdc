@@ -1,0 +1,13 @@
+---
+description: Full-stack build order and completeness rules for agrovet-pos
+alwaysApply: true
+---
+
+# Build rules
+
+1. FULL-STACK COMPLETENESS: never build an interface for something whose endpoints do not exist. Before any screen is built, list every action on it (load, create, edit, deactivate, filter) and map each to a real endpoint (method, path, permission, validation). If an endpoint is missing, build and verify it first. Never leave a button or form that calls a missing or unguarded route; hide features that are not built.
+2. BUILD ORDER for every feature: schema, then migration, then permission keys in `permissions.ts` and `ROLE_MATRIX`, then `npm run db:sync-roles`, then endpoints with validation and audit logging, then scripted API verification, then frontend, then verification of the screen.
+3. Every list endpoint and screen supports loading, empty, and error states.
+4. Every feature ends with a table: Screen action | Endpoint | Permission | Verified (yes/no and how).
+5. Migrations that alter or drop existing tables need approval before applying. Migrations that only create new tables may be applied after the SQL summary is printed.
+6. Test scripts may only delete rows they created themselves, identified by a `__test_` prefix, and must clean up before finishing.
