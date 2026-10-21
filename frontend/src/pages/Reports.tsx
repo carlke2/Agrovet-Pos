@@ -39,43 +39,43 @@ const Reports: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans">
+      <div className="p-4 md:p-8 bg-background min-h-screen font-sans">
         <Loader size="md" title="Loading reports..." subtitle="Gathering sales analytics" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6">
         <h2 className="text-2xl font-bold">System Reports</h2>
         <p className="text-white/80 text-sm mt-1">Agrovet POS analytics</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <div className="bg-surface rounded-card p-5 border border-sand">
           <div className="flex items-center gap-3">
-            <Users className="text-[#0f172a]" size={24} />
+            <Users className="text-ink" size={24} />
             <div>
-              <p className="text-sm text-gray-500">Staff</p>
+              <p className="text-sm text-muted">Staff</p>
               <p className="text-2xl font-bold">{staff.length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <div className="bg-surface rounded-card p-5 border border-sand">
           <div className="flex items-center gap-3">
-            <UtensilsCrossed className="text-[#334155]" size={24} />
+            <UtensilsCrossed className="text-ink" size={24} />
             <div>
-              <p className="text-sm text-gray-500">Menu Items</p>
+              <p className="text-sm text-muted">Items</p>
               <p className="text-2xl font-bold">{menuCount}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <div className="bg-surface rounded-card p-5 border border-sand">
           <div className="flex items-center gap-3">
-            <DollarSign className="text-[#0f172a]" size={24} />
+            <DollarSign className="text-ink" size={24} />
             <div>
-              <p className="text-sm text-gray-500">Sales</p>
+              <p className="text-sm text-muted">Sales</p>
               <p className="text-2xl font-bold">KES {finance.revenue.toLocaleString()}</p>
             </div>
           </div>
@@ -83,28 +83,28 @@ const Reports: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl p-6 border border-gray-100">
-          <h3 className="font-bold text-[#334155] mb-4">Financial Summary</h3>
+        <div className="bg-surface rounded-card p-6 border border-sand">
+          <h3 className="font-bold text-ink mb-4">Financial Summary</h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-[#f8fafc] rounded-xl">
-              <span className="flex items-center gap-2 text-sm"><TrendingUp size={16} className="text-[#0f172a]" /> Sales</span>
-              <span className="font-bold text-[#0f172a]">KES {finance.revenue.toLocaleString()}</span>
+            <div className="flex justify-between items-center p-3 bg-background rounded-control">
+              <span className="flex items-center gap-2 text-sm"><TrendingUp size={16} className="text-ink" /> Sales</span>
+              <span className="font-bold text-ink">KES {finance.revenue.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
+            <div className="flex justify-between items-center p-3 bg-red-50 rounded-control">
               <span className="flex items-center gap-2 text-sm"><TrendingDown size={16} className="text-red-600" /> Expenses</span>
               <span className="font-bold text-red-600">KES {finance.expenses.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-[#f8fafc] rounded-xl">
+            <div className="flex justify-between items-center p-3 bg-background rounded-control">
               <span className="text-sm font-medium">Net</span>
-              <span className={`font-bold ${finance.netProfit >= 0 ? "text-[#0f172a]" : "text-red-600"}`}>KES {finance.netProfit.toLocaleString()}</span>
+              <span className={`font-bold ${finance.netProfit >= 0 ? "text-ink" : "text-red-600"}`}>KES {finance.netProfit.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100">
-          <h3 className="font-bold text-[#334155] mb-4">Staff by Role</h3>
+        <div className="bg-surface rounded-card p-6 border border-sand">
+          <h3 className="font-bold text-ink mb-4">Staff by Role</h3>
           {Object.keys(staffByRole).length === 0 ? (
-            <p className="text-gray-400 text-sm">No staff registered</p>
+            <p className="text-muted text-sm">No staff registered</p>
           ) : (
             <div className="space-y-2">
               {Object.entries(staffByRole).map(([role, count]) => (

@@ -91,48 +91,48 @@ const AuditLogs: React.FC = () => {
   const getEventIcon = (eventType: string) => {
     switch (eventType) {
       case "login":
-        return <User className="text-[#0f172a]" size={18} />;
+        return <User className="text-ink" size={18} />;
       case "payment":
       case "pos_sale":
       case "pos_cash_sale":
-        return <CreditCard className="text-[#0f172a]" size={18} />;
+        return <CreditCard className="text-ink" size={18} />;
       case "user_created":
       case "user_updated":
       case "user_deleted":
-        return <Shield className="text-[#0f172a]" size={18} />;
+        return <Shield className="text-ink" size={18} />;
       default:
-        return <FileText className="text-gray-600" size={18} />;
+        return <FileText className="text-muted" size={18} />;
     }
   };
 
   const getEventBadgeColor = (eventType: string) => {
-    if (eventType.includes("login")) return "bg-[#f8fafc] text-[#0f172a]";
-    if (eventType.includes("payment")) return "bg-[#e2e8f0] text-[#0f172a]";
-    if (eventType.includes("created")) return "bg-[#e2e8f0] text-[#0f172a]";
+    if (eventType.includes("login")) return "bg-background text-ink";
+    if (eventType.includes("payment")) return "bg-primary-100 text-ink";
+    if (eventType.includes("created")) return "bg-primary-100 text-ink";
     if (eventType.includes("updated")) return "bg-yellow-100 text-yellow-700";
     if (eventType.includes("deleted")) return "bg-red-100 text-red-700";
-    return "bg-gray-100 text-gray-700";
+    return "bg-gray-100 text-ink";
   };
 
   const getUserTypeBadge = (userType: string) => {
     const colors: Record<string, string> = {};
     return (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${colors[userType as keyof typeof colors] || "bg-gray-100 text-gray-700"}`}>
+      <span className={`px-2 py-1 rounded text-xs font-medium ${colors[userType as keyof typeof colors] || "bg-gray-100 text-ink"}`}>
         {userType}
       </span>
     );
   };
 
   return (
-    <div className="max-w-7xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-sm border">
+    <div className="max-w-7xl mx-auto mt-10 bg-surface p-6 rounded-control shadow-sm border">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-800">Audit Logs</h2>
-          <p className="text-sm text-gray-500 mt-1">Real-time system activity monitoring</p>
+          <h2 className="text-2xl font-semibold text-ink">Audit Logs</h2>
+          <p className="text-sm text-muted mt-1">Real-time system activity monitoring</p>
         </div>
         <button
           onClick={fetchEvents}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] text-white rounded-lg hover:bg-[#0f172a] transition"
+          className="flex items-center gap-2 px-4 py-2 bg-primary-800 text-white rounded-lg hover:bg-primary-800 transition"
         >
           <RefreshCw size={18} />
           Refresh
@@ -142,20 +142,20 @@ const AuditLogs: React.FC = () => {
       {/* Statistics Cards */}
       {data?.stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-[#f8fafc] p-4 rounded-lg border border-black/10">
-            <p className="text-sm text-gray-600 mb-1">Total Events</p>
+          <div className="bg-background p-4 rounded-lg border border-black/10">
+            <p className="text-sm text-muted mb-1">Total Events</p>
             <p className="text-2xl font-bold text-black">{data.stats.total.toLocaleString()}</p>
           </div>
-          <div className="bg-[#f8fafc] p-4 rounded-lg border border-black/10">
-            <p className="text-sm text-gray-600 mb-1">Today's Events</p>
+          <div className="bg-background p-4 rounded-lg border border-black/10">
+            <p className="text-sm text-muted mb-1">Today's Events</p>
             <p className="text-2xl font-bold text-black">{data.stats.today}</p>
           </div>
-          <div className="bg-[#f8fafc] p-4 rounded-lg border border-black/10">
-            <p className="text-sm text-gray-600 mb-1">Recent Logins (24h)</p>
+          <div className="bg-background p-4 rounded-lg border border-black/10">
+            <p className="text-sm text-muted mb-1">Recent Logins (24h)</p>
             <p className="text-2xl font-bold text-black">{data.stats.recentLogins}</p>
           </div>
-          <div className="bg-[#f8fafc] p-4 rounded-lg border border-black/10">
-            <p className="text-sm text-gray-600 mb-1">Current Page</p>
+          <div className="bg-background p-4 rounded-lg border border-black/10">
+            <p className="text-sm text-muted mb-1">Current Page</p>
             <p className="text-2xl font-bold text-black">
               {data.pagination.page} / {data.pagination.pages}
             </p>
@@ -166,24 +166,24 @@ const AuditLogs: React.FC = () => {
       {/* Filters */}
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Filter size={18} className="text-gray-600" />
-          <span className="font-semibold text-gray-700">Filters</span>
+          <Filter size={18} className="text-muted" />
+          <span className="font-semibold text-ink">Filters</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-2.5 text-muted" size={18} />
             <input
               type="text"
               placeholder="Search events..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-              className="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#334155]"
+              className="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-primary-700"
             />
           </div>
           <select
             value={filters.eventType}
             onChange={(e) => setFilters({ ...filters, eventType: e.target.value, page: 1 })}
-            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#334155]"
+            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-700"
           >
             <option value="">All Event Types</option>
             <option value="login">Login</option>
@@ -196,7 +196,7 @@ const AuditLogs: React.FC = () => {
           <select
             value={filters.userType}
             onChange={(e) => setFilters({ ...filters, userType: e.target.value, page: 1 })}
-            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#334155]"
+            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-700"
           >
             <option value="">All User Types</option>
             <option value="Admin">Admin</option>
@@ -209,14 +209,14 @@ const AuditLogs: React.FC = () => {
             type="date"
             value={filters.startDate}
             onChange={(e) => setFilters({ ...filters, startDate: e.target.value, page: 1 })}
-            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#334155]"
+            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-700"
             placeholder="Start Date"
           />
           <input
             type="date"
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value, page: 1 })}
-            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#334155]"
+            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-700"
             placeholder="End Date"
           />
         </div>
@@ -225,7 +225,7 @@ const AuditLogs: React.FC = () => {
       {/* Events Table */}
       <div className="overflow-x-auto border rounded-lg">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-gray-700 text-left">
+          <thead className="bg-gray-50 text-ink text-left">
             <tr>
               <th className="px-4 py-3 border-b">Time</th>
               <th className="px-4 py-3 border-b">Event Type</th>
@@ -244,7 +244,7 @@ const AuditLogs: React.FC = () => {
               </tr>
             ) : !data || data.events.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center p-6 text-gray-500 italic">
+                <td colSpan={6} className="text-center p-6 text-muted italic">
                   No audit events found.
                 </td>
               </tr>
@@ -253,8 +253,8 @@ const AuditLogs: React.FC = () => {
                 <tr key={event._id} className="border-b hover:bg-gray-50 transition">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Clock size={14} className="text-gray-400" />
-                      <span className="text-gray-600">
+                      <Clock size={14} className="text-muted" />
+                      <span className="text-muted">
                         {new Date(event.timestamp).toLocaleString()}
                       </span>
                     </div>
@@ -269,31 +269,44 @@ const AuditLogs: React.FC = () => {
                   </td>
                   <td className="px-4 py-3">
                     <div>
-                      <div className="font-medium text-gray-900">{event.userName || "Unknown"}</div>
+                      <div className="font-medium text-ink">{event.userName || "Unknown"}</div>
                       {event.userEmail && (
-                        <div className="text-xs text-gray-500">{event.userEmail}</div>
+                        <div className="text-xs text-muted">{event.userEmail}</div>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3">{getUserTypeBadge(event.userType)}</td>
                   <td className="px-4 py-3">
                     <div>
-                      <div className="font-medium text-gray-900">{event.action}</div>
+                      <div className="font-medium text-ink">{event.action}</div>
                       {event.description && (
-                        <div className="text-xs text-gray-500 mt-1">{event.description}</div>
+                        <div className="text-xs text-muted mt-1">{event.description}</div>
                       )}
                       {event.metadata && Object.keys(event.metadata).length > 0 && (
-                        <details className="mt-1">
-                          <summary className="text-xs text-[#0f172a] cursor-pointer">View details</summary>
-                          <pre className="text-xs mt-1 p-2 bg-gray-100 rounded overflow-auto max-w-md">
-                            {JSON.stringify(event.metadata, null, 2)}
-                          </pre>
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-xs font-semibold text-primary-800">View details</summary>
+                          <dl className="mt-2 space-y-1">
+                            {Object.entries(event.metadata).map(([key, value]) => (
+                              <div key={key} className="grid grid-cols-[8rem_1fr] gap-2 text-xs">
+                                <dt className="font-semibold text-muted">{key}</dt>
+                                <dd className="text-ink">
+                                  {value != null && typeof value === "object" ? JSON.stringify(value) : String(value)}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-xs text-muted">Technical details</summary>
+                            <pre className="mt-1 max-w-md overflow-auto rounded-control bg-background p-2 text-xs text-ink">
+                              {JSON.stringify(event.metadata, null, 2)}
+                            </pre>
+                          </details>
                         </details>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-xs text-gray-600">{event.ipAddress || "N/A"}</span>
+                    <span className="font-mono text-xs text-muted">{event.ipAddress || "N/A"}</span>
                   </td>
                 </tr>
               ))
@@ -305,7 +318,7 @@ const AuditLogs: React.FC = () => {
       {/* Pagination */}
       {data && data.pagination.pages > 1 && (
         <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-muted">
             Showing {((data.pagination.page - 1) * data.pagination.limit) + 1} to{" "}
             {Math.min(data.pagination.page * data.pagination.limit, data.pagination.total)} of{" "}
             {data.pagination.total} events
@@ -332,12 +345,12 @@ const AuditLogs: React.FC = () => {
       {/* Event Type Statistics */}
       {data?.stats.byEventType && data.stats.byEventType.length > 0 && (
         <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-800 mb-3">Events by Type</h3>
+          <h3 className="font-semibold text-ink mb-3">Events by Type</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {data.stats.byEventType.map((item) => (
-              <div key={item._id} className="bg-white p-3 rounded border">
-                <div className="text-xs text-gray-600 mb-1">{item._id.replace(/_/g, " ")}</div>
-                <div className="text-lg font-bold text-gray-900">{item.count}</div>
+              <div key={item._id} className="bg-surface p-3 rounded border">
+                <div className="text-xs text-muted mb-1">{item._id.replace(/_/g, " ")}</div>
+                <div className="text-lg font-bold text-ink">{item.count}</div>
               </div>
             ))}
           </div>

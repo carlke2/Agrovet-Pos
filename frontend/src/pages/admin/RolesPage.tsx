@@ -76,9 +76,9 @@ const RolesPage = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="bg-[#334155] text-white rounded-2xl p-6">
+        <div className="bg-primary-700 text-white rounded-card p-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield size={28} /> Roles
           </h1>
@@ -92,17 +92,17 @@ const RolesPage = () => {
             const locked = role.name === "Admin";
             const selected = drafts[role.id] || [];
             return (
-              <section key={role.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+              <section key={role.id} className="bg-surface rounded-card border border-sand shadow-sm p-5 space-y-4">
                 <div>
-                  <h2 className="font-bold text-[#334155]">{role.name}</h2>
-                  {role.description && <p className="text-sm text-gray-500 mt-1">{role.description}</p>}
+                  <h2 className="font-bold text-ink">{role.name}</h2>
+                  {role.description && <p className="text-sm text-muted mt-1">{role.description}</p>}
                   {locked && (
                     <p className="text-xs text-amber-700 mt-2">This role cannot lose any permission.</p>
                   )}
                 </div>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {PERMISSION_OPTIONS.map((option) => (
-                    <label key={option.key} className="flex items-center gap-2 text-sm text-gray-700">
+                    <label key={option.key} className="flex items-center gap-2 text-sm text-ink">
                       <input
                         type="checkbox"
                         checked={selected.includes(option.key)}
@@ -117,7 +117,7 @@ const RolesPage = () => {
                   type="button"
                   disabled={locked || savingId === role.id}
                   onClick={() => save(role)}
-                  className="px-4 py-2 bg-[#334155] text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                  className="px-4 py-2 bg-primary-700 text-white rounded-control text-sm font-semibold disabled:opacity-50"
                 >
                   {locked ? "Locked" : savingId === role.id ? "Saving..." : "Save permissions"}
                 </button>

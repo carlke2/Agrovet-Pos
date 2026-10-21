@@ -53,8 +53,8 @@ const ReceiptsPage = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 flex justify-between items-center">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2"><Receipt /> POS Receipts</h2>
           <p className="text-white/80 text-sm mt-1">Sales and transaction history</p>
@@ -68,29 +68,29 @@ const ReceiptsPage = () => {
       {loading ? (
         <Loader size="sm" title="Loading receipts..." subtitle="Fetching POS transaction history" className="py-8" />
       ) : receipts.length === 0 ? (
-        <div className="bg-white rounded-2xl p-8 text-center text-gray-500">No receipts yet</div>
+        <div className="bg-surface rounded-card p-8 text-center text-muted">No receipts yet</div>
       ) : (
         <div className="space-y-3">
           {receipts.map((r) => (
-            <div key={r.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div key={r.id} className="bg-surface rounded-card border border-sand overflow-hidden">
               <button
                 onClick={() => setExpanded(expanded === r.id ? null : r.id)}
                 className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition text-left"
               >
                 <div>
-                  <p className="font-semibold text-[#334155] capitalize">
+                  <p className="font-semibold text-ink capitalize">
                     {(r.paymentMethod || "cash").toLowerCase() === "mpesa" ? "M-Pesa" : "Cash"}
                     {r.cashierName ? (
-                      <span className="text-gray-400 font-normal"> · {r.cashierName}</span>
+                      <span className="text-muted font-normal"> · {r.cashierName}</span>
                     ) : null}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-muted mt-0.5">
                     {new Date(r.createdAt).toLocaleString()} · {displayReceiptNo(r)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-[#0f172a]">KES {r.totalAmount.toLocaleString()}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === "completed" ? "bg-[#e2e8f0] text-[#0f172a]" : "bg-gray-100 text-gray-600"}`}>{r.status}</span>
+                  <p className="font-bold text-ink">KES {r.totalAmount.toLocaleString()}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${r.status === "completed" ? "bg-primary-100 text-ink" : "bg-gray-100 text-muted"}`}>{r.status}</span>
                 </div>
               </button>
               {expanded === r.id && (
@@ -101,18 +101,18 @@ const ReceiptsPage = () => {
                       <span className="font-medium">KES {(item.price * item.quantity).toFixed(0)}</span>
                     </div>
                   ))}
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-sand">
                     <button
                       type="button"
                       onClick={() => handlePrint(r)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#334155] border border-[#334155]/20 rounded-lg hover:bg-[#334155]/5"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-ink border border-primary-700/20 rounded-lg hover:bg-primary-800/5"
                     >
                       <Printer size={14} /> Print
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDownload(r)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#334155] rounded-lg hover:bg-[#334155]/90"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-primary-700 rounded-lg hover:bg-primary-800"
                     >
                       <Download size={14} /> Download PDF
                     </button>

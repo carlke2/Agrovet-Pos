@@ -68,8 +68,8 @@ const StaffAttendanceReport = () => {
   }, [startDate, endDate]);
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Clock /> Staff Attendance
@@ -78,62 +78,62 @@ const StaffAttendanceReport = () => {
         </div>
         <div className="text-right">
           <p className="text-white/80 text-xs">Currently checked in today</p>
-          <p className="text-2xl font-bold text-[#f8fafc]">{presentCount}</p>
+          <p className="text-2xl font-bold text-surface">{presentCount}</p>
         </div>
       </div>
 
       {today && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase">Today&apos;s events</p>
-            <p className="text-2xl font-bold text-[#334155] mt-1">{today.totalEvents}</p>
+          <div className="bg-surface rounded-card p-5 border border-sand">
+            <p className="text-xs text-muted uppercase">Today&apos;s events</p>
+            <p className="text-2xl font-bold text-ink mt-1">{today.totalEvents}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase">Staff checked in</p>
-            <p className="text-2xl font-bold text-[#334155] mt-1">{today.staffPresent}</p>
+          <div className="bg-surface rounded-card p-5 border border-sand">
+            <p className="text-xs text-muted uppercase">Staff checked in</p>
+            <p className="text-2xl font-bold text-ink mt-1">{today.staffPresent}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase">Active staff today</p>
-            <p className="text-2xl font-bold text-[#334155] mt-1">{today.summary.length}</p>
+          <div className="bg-surface rounded-card p-5 border border-sand">
+            <p className="text-xs text-muted uppercase">Active staff today</p>
+            <p className="text-2xl font-bold text-ink mt-1">{today.summary.length}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+      <div className="bg-surface rounded-card border border-sand p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Filter size={18} className="text-[#334155]" />
-          <span className="font-semibold text-[#334155]">Filters</span>
+          <Filter size={18} className="text-ink" />
+          <span className="font-semibold text-ink">Filters</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-sand rounded-lg px-3 py-2 text-sm"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="border border-sand rounded-lg px-3 py-2 text-sm"
           />
           <button
             type="button"
             onClick={() => { setStartDate(""); setEndDate(""); }}
-            className="text-sm text-gray-500 hover:text-[#334155]"
+            className="text-sm text-muted hover:text-ink"
           >
             Clear dates
           </button>
         </div>
-        <p className="text-xs text-gray-500">{filteredLabel} · {rows.length} records</p>
+        <p className="text-xs text-muted">{filteredLabel} · {rows.length} records</p>
       </div>
 
       {loading ? (
         <Loader size="sm" title="Loading attendance..." subtitle="Fetching staff records" className="py-8" />
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+        <div className="bg-surface rounded-card border border-sand overflow-x-auto">
           <table className="w-full text-sm min-w-[720px]">
-            <thead className="text-gray-500 uppercase text-xs bg-gray-50">
+            <thead className="text-muted uppercase text-xs bg-gray-50">
               <tr>
                 <th className="text-left py-3 px-4">Staff</th>
                 <th className="text-left py-3 px-4">Role</th>
@@ -144,22 +144,22 @@ const StaffAttendanceReport = () => {
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-400">No attendance records yet</td>
+                  <td colSpan={4} className="p-8 text-center text-muted">No attendance records yet</td>
                 </tr>
               ) : (
                 rows.map((r) => (
-                  <tr key={r.id} className="border-t border-gray-100">
-                    <td className="py-3 px-4 font-semibold text-[#334155]">{r.name}</td>
-                    <td className="py-3 px-4 capitalize text-gray-600">{r.role}</td>
+                  <tr key={r.id} className="border-t border-sand">
+                    <td className="py-3 px-4 font-semibold text-ink">{r.name}</td>
+                    <td className="py-3 px-4 capitalize text-muted">{r.role}</td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        r.type === "check_in" ? "bg-[#e2e8f0] text-[#0f172a]" : "bg-amber-100 text-amber-800"
+                        r.type === "check_in" ? "bg-primary-100 text-ink" : "bg-amber-100 text-amber-800"
                       }`}>
                         {r.type === "check_in" ? <LogIn size={12} /> : <LogOut size={12} />}
                         {r.type === "check_in" ? "Check in" : "Check out"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
+                    <td className="py-3 px-4 text-muted whitespace-nowrap">
                       {new Date(r.date).toLocaleString()}
                     </td>
                   </tr>

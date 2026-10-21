@@ -97,7 +97,7 @@ input[inputmode="numeric"] {
   background-color: var(--success);
 }
 .swal2-icon.swal2-success .swal2-success-ring {
-  border: 0.25em solid rgba(47, 158, 91, 0.3);
+  border: 0.25em solid color-mix(in srgb, var(--success) 30%, transparent);
 }
 .swal2-timer-progress-bar {
   background: var(--primary);

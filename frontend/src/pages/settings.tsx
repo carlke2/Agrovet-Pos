@@ -57,8 +57,8 @@ const Settings = () => {
   if (!canManageSettings) {
     return (
       <div className="p-6 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold text-[#334155]">Settings</h2>
-        <p className="text-sm text-gray-500 mt-2">You do not have permission to change settings.</p>
+        <h2 className="text-2xl font-bold text-ink">Settings</h2>
+        <p className="text-sm text-muted mt-2">You do not have permission to change settings.</p>
       </div>
     );
   }
@@ -66,19 +66,19 @@ const Settings = () => {
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-[#334155] flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-ink flex items-center gap-2">
           <SettingsIcon size={24} /> Settings
         </h2>
-        <p className="text-sm text-gray-500 mt-1">System notification controls</p>
+        <p className="text-sm text-muted mt-1">System notification controls</p>
       </div>
 
       {loading ? (
         <Loader size="sm" title="Loading settings..." subtitle="Fetching system preferences" className="py-10" />
       ) : (
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6 space-y-5">
+        <section className="bg-surface rounded-card border border-sand shadow-sm p-5 md:p-6 space-y-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-[#334155]">SMS</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-ink">SMS</p>
+            <p className="text-sm text-muted mt-1">
               System-wide kill switch for all Advanta SMS (welcome messages and alerts).
               {!smsConfigured && (
                 <span className="block mt-1 text-amber-600">
@@ -89,21 +89,21 @@ const Settings = () => {
           </div>
 
           <div
-            className={`flex items-start justify-between gap-4 p-4 rounded-xl border ${
-              smsDisabled ? "bg-amber-50/70 border-amber-100" : "bg-[#f8fafc]/60 border-[#cbd5e1]"
+            className={`flex items-start justify-between gap-4 p-4 rounded-control border ${
+              smsDisabled ? "bg-amber-50/70 border-amber-100" : "bg-background/60 border-sand"
             }`}
           >
             <div className="flex gap-3 min-w-0">
               <div
                 className={`mt-0.5 p-2 rounded-lg shrink-0 ${
-                  smsDisabled ? "bg-amber-100 text-amber-700" : "bg-[#e2e8f0] text-[#0f172a]"
+                  smsDisabled ? "bg-amber-100 text-amber-700" : "bg-primary-100 text-ink"
                 }`}
               >
                 {smsDisabled ? <BellOff size={18} /> : <MessageSquare size={18} />}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-[#334155]">Disable SMS</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="font-semibold text-ink">Disable SMS</p>
+                <p className="text-xs text-muted mt-0.5">
                   {smsDisabled
                     ? "SMS is off for the whole system."
                     : "SMS is allowed. Turn this on to stop all outbound SMS."}
@@ -121,7 +121,7 @@ const Settings = () => {
               }`}
             >
               <span
-                className={`block h-6 w-6 bg-white rounded-full shadow transition ${
+                className={`block h-6 w-6 bg-surface rounded-full shadow transition ${
                   smsDisabled ? "translate-x-6" : "translate-x-0"
                 }`}
               />
@@ -132,7 +132,7 @@ const Settings = () => {
             type="button"
             onClick={save}
             disabled={saving}
-            className="w-full sm:w-auto px-5 py-2.5 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full sm:w-auto px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-control text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
             <Save size={16} />
             {saving ? "Saving..." : "Save settings"}

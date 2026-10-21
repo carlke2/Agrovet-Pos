@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ShoppingCart,
   Search,
@@ -19,7 +19,10 @@ import {
 } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
-import Loader from "@/components/ui/loader";
+import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
+import Money from "@/components/ui/Money";
+import PageLoader from "@/components/ui/PageLoader";
 import { displayReceiptNo } from "@/lib/receipt";
 import {
   downloadOrderReceipt,
@@ -109,6 +112,7 @@ const PosTerminal = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [category, setCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const [view, setView] = useState<PosView>("checkout");
   const [salesDate, setSalesDate] = useState(todayDateString);
   const [salesSummary, setSalesSummary] = useState<SalesSummary | null>(null);
@@ -190,6 +194,10 @@ const PosTerminal = () => {
   useEffect(() => {
     fetchMenu();
   }, [fetchMenu]);
+
+  useEffect(() => {
+    if (view === "checkout") searchRef.current?.focus();
+  }, [view]);
 
   useEffect(() => {
     if (view === "sales") {
@@ -352,24 +360,20 @@ const PosTerminal = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#f8fafc] min-h-screen font-sans">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 mb-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 md:p-6 bg-background min-h-screen font-sans">
+      <div className="bg-primary-700 text-white rounded-card p-6 mb-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black flex items-center gap-2">
-            <ShoppingCart className="text-white" /> Agrovet POS · POS
+            <ShoppingCart className="text-white" /> Point of Sale
           </h2>
-          <p className="text-white/80 text-sm mt-1">
-            {view === "checkout"
-              ? "Walk-in cash and M-Pesa sales"
-              : "Track sales and receipts by day"}
-          </p>
+          <p className="text-white/80 text-sm mt-1">Counter sales</p>
         </div>
-        <div className="flex gap-2 bg-white/10 p-1 rounded-xl">
+        <div className="flex gap-2 bg-surface/10 p-1 rounded-control">
           <button
             type="button"
             onClick={() => setView("checkout")}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              view === "checkout" ? "bg-white text-[#334155]" : "text-white/70 hover:bg-white/10"
+              view === "checkout" ? "bg-surface text-ink" : "text-white/70 hover:bg-surface/10"
             }`}
           >
             Checkout
@@ -378,7 +382,7 @@ const PosTerminal = () => {
             type="button"
             onClick={() => setView("sales")}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              view === "sales" ? "bg-white text-[#334155]" : "text-white/70 hover:bg-white/10"
+              view === "sales" ? "bg-surface text-ink" : "text-white/70 hover:bg-surface/10"
             }`}
           >
             Sales Tracker
@@ -388,26 +392,26 @@ const PosTerminal = () => {
 
       {view === "sales" ? (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-surface rounded-card border border-sand p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Filter by day</p>
-              <p className="text-sm font-semibold text-[#334155] mt-1">View sales for a specific date</p>
+              <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider">Filter by day</p>
+              <p className="text-sm font-semibold text-ink mt-1">View sales for a specific date</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   type="date"
                   value={salesDate}
                   max={todayDateString()}
                   onChange={(e) => setSalesDate(e.target.value)}
-                  className="pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                  className="pl-9 pr-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => setSalesDate(todayDateString())}
-                className="px-3 py-2.5 text-xs font-bold text-[#334155] border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                className="px-3 py-2.5 text-xs font-bold text-ink border border-slate-200 rounded-control hover:bg-slate-50 transition"
               >
                 Today
               </button>
@@ -415,80 +419,80 @@ const PosTerminal = () => {
           </div>
 
           {salesLoading ? (
-            <Loader size="sm" title="Loading sales..." subtitle="Fetching daily summary and receipts" className="py-8" />
+            <PageLoader label="Loading sales..." detail="Fetching daily summary and receipts" className="py-8" />
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                <div className="bg-surface rounded-card p-5 border border-sand">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Total Collected</p>
-                      <p className="text-2xl font-bold text-[#0f172a] mt-1">
+                      <p className="text-sm text-muted">Total Collected</p>
+                      <p className="text-2xl font-bold text-ink mt-1">
                         KES {(salesSummary?.totalSales ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]">
+                    <div className="p-3 bg-background rounded-control text-ink">
                       <TrendingUp size={22} />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">POS + till M-Pesa</p>
+                  <p className="text-xs text-muted mt-2">POS + till M-Pesa</p>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                <div className="bg-surface rounded-card p-5 border border-sand">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Till M-Pesa</p>
-                      <p className="text-2xl font-bold text-[#334155] mt-1">
+                      <p className="text-sm text-muted">Till M-Pesa</p>
+                      <p className="text-2xl font-bold text-ink mt-1">
                         KES {(salesSummary?.tillInflow ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#334155]">
+                    <div className="p-3 bg-background rounded-control text-ink">
                       <Smartphone size={22} />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-muted mt-2">
                     {salesSummary?.tillPaymentCount ?? 0} webhook payment
                     {(salesSummary?.tillPaymentCount ?? 0) === 1 ? "" : "s"}
                   </p>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                <div className="bg-surface rounded-card p-5 border border-sand">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">POS Sales</p>
-                      <p className="text-2xl font-bold text-[#334155] mt-1">
+                      <p className="text-sm text-muted">POS Sales</p>
+                      <p className="text-2xl font-bold text-ink mt-1">
                         KES {(salesSummary?.posSales ?? 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#f8fafc] rounded-xl text-[#0f172a]">
+                    <div className="p-3 bg-background rounded-control text-ink">
                       <Receipt size={22} />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-muted mt-2">
                     {salesSummary?.transactionCount ?? 0} receipt
                     {(salesSummary?.transactionCount ?? 0) === 1 ? "" : "s"}
                   </p>
                 </div>
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                <div className="bg-surface rounded-card p-5 border border-sand">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Items Sold</p>
-                      <p className="text-2xl font-bold text-[#0f172a] mt-1">
+                      <p className="text-sm text-muted">Items Sold</p>
+                      <p className="text-2xl font-bold text-ink mt-1">
                         {salesSummary?.itemsSold ?? 0}
                       </p>
                     </div>
-                    <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
+                    <div className="p-3 bg-amber-50 rounded-control text-amber-600">
                       <Package size={22} />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Menu items checked out</p>
+                  <p className="text-xs text-muted mt-2">Items checked out</p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <h3 className="font-bold text-[#334155] mb-4 flex items-center gap-2">
+              <div className="bg-surface rounded-card border border-sand p-6">
+                <h3 className="font-bold text-ink mb-4 flex items-center gap-2">
                   <BarChart3 size={18} /> Hourly Sales
                 </h3>
                 {hourlyChartData.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-10">No sales recorded for this day.</p>
+                  <p className="text-sm text-muted text-center py-10">No sales recorded for this day.</p>
                 ) : (
                   <div className="w-full min-w-0" style={{ height: 256 }}>
                     <ResponsiveContainer width="100%" height={256} minWidth={0}>
@@ -497,19 +501,19 @@ const PosTerminal = () => {
                         <XAxis dataKey="hour" />
                         <YAxis />
                         <Tooltip formatter={(v: number) => `KES ${v.toLocaleString()}`} />
-                        <Bar dataKey="amount" fill="#334155" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="amount" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 )}
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-[#334155] flex items-center gap-2">
+              <div className="bg-surface rounded-card border border-sand overflow-hidden">
+                <div className="px-6 py-4 border-b border-sand flex items-center justify-between">
+                  <h3 className="font-bold text-ink flex items-center gap-2">
                     <Receipt size={18} /> Day Activity
                   </h3>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted">
                     {new Date(`${salesDate}T12:00:00`).toLocaleDateString(undefined, {
                       weekday: "long",
                       year: "numeric",
@@ -519,7 +523,7 @@ const PosTerminal = () => {
                   </p>
                 </div>
                 {salesReceipts.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">No sales or till payments for this day</div>
+                  <div className="p-8 text-center text-muted">No sales or till payments for this day</div>
                 ) : (
                   <div className="divide-y divide-gray-50">
                     {salesReceipts.map((r) => (
@@ -530,15 +534,15 @@ const PosTerminal = () => {
                           className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition text-left"
                         >
                           <div>
-                            <p className="font-semibold text-[#334155]">
+                            <p className="font-semibold text-ink">
                               {receiptLabel(r)}
                               {r.source === "till" && (
-                                <span className="ml-2 text-[10px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded bg-[#e2e8f0] text-[#0f172a]">
+                                <span className="ml-2 text-[10px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary-100 text-ink">
                                   Till
                                 </span>
                               )}
                             </p>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-xs text-muted mt-0.5">
                               {new Date(r.createdAt).toLocaleString()}
                               {r.source === "till"
                                 ? ` · ${r.receiptNo || "Till payment"}${r.phone ? ` · ${r.phone}` : ""}`
@@ -546,14 +550,14 @@ const PosTerminal = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-[#0f172a]">KES {r.totalAmount.toLocaleString()}</p>
+                            <p className="font-bold text-ink">KES {r.totalAmount.toLocaleString()}</p>
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
                                 r.source === "till"
-                                  ? "bg-[#e2e8f0] text-[#0f172a]"
+                                  ? "bg-primary-100 text-ink"
                                   : r.status === "completed"
-                                    ? "bg-[#e2e8f0] text-[#0f172a]"
-                                    : "bg-gray-100 text-gray-600"
+                                    ? "bg-primary-100 text-ink"
+                                    : "bg-gray-100 text-muted"
                               }`}
                             >
                               {r.source === "till" ? r.label || "Till webhook" : r.status}
@@ -573,18 +577,18 @@ const PosTerminal = () => {
                               </div>
                             ))}
                             {r.source !== "till" && (
-                              <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                              <div className="flex gap-2 mt-3 pt-3 border-t border-sand">
                                 <button
                                   type="button"
                                   onClick={() => handlePrintReceipt(r)}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#334155] border border-[#334155]/20 rounded-lg hover:bg-[#334155]/5"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-ink border border-primary-700/20 rounded-lg hover:bg-primary-800/5"
                                 >
                                   <Printer size={14} /> Print
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDownloadReceipt(r)}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#334155] rounded-lg hover:bg-[#334155]/90"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-primary-700 rounded-lg hover:bg-primary-800"
                                 >
                                   <Download size={14} /> Download PDF
                                 </button>
@@ -601,45 +605,49 @@ const PosTerminal = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-white rounded-2xl p-3 border border-slate-100 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+          <div className="lg:col-span-3 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-surface rounded-card p-3 border border-sand shadow-sm">
               <div className="flex gap-1.5 flex-wrap">
                 {categories.map((c) => (
                   <button
                     key={c}
                     onClick={() => setCategory(c)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-control text-xs font-bold transition-all duration-200 ${
                       category === c
-                        ? "bg-[#334155] text-white shadow-sm"
-                        : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                        ? "bg-primary-700 text-white shadow-sm"
+                        : "bg-gray-50 text-muted hover:bg-gray-100"
                     }`}
                   >
                     {c}
                   </button>
                 ))}
               </div>
-              <div className="relative w-full sm:w-64">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="relative w-full sm:w-80">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
                   <Search size={16} />
                 </span>
                 <input
+                  ref={searchRef}
                   type="text"
-                  placeholder="Search menu..."
+                  placeholder="Search items or scan barcode"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+                  className="w-full pl-9 pr-4 py-3 bg-background border border-sand rounded-control text-base focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface"
                 />
               </div>
             </div>
 
             {filtered.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-gray-400 shadow-sm">
-                <ShoppingCart size={40} className="mx-auto mb-2 text-gray-300" strokeWidth={1.5} />
-                <p className="text-sm font-semibold">No items match your search filters.</p>
+              <div className="bg-surface rounded-card border border-sand shadow-sm">
+                <EmptyState
+                  mode="search"
+                  title="No items match your search"
+                  message="Try another name or scan a different barcode."
+                />
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {filtered.map((item) => {
                   const available =
                     item.isAvailable !== false && (item.stockLevel == null || item.stockLevel > 0);
@@ -648,10 +656,10 @@ const PosTerminal = () => {
                       key={item.id}
                       onClick={() => available && addToCart(item)}
                       disabled={!available}
-                      className={`bg-white rounded-2xl border transition-all duration-200 text-left relative flex flex-col overflow-hidden select-none ${
+                      className={`min-h-[148px] bg-surface rounded-card border transition-all duration-200 text-left relative flex flex-col overflow-hidden select-none ${
                         available
-                          ? "border-slate-100 hover:shadow-md hover:border-amber-200 active:scale-[0.98]"
-                          : "opacity-60 cursor-not-allowed border-gray-200 bg-gray-50/50"
+                          ? "border-sand hover:shadow-md hover:border-amber-200 active:scale-[0.98]"
+                          : "opacity-60 cursor-not-allowed border-sand bg-gray-50/50"
                       }`}
                     >
                       {item.imageUrl ? (
@@ -674,17 +682,17 @@ const PosTerminal = () => {
                         </span>
                       )}
                       <div className="p-3 flex flex-col gap-1">
-                        <p className="font-extrabold text-[#334155] text-xs leading-tight line-clamp-2">
+                        <p className="font-extrabold text-ink text-base leading-tight line-clamp-2">
                           {item.name}
                         </p>
-                        <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">
+                        <p className="text-[9px] text-muted uppercase tracking-wider font-bold">
                           {item.category}
                         </p>
-                        <p className="text-[#334155] font-black text-sm mt-1">
-                          KES {item.price.toLocaleString()}
+                        <p className="text-ink font-black text-base mt-1">
+                          <Money amount={item.price} />
                         </p>
                         {item.stockLevel != null ? (
-                          <p className="text-[9px] text-gray-400 font-semibold">{item.stockLevel} left</p>
+                          <p className="text-[9px] text-muted font-semibold">{item.stockLevel} left</p>
                         ) : null}
                       </div>
                     </button>
@@ -694,10 +702,10 @@ const PosTerminal = () => {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-5 space-y-5 shadow-sm h-fit sticky top-6">
+          <div className="lg:col-span-2 bg-surface rounded-card border border-sand p-5 space-y-5 shadow-sm h-fit sticky top-6">
             <div className="space-y-2 flex flex-col">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+                <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">
                   Cart Items
                 </span>
                 {cart.length > 0 && (
@@ -720,24 +728,24 @@ const PosTerminal = () => {
                   cart.map((item) => (
                     <div
                       key={item.menuItemId}
-                      className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-100 rounded-xl select-none"
+                      className="flex items-center gap-2 p-2 bg-gray-50 border border-sand rounded-control select-none"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-extrabold text-[#334155] text-xs truncate leading-tight">
+                        <p className="font-extrabold text-ink text-xs truncate leading-tight">
                           {item.name}
                         </p>
-                        <p className="text-[9px] text-gray-400 font-semibold mt-0.5">
+                        <p className="text-[9px] text-muted font-semibold mt-0.5">
                           KES {item.price.toLocaleString()} each
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 bg-white border border-gray-150 rounded-lg p-0.5 shadow-sm shrink-0">
+                      <div className="flex items-center gap-1 bg-surface border border-gray-150 rounded-lg p-0.5 shadow-sm shrink-0">
                         <button
                           onClick={() => updateQty(item.menuItemId, -1)}
-                          className="p-1 hover:bg-gray-50 rounded text-gray-650 hover:text-gray-800 transition"
+                          className="p-1 hover:bg-gray-50 rounded text-gray-650 hover:text-ink transition"
                         >
                           <Minus size={10} />
                         </button>
-                        <span className="w-4 text-center font-black text-[11px] text-[#334155]">
+                        <span className="w-4 text-center font-black text-[11px] text-ink">
                           {item.quantity}
                         </span>
                         <button
@@ -747,7 +755,7 @@ const PosTerminal = () => {
                           <Plus size={10} />
                         </button>
                       </div>
-                      <div className="w-16 text-right font-black text-[#334155] text-xs shrink-0">
+                      <div className="w-16 text-right font-black text-ink text-xs shrink-0">
                         KES {(item.price * item.quantity).toLocaleString()}
                       </div>
                       <button
@@ -763,27 +771,30 @@ const PosTerminal = () => {
               </div>
             </div>
 
-            <div className="border-t border-gray-100 pt-4 space-y-3">
+            <div className="border-t border-sand pt-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-gray-500">Checkout Total</span>
-                <span className="font-black text-lg text-[#334155]">KES {total.toLocaleString()}</span>
+                <span className="text-xs font-bold text-muted">Checkout Total</span>
+                <span className="font-black text-lg text-ink"><Money amount={total} /></span>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant="accent"
+                size="lg"
+                className="w-full"
+                loading={cashLoading}
+                disabled={mpesaLoading || cart.length === 0}
                 onClick={payWithCash}
-                disabled={cashLoading || mpesaLoading || cart.length === 0}
-                className="w-full py-3 bg-amber-500 text-white rounded-xl font-extrabold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
               >
                 <Banknote size={16} />
-                <span>{cashLoading ? "Processing..." : "Cash Sale"}</span>
-              </button>
+                Cash sale
+              </Button>
 
               <button
                 type="button"
                 onClick={() => setShowMpesa(true)}
                 disabled={mpesaLoading || cashLoading || cart.length === 0}
-                className="w-full py-3 bg-[#334155] text-white rounded-xl font-extrabold hover:bg-[#0f172a] disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-3 bg-primary-700 text-white rounded-control font-extrabold hover:bg-primary-800 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
               >
                 <Smartphone size={16} />
                 <span>M-Pesa STK</span>
@@ -795,26 +806,26 @@ const PosTerminal = () => {
 
       {showMpesa && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 bg-[#334155] text-white flex items-center justify-between">
+          <div className="w-full max-w-md bg-surface rounded-3xl shadow-2xl border border-sand overflow-hidden">
+            <div className="px-6 py-5 bg-primary-700 text-white flex items-center justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-wider">M-Pesa Payment</p>
-                <p className="text-xs text-[#f8fafc] mt-0.5">Safaricom Daraja · KES {total.toLocaleString()}</p>
+                <p className="text-xs text-surface mt-0.5">Safaricom Daraja · KES {total.toLocaleString()}</p>
               </div>
               <button
                 type="button"
                 onClick={() => !mpesaLoading && setShowMpesa(false)}
-                className="p-1.5 rounded-lg hover:bg-white/10"
+                className="p-1.5 rounded-lg hover:bg-surface/10"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted">
                 Enter the customer&apos;s M-Pesa number — they will receive an STK prompt on their phone.
               </p>
-              <div className="relative flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-                <Smartphone className="w-5 h-5 text-gray-400 mr-3" />
+              <div className="relative flex items-center bg-gray-50 border border-sand rounded-control px-4 py-3">
+                <Smartphone className="w-5 h-5 text-muted mr-3" />
                 <input
                   type="tel"
                   value={mpesaPhone}
@@ -824,15 +835,17 @@ const PosTerminal = () => {
                   disabled={mpesaLoading}
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                size="lg"
+                className="w-full"
+                loading={mpesaLoading}
                 onClick={payWithMpesa}
-                disabled={mpesaLoading}
-                className="w-full py-4 bg-[#334155] text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {mpesaLoading ? <Loader size="xs" showText={false} /> : <Smartphone size={18} />}
-                {mpesaLoading ? "Awaiting M-Pesa PIN..." : `Send STK · KES ${total.toLocaleString()}`}
-              </button>
+                <Smartphone size={18} />
+                {mpesaLoading ? "Awaiting M-Pesa PIN..." : "Send STK"}
+                {!mpesaLoading && <Money amount={total} />}
+              </Button>
             </div>
           </div>
         </div>
@@ -840,16 +853,16 @@ const PosTerminal = () => {
 
       {showReceipt && lastReceipt && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-surface rounded-card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-[#334155]">
+              <div className="flex items-center gap-2 text-ink">
                 <CheckCircle2 size={22} />
-                <h3 className="font-bold text-[#334155]">Sale Complete</h3>
+                <h3 className="font-bold text-ink">Sale Complete</h3>
               </div>
               <button
                 type="button"
                 onClick={closeReceipt}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                className="p-2 text-muted hover:text-muted rounded-lg"
               >
                 <X size={18} />
               </button>
@@ -858,7 +871,7 @@ const PosTerminal = () => {
             <button
               type="button"
               onClick={closeReceipt}
-              className="mt-4 w-full py-3 bg-[#334155] text-white rounded-xl font-bold text-sm hover:bg-[#334155]/90"
+              className="mt-4 w-full py-3 bg-primary-700 text-white rounded-control font-bold text-sm hover:bg-primary-800"
             >
               New Sale
             </button>

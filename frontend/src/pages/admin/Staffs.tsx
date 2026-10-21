@@ -28,7 +28,7 @@ const emptyStaff = {
 };
 
 const inputCls =
-  "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#334155] outline-none";
+  "w-full px-3 py-2 border border-sand rounded-lg text-sm focus:ring-2 focus:ring-primary-700 outline-none";
 
 const Staffs = () => {
   const [staff, setStaff] = useState<StaffRow[]>([]);
@@ -156,26 +156,26 @@ const Staffs = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-[#334155] text-white rounded-2xl p-6">
+        <div className="bg-primary-700 text-white rounded-card p-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users size={28} /> Staff
           </h1>
           <p className="text-white/80 text-sm mt-1">Create staff accounts and assign a role</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+        <div className="bg-surface rounded-card border border-sand p-4 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="text-[#334155]" />
-              <span className="font-semibold text-[#334155]">Search & filters</span>
+              <Filter size={18} className="text-ink" />
+              <span className="font-semibold text-ink">Search & filters</span>
             </div>
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs font-semibold text-gray-500 hover:text-[#334155]"
+                className="text-xs font-semibold text-muted hover:text-ink"
               >
                 Clear all
               </button>
@@ -183,12 +183,12 @@ const Staffs = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="relative lg:col-span-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search name, email, phone…"
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#334155] outline-none"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-sand rounded-lg focus:ring-2 focus:ring-primary-700 outline-none"
               />
             </div>
             <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className={inputCls}>
@@ -208,19 +208,19 @@ const Staffs = () => {
             </select>
           </div>
           {!loading && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               Showing {filteredStaff.length} of {staff.length} staff
             </p>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-gray-100">
-            <h2 className="font-bold text-[#334155]">All staff</h2>
+        <div className="bg-surface rounded-card border border-sand shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-sand">
+            <h2 className="font-bold text-ink">All staff</h2>
             <button
               type="button"
               onClick={openAdd}
-              className="flex items-center gap-2 bg-[#334155] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#334155]/90"
+              className="flex items-center gap-2 bg-primary-700 text-white px-4 py-2 rounded-control text-sm font-semibold hover:bg-primary-800"
             >
               <Plus size={16} /> Add staff
             </button>
@@ -229,13 +229,13 @@ const Staffs = () => {
           {loading ? (
             <Loader size="sm" title="Loading staff..." subtitle="Fetching staff accounts" className="py-8" />
           ) : filteredStaff.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-muted">
               {staff.length === 0 ? "No staff yet" : "No staff match your filters"}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+                <thead className="bg-gray-50 text-muted uppercase text-xs">
                   <tr>
                     <th className="px-4 py-3 text-left">Name</th>
                     <th className="px-4 py-3 text-left">Role</th>
@@ -249,14 +249,14 @@ const Staffs = () => {
                   {filteredStaff.map((u) => (
                     <tr key={u.id} className="border-t border-gray-50 hover:bg-gray-50/50">
                       <td className="px-4 py-3 font-semibold">{u.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{u.role}</td>
+                      <td className="px-4 py-3 text-muted">{u.role}</td>
                       <td className="px-4 py-3">{u.email}</td>
-                      <td className="px-4 py-3 text-gray-500">{u.phone || "—"}</td>
+                      <td className="px-4 py-3 text-muted">{u.phone || "—"}</td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
                             u.status === "active"
-                              ? "bg-[#e2e8f0] text-[#0f172a]"
+                              ? "bg-primary-100 text-ink"
                               : "bg-red-100 text-red-700"
                           }`}
                         >
@@ -268,7 +268,7 @@ const Staffs = () => {
                           <button
                             type="button"
                             onClick={() => editStaffMember(u)}
-                            className="p-2 text-gray-400 hover:text-amber-600"
+                            className="p-2 text-muted hover:text-amber-600"
                             title="Edit"
                           >
                             <Edit size={16} />
@@ -276,7 +276,7 @@ const Staffs = () => {
                           <button
                             type="button"
                             onClick={() => toggleStatus(u)}
-                            className="p-2 text-gray-400 hover:text-[#334155]"
+                            className="p-2 text-muted hover:text-ink"
                             title={u.status === "active" ? "Deactivate" : "Activate"}
                           >
                             {u.status === "active" ? <UserX size={16} /> : <UserCheck size={16} />}
@@ -294,10 +294,10 @@ const Staffs = () => {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-surface rounded-card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-[#334155]">{editId ? "Edit staff" : "Add staff"}</h3>
-              <button type="button" onClick={closeForm} className="text-gray-400 hover:text-gray-600">
+              <h3 className="font-bold text-ink">{editId ? "Edit staff" : "Add staff"}</h3>
+              <button type="button" onClick={closeForm} className="text-muted hover:text-muted">
                 <X size={20} />
               </button>
             </div>
@@ -352,7 +352,7 @@ const Staffs = () => {
                 minLength={7}
               />
 
-              <button type="submit" className="w-full py-2.5 bg-[#334155] text-white rounded-xl font-semibold">
+              <button type="submit" className="w-full py-2.5 bg-primary-700 text-white rounded-control font-semibold">
                 {editId ? "Save changes" : "Add staff"}
               </button>
             </form>

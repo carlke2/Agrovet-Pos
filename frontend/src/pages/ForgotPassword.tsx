@@ -3,13 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
-import Loader from "@/components/ui/loader";
+import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
 
 type Step = "email" | "code" | "password" | "done";
 
-const BRAND = "#334155";
 const inputCls =
-  "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-[#334155]/30 focus:bg-white rounded-xl outline-none text-sm transition";
+  "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-primary-700/30 focus:bg-surface rounded-control outline-none text-sm transition";
 
 function maskEmail(email: string): string {
   const [local, domain] = email.trim().split("@");
@@ -104,14 +104,14 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 font-sans flex items-center justify-center">
-      <div className="w-full max-w-[400px] bg-white rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100">
+    <div className="min-h-screen bg-background p-4 font-sans flex items-center justify-center">
+      <div className="w-full max-w-[400px] bg-surface rounded-3xl shadow-xl p-6 md:p-8 border border-sand">
         <div className="flex flex-col items-center mb-6 text-center">
-          <h1 className="text-xl font-bold text-[#334155] mb-3">Agrovet POS</h1>
-          <h1 className="text-xl font-bold text-[#334155] flex items-center gap-2">
+          <h1 className="text-xl font-bold text-ink mb-3">Agrovet POS</h1>
+          <h1 className="text-xl font-bold text-ink flex items-center gap-2">
             <KeyRound size={20} /> Forgot Password
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted mt-1">
             {step === "email" && "We'll email you a 6-digit code (expires in 5 minutes)"}
             {step === "code" && "Enter the code we sent to your email"}
             {step === "password" && "Choose a new password"}
@@ -122,9 +122,9 @@ const ForgotPassword = () => {
         {step === "email" && (
           <form onSubmit={requestCode} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-[#334155] ml-1 mb-1 block">Staff email</label>
+              <label className="text-xs font-bold text-ink ml-1 mb-1 block">Staff email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
                 <input
                   type="email"
                   required
@@ -135,20 +135,15 @@ const ForgotPassword = () => {
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ backgroundColor: BRAND }}
-              className="w-full py-3 text-sm font-bold rounded-xl text-white hover:opacity-90 disabled:opacity-50"
-            >
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
               {loading ? "Sending..." : "Send reset code"}
-            </button>
+            </Button>
           </form>
         )}
 
         {step === "code" && (
           <div className="space-y-4">
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-muted text-center">
               Code sent to <strong>{maskEmail(email)}</strong>
             </p>
             <input
@@ -165,8 +160,8 @@ const ForgotPassword = () => {
               className={`${inputCls} text-center text-2xl tracking-[0.4em] font-bold disabled:opacity-60`}
             />
             {verifying && (
-              <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                <Loader size="xs" showText={false} />
+              <div className="flex items-center justify-center gap-2 text-xs text-muted">
+                <Spinner inline size="sm" label="Verifying code" />
                 Verifying code...
               </div>
             )}
@@ -179,7 +174,7 @@ const ForgotPassword = () => {
                 setCode("");
                 void requestCode();
               }}
-              className="w-full text-xs text-gray-500 hover:text-[#334155] disabled:opacity-50"
+              className="w-full text-xs text-muted hover:text-ink disabled:opacity-50"
             >
               {loading ? "Sending..." : "Resend code"}
             </button>
@@ -208,34 +203,24 @@ const ForgotPassword = () => {
               className={inputCls}
               autoComplete="new-password"
             />
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ backgroundColor: BRAND }}
-              className="w-full py-3 text-sm font-bold rounded-xl text-white hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loading ? <Loader size="xs" showText={false} /> : <ShieldCheck size={16} />}
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
+              <ShieldCheck size={16} />
               {loading ? "Saving..." : "Reset password"}
-            </button>
+            </Button>
           </form>
         )}
 
         {step === "done" && (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-gray-600">You can now sign in with your new password.</p>
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              style={{ backgroundColor: BRAND }}
-              className="w-full py-3 text-sm font-bold rounded-xl text-white hover:opacity-90"
-            >
+            <p className="text-sm text-muted">You can now sign in with your new password.</p>
+            <Button type="button" size="lg" className="w-full" onClick={() => navigate("/login")}>
               Go to login
-            </button>
+            </Button>
           </div>
         )}
 
-        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-          <Link to="/login" className="text-xs text-[#334155] font-semibold inline-flex items-center gap-1 hover:underline">
+        <div className="mt-6 pt-4 border-t border-sand text-center">
+          <Link to="/login" className="text-xs text-ink font-semibold inline-flex items-center gap-1 hover:underline">
             <ArrowLeft size={14} /> Back to login
           </Link>
         </div>

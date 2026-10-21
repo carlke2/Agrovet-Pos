@@ -115,7 +115,7 @@ const StaffAttendanceTerminal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#334155] text-white font-sans">
+    <div className="min-h-screen bg-primary-700 text-white font-sans">
       <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
         <div className="text-center space-y-3 pt-4">
           <p className="text-sm font-black tracking-wide">Agrovet POS</p>
@@ -135,7 +135,7 @@ const StaffAttendanceTerminal = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search staff by name, email, or role…"
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white/10 border border-white/10 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full pl-11 pr-4 py-3 rounded-card bg-surface/10 border border-white/10 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
               />
             </div>
 
@@ -152,10 +152,10 @@ const StaffAttendanceTerminal = () => {
                     key={member.id}
                     type="button"
                     onClick={() => selectStaff(member)}
-                    className="text-left rounded-2xl p-4 border transition bg-white/10 border-white/10 hover:bg-white/15 hover:border-white/25"
+                    className="text-left rounded-card p-4 border transition bg-surface/10 border-white/10 hover:bg-surface/15 hover:border-white/25"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="h-11 w-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 font-bold text-lg">
+                      <div className="h-11 w-11 rounded-control bg-surface/10 flex items-center justify-center shrink-0 font-bold text-lg">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -201,9 +201,9 @@ const StaffAttendanceTerminal = () => {
               <ArrowLeft size={16} /> Back to staff list
             </button>
 
-            <div className="bg-white/10 rounded-2xl p-6 border border-white/10 space-y-4">
+            <div className="bg-surface/10 rounded-card p-6 border border-white/10 space-y-4">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                <div className="h-16 w-16 rounded-card bg-surface/10 flex items-center justify-center">
                   <UserCircle2 size={36} className="text-white/70" />
                 </div>
                 <div>
@@ -215,9 +215,9 @@ const StaffAttendanceTerminal = () => {
 
               {selected.nextAction && !lastResult && (
                 <p
-                  className={`text-sm font-semibold px-3 py-2 rounded-xl inline-flex items-center gap-2 ${
+                  className={`text-sm font-semibold px-3 py-2 rounded-control inline-flex items-center gap-2 ${
                     selected.nextAction === "check_in"
-                      ? "bg-[#e2e8f0]/25 text-[#f8fafc]"
+                      ? "bg-primary-100/25 text-surface"
                       : "bg-amber-500/20 text-amber-100"
                   }`}
                 >
@@ -231,7 +231,7 @@ const StaffAttendanceTerminal = () => {
                   type="button"
                   onClick={clock}
                   disabled={clocking}
-                  className="w-full py-5 rounded-2xl bg-white text-[#334155] font-bold text-lg flex items-center justify-center gap-3 hover:bg-[#f8fafc] disabled:opacity-50 transition"
+                  className="w-full py-5 rounded-card bg-surface text-ink font-bold text-lg flex items-center justify-center gap-3 hover:bg-background disabled:opacity-50 transition"
                 >
                   {clocking ? <Loader size="sm" showText={false} /> : <Clock size={28} />}
                   {clocking
@@ -244,9 +244,9 @@ const StaffAttendanceTerminal = () => {
 
               {lastResult && (
                 <div
-                  className={`rounded-2xl p-5 border ${
+                  className={`rounded-card p-5 border ${
                     lastResult.type === "check_in"
-                      ? "bg-[#e2e8f0]/20 border-[#cbd5e1]/60"
+                      ? "bg-primary-100/20 border-sand/60"
                       : "bg-amber-500/15 border-amber-400/30"
                   }`}
                 >

@@ -101,15 +101,15 @@ const ImageUploader = ({ value, onChange, disabled }: ImageUploaderProps) => {
 
   return (
     <div className="space-y-2">
-      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+      <label className="text-[10px] font-bold text-muted uppercase tracking-wider">
         Food Image (optional)
       </label>
 
       {value ? (
-        <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-slate-200 group">
+        <div className="relative w-full h-44 rounded-card overflow-hidden border border-slate-200 group">
           <img
             src={value}
-            alt="Menu item"
+            alt="Item"
             className="w-full h-full object-cover"
           />
           {/* overlay controls */}
@@ -118,7 +118,7 @@ const ImageUploader = ({ value, onChange, disabled }: ImageUploaderProps) => {
               type="button"
               disabled={disabled || uploading}
               onClick={() => !disabled && inputRef.current?.click()}
-              className="px-3 py-1.5 bg-white/90 text-gray-800 rounded-lg text-xs font-bold hover:bg-white transition flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-surface/90 text-ink rounded-lg text-xs font-bold hover:bg-surface transition flex items-center gap-1.5"
             >
               <ImagePlus size={13} /> Change
             </button>
@@ -138,27 +138,27 @@ const ImageUploader = ({ value, onChange, disabled }: ImageUploaderProps) => {
           onDragOver={(e) => { e.preventDefault(); if (!disabled) setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className={`w-full h-36 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 transition-all duration-200 cursor-pointer ${
+          className={`w-full h-36 border-2 border-dashed rounded-card flex flex-col items-center justify-center gap-2 transition-all duration-200 cursor-pointer ${
             disabled
-              ? "border-gray-100 bg-gray-50 cursor-not-allowed"
+              ? "border-sand bg-gray-50 cursor-not-allowed"
               : dragging
-              ? "border-[#334155] bg-[#f8fafc]"
-              : "border-slate-200 bg-gray-50/50 hover:border-[#334155] hover:bg-[#f8fafc]/30"
+              ? "border-primary-700 bg-background"
+              : "border-slate-200 bg-gray-50/50 hover:border-primary-700 hover:bg-background/30"
           }`}
         >
           {uploading ? (
             <>
               <Loader size="sm" showText={false} />
-              <span className="text-xs text-[#0f172a] font-semibold">Uploading...</span>
+              <span className="text-xs text-ink font-semibold">Uploading...</span>
             </>
           ) : (
             <>
-              <ImagePlus size={24} className={dragging ? "text-[#334155]" : "text-gray-300"} />
+              <ImagePlus size={24} className={dragging ? "text-ink" : "text-gray-300"} />
               <div className="text-center">
-                <p className="text-xs font-bold text-gray-500">
+                <p className="text-xs font-bold text-muted">
                   {dragging ? "Drop to upload" : "Click or drag image here"}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">JPG, PNG, WEBP - max 3 MB</p>
+                <p className="text-[10px] text-muted mt-0.5">JPG, PNG, WEBP - max 3 MB</p>
               </div>
             </>
           )}
@@ -258,7 +258,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       });
       setAddForm({ ...EMPTY_FORM, category: categories[0]?.name ?? "" });
       await fetchItems();
-      toast.success("Menu item added");
+      toast.success("Item added");
       if (showTabs) setTab("list");
     } catch (e: any) {
       toast.error("Error", e.response?.data?.message);
@@ -283,7 +283,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
         stockLevel: draft.stockLevel === "" ? null : Number(draft.stockLevel),
       });
       await fetchItems();
-      toast.success("Menu item updated");
+      toast.success("Item updated");
       if (showTabs) setTab("list");
     } catch (e: any) {
       toast.error("Error", e.response?.data?.message);
@@ -308,7 +308,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       }
       setDeleteId("");
       await fetchItems();
-      toast.success("Menu item deleted");
+      toast.success("Item deleted");
       if (showTabs) setTab("list");
     } catch (e: any) {
       toast.error("Error", e.response?.data?.message);
@@ -418,10 +418,10 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
   }, [showTabs, tab]);
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <ClipboardList /> Menu Management
+          <ClipboardList /> Items
         </h2>
         <p className="text-white/80 text-sm mt-1">
           Use separate tabs to add, edit, update, and delete items
@@ -429,7 +429,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       </div>
 
       {unavailable.length > 0 && tab === "list" && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-card p-4 flex items-start gap-3">
           <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
           <div>
             <p className="font-semibold text-amber-800">Unavailable Items</p>
@@ -441,16 +441,16 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       )}
 
       {showTabs && (
-        <div className="flex flex-wrap gap-2 bg-white rounded-2xl p-2 border border-gray-100">
+        <div className="flex flex-wrap gap-2 bg-surface rounded-card p-2 border border-sand">
           {tabsToShow.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setTab(id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-control text-sm font-semibold transition ${
                 tab === id
-                  ? "bg-[#334155] text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-primary-700 text-white shadow-sm"
+                  : "text-muted hover:bg-gray-50"
               }`}
             >
               <Icon size={16} />
@@ -461,9 +461,9 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       )}
 
       {tab === "list" && (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+        <div className="bg-surface rounded-card border border-sand overflow-hidden shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-gray-500 uppercase text-[10px] border-b border-slate-100">
+            <thead className="bg-slate-50 text-muted uppercase text-[10px] border-b border-sand">
               <tr>
                 <th className="px-5 py-4 text-left font-extrabold tracking-wider">Item</th>
                 <th className="px-5 py-4 text-left font-extrabold tracking-wider">Category</th>
@@ -476,8 +476,8 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
             <tbody className="divide-y divide-slate-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-gray-400">
-                    No menu items yet. Use the <strong>Add</strong> tab.
+                  <td colSpan={6} className="px-5 py-12 text-center text-muted">
+                    No items yet. Use the <strong>Add</strong> tab.
                   </td>
                 </tr>
               ) : (
@@ -493,19 +493,19 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                           <img
                             src={item.imageUrl}
                             alt={item.name}
-                            className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-100"
+                            className="w-10 h-10 rounded-control object-cover shrink-0 border border-sand"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shrink-0 border border-slate-100">
+                          <div className="w-10 h-10 rounded-control bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shrink-0 border border-sand">
                             <span className="text-slate-400 text-xs font-black">
                               {item.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         )}
                         <div>
-                          <p className="font-extrabold text-[#334155]">{item.name}</p>
+                          <p className="font-extrabold text-ink">{item.name}</p>
                           {item.description && (
-                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{item.description}</p>
+                            <p className="text-xs text-muted mt-0.5 line-clamp-1">{item.description}</p>
                           )}
                         </div>
                       </div>
@@ -513,14 +513,14 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                     <td className="px-5 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">{item.category}</span>
                     </td>
-                    <td className="px-5 py-4 text-right font-black text-[#334155]">
+                    <td className="px-5 py-4 text-right font-black text-ink">
                       KES {item.price.toLocaleString()}
                     </td>
                     <td className="px-5 py-4 text-center">
                       {item.stockLevel == null ? (
-                        <span className="text-xs text-gray-400">—</span>
+                        <span className="text-xs text-muted">—</span>
                       ) : (
-                        <span className={`text-xs font-bold ${item.stockLevel <= 0 ? "text-red-600" : "text-gray-700"}`}>
+                        <span className={`text-xs font-bold ${item.stockLevel <= 0 ? "text-red-600" : "text-ink"}`}>
                           {item.stockLevel}
                         </span>
                       )}
@@ -531,11 +531,11 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                         onClick={() => toggleAvailability(item)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition ${
                           item.isAvailable
-                            ? "bg-[#f8fafc] text-[#0f172a] border-[#cbd5e1]/50 hover:bg-[#e2e8f0]"
+                            ? "bg-background text-ink border-sand/50 hover:bg-primary-100"
                             : "bg-amber-50 text-amber-700 border-amber-100/50 hover:bg-amber-100"
                         }`}
                       >
-                        <span className={`h-1.5 w-1.5 rounded-full ${item.isAvailable ? "bg-[#334155]" : "bg-amber-600"}`} />
+                        <span className={`h-1.5 w-1.5 rounded-full ${item.isAvailable ? "bg-primary-700" : "bg-amber-600"}`} />
                         {item.isAvailable ? "Available" : "Unavailable"}
                       </button>
                     </td>
@@ -544,7 +544,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                         <button
                           type="button"
                           onClick={() => goToEdit(item)}
-                          className="px-2.5 py-1 text-xs font-bold text-[#0f172a] hover:bg-[#f8fafc] border border-[#cbd5e1] rounded-lg transition duration-150"
+                          className="px-2.5 py-1 text-xs font-bold text-ink hover:bg-background border border-sand rounded-lg transition duration-150"
                         >
                           Edit
                         </button>
@@ -567,13 +567,13 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
 
       {tab === "categories" && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-              <h3 className="font-extrabold text-[#334155]">All Categories</h3>
-              <p className="text-xs text-gray-400 mt-1">Categories appear in POS filters and menu item forms.</p>
+          <div className="bg-surface rounded-card border border-sand overflow-hidden shadow-sm">
+            <div className="px-5 py-4 border-b border-sand bg-slate-50">
+              <h3 className="font-extrabold text-ink">All Categories</h3>
+              <p className="text-xs text-muted mt-1">Categories appear in POS filters and item forms.</p>
             </div>
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-gray-500 uppercase text-[10px] border-b border-slate-100">
+              <thead className="bg-slate-50 text-muted uppercase text-[10px] border-b border-sand">
                 <tr>
                   <th className="px-5 py-3 text-left font-extrabold tracking-wider">Name</th>
                   <th className="px-5 py-3 text-left font-extrabold tracking-wider">Sort</th>
@@ -584,7 +584,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
               <tbody className="divide-y divide-slate-100">
                 {categories.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-5 py-10 text-center text-gray-400">
+                    <td colSpan={4} className="px-5 py-10 text-center text-muted">
                       No categories yet. Add your first category on the right.
                     </td>
                   </tr>
@@ -593,15 +593,15 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                     const itemCount = items.filter((i) => i.category === category.name).length;
                     return (
                       <tr key={category.id} className="hover:bg-slate-50/40 transition">
-                        <td className="px-5 py-4 font-bold text-[#334155]">{category.name}</td>
-                        <td className="px-5 py-4 text-gray-500">{category.sortOrder}</td>
-                        <td className="px-5 py-4 text-gray-500">{itemCount}</td>
+                        <td className="px-5 py-4 font-bold text-ink">{category.name}</td>
+                        <td className="px-5 py-4 text-muted">{category.sortOrder}</td>
+                        <td className="px-5 py-4 text-muted">{itemCount}</td>
                         <td className="px-5 py-4 text-right">
                           <div className="inline-flex gap-1.5">
                             <button
                               type="button"
                               onClick={() => loadCategoryIntoDraft(category)}
-                              className="px-2.5 py-1 text-xs font-bold text-[#0f172a] hover:bg-[#f8fafc] border border-[#cbd5e1] rounded-lg transition"
+                              className="px-2.5 py-1 text-xs font-bold text-ink hover:bg-background border border-sand rounded-lg transition"
                             >
                               Edit
                             </button>
@@ -625,34 +625,34 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           <div className="space-y-6">
             <form
               onSubmit={handleAddCategory}
-              className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm"
+              className="bg-surface rounded-card p-6 border border-sand space-y-4 shadow-sm"
             >
-              <h3 className="font-extrabold text-[#334155] text-lg">Add Category</h3>
+              <h3 className="font-extrabold text-ink text-lg">Add Category</h3>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Name</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Name</label>
                 <input
                   placeholder="e.g. Breakfast"
                   value={categoryForm.name}
                   onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sort Order (optional)</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Sort Order (optional)</label>
                 <input
                   type="number"
                   placeholder="0"
                   value={categoryForm.sortOrder}
                   onChange={(e) => setCategoryForm({ ...categoryForm, sortOrder: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200"
                   min="0"
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
+                className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
               >
                 {submitting ? "Adding..." : "Add Category"}
               </button>
@@ -660,11 +660,11 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
 
             <form
               onSubmit={handleUpdateCategory}
-              className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm"
+              className="bg-surface rounded-card p-6 border border-sand space-y-4 shadow-sm"
             >
-              <h3 className="font-extrabold text-[#334155] text-lg">Update Category</h3>
+              <h3 className="font-extrabold text-ink text-lg">Update Category</h3>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Category</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Select Category</label>
                 <select
                   value={editingCategoryId}
                   onChange={(e) => {
@@ -675,7 +675,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                       setCategoryDraft({ name: "", sortOrder: "" });
                     }
                   }}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
                 >
                   <option value="">Select category</option>
                   {categories.map((c) => (
@@ -686,50 +686,50 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Name</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">New Name</label>
                 <input
                   placeholder="Category name"
                   value={categoryDraft.name}
                   onChange={(e) => setCategoryDraft({ ...categoryDraft, name: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50"
                   disabled={!editingCategoryId}
                   required
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sort Order</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Sort Order</label>
                 <input
                   type="number"
                   placeholder="0"
                   value={categoryDraft.sortOrder}
                   onChange={(e) => setCategoryDraft({ ...categoryDraft, sortOrder: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50"
                   disabled={!editingCategoryId}
                   min="0"
                 />
               </div>
               {editingCategory && (
-                <p className="text-xs text-gray-400">
-                  Renaming updates all menu items currently in &quot;{editingCategory.name}&quot;.
+                <p className="text-xs text-muted">
+                  Renaming updates all items currently in &quot;{editingCategory.name}&quot;.
                 </p>
               )}
               <button
                 type="submit"
                 disabled={!editingCategoryId || submitting}
-                className="w-full py-3 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 transition duration-200 shadow-sm"
+                className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm disabled:opacity-40 transition duration-200 shadow-sm"
               >
                 {submitting ? "Saving..." : "Save Category"}
               </button>
             </form>
 
-            <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm">
+            <div className="bg-surface rounded-card p-6 border border-sand space-y-4 shadow-sm">
               <h3 className="font-extrabold text-red-750 text-lg">Delete Category</h3>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Category</label>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Select Category</label>
                 <select
                   value={deleteCategoryId}
                   onChange={(e) => setDeleteCategoryId(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
                 >
                   <option value="">Select category</option>
                   {categories.map((c) => (
@@ -740,19 +740,19 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 </select>
               </div>
               {deleteCategoryTarget && (
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-xs text-rose-800 space-y-2">
+                <div className="rounded-card border border-rose-100 bg-rose-50/50 p-4 text-xs text-rose-800 space-y-2">
                   <p>
                     Items using this category:{" "}
                     <strong>{items.filter((i) => i.category === deleteCategoryTarget.name).length}</strong>
                   </p>
                   <p className="text-rose-700">
-                    Categories with menu items cannot be deleted. Reassign or remove those items first.
+                    Categories with items cannot be deleted. Reassign or remove those items first.
                   </p>
                   <button
                     type="button"
                     onClick={handleDeleteCategory}
                     disabled={submitting}
-                    className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-extrabold text-xs transition duration-200 shadow-sm disabled:opacity-40"
+                    className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-control font-extrabold text-xs transition duration-200 shadow-sm disabled:opacity-40"
                   >
                     {submitting ? "Deleting..." : "Delete Category"}
                   </button>
@@ -766,9 +766,9 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       {tab === "add" && (
         <form
           onSubmit={handleAdd}
-          className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm"
+          className="bg-surface rounded-card p-6 border border-sand space-y-4 max-w-lg shadow-sm"
         >
-          <h3 className="font-extrabold text-[#334155] text-lg">Add new menu item</h3>
+          <h3 className="font-extrabold text-ink text-lg">Add new item</h3>
 
           <ImageUploader
             value={addForm.imageUrl}
@@ -776,45 +776,45 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           />
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Item Name</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Item Name</label>
             <input
               placeholder="e.g. Country sourdough"
               value={addForm.name}
               onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200"
               required
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description (optional)</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Description (optional)</label>
             <input
               placeholder="e.g. Served with fresh vinaigrette dressing"
               value={addForm.description}
               onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Price (KES)</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Price (KES)</label>
               <input
                 type="number"
                 placeholder="0.00"
                 value={addForm.price}
                 onChange={(e) => setAddForm({ ...addForm, price: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
                 required
                 min="0"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Category</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Category</label>
               <select
                 value={addForm.category}
                 onChange={(e) => setAddForm({ ...addForm, category: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
                 required
               >
                 {categoryNames.length === 0 ? (
@@ -831,37 +831,37 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stock (portions)</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Stock (portions)</label>
             <input
               type="number"
               min="0"
               placeholder="Leave blank for unlimited"
               value={addForm.stockLevel}
               onChange={(e) => setAddForm({ ...addForm, stockLevel: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200"
             />
-            <p className="text-[10px] text-gray-400">Decreases by 1 each time this item is sold. Restock here or in Update.</p>
+            <p className="text-[10px] text-muted">Decreases by 1 each time this item is sold. Restock here or in Update.</p>
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
+            className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm disabled:opacity-50 transition duration-200 shadow-sm"
           >
-            {submitting ? "Adding Item..." : "Add Menu Item"}
+            {submitting ? "Adding Item..." : "Add Item"}
           </button>
         </form>
       )}
 
       {tab === "edit" && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm">
-          <h3 className="font-extrabold text-[#334155] text-lg">Edit Menu Item</h3>
-          <p className="text-xs text-gray-400 leading-normal">
+        <div className="bg-surface rounded-card p-6 border border-sand space-y-4 max-w-lg shadow-sm">
+          <h3 className="font-extrabold text-ink text-lg">Edit Item</h3>
+          <p className="text-xs text-muted leading-normal">
             Choose an item to load its details. You can make and save adjustments in the <strong>Update</strong> tab.
           </p>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Menu Item</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Select Item</label>
             <select
               value={selectedId}
               onChange={(e) => {
@@ -872,9 +872,9 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   setDraft(EMPTY_FORM);
                 }
               }}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
             >
-              <option value="">Select menu item</option>
+              <option value="">Select item</option>
               {items.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.name} ({i.category}) - KES {i.price}
@@ -884,34 +884,34 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           </div>
 
           {selectedItem && (
-            <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc]/50 p-5 space-y-3.5 text-xs text-slate-700 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="rounded-card border border-sand bg-background/50 p-5 space-y-3.5 text-xs text-slate-700 animate-in fade-in slide-in-from-top-1 duration-200">
               {selectedItem.imageUrl && (
                 <img
                   src={selectedItem.imageUrl}
                   alt={selectedItem.name}
-                  className="w-full h-36 object-cover rounded-xl border border-[#cbd5e1]"
+                  className="w-full h-36 object-cover rounded-control border border-sand"
                 />
               )}
-              <div className="flex justify-between items-start border-b border-[#cbd5e1]/40 pb-2">
-                <span className="font-bold text-[#0f172a] text-sm">{selectedItem.name}</span>
-                <span className="px-2 py-0.5 bg-[#cbd5e1] text-[#0f172a] rounded-md font-bold uppercase tracking-wider text-[9px]">{selectedItem.category}</span>
+              <div className="flex justify-between items-start border-b border-sand/40 pb-2">
+                <span className="font-bold text-ink text-sm">{selectedItem.name}</span>
+                <span className="px-2 py-0.5 bg-sand text-ink rounded-md font-bold uppercase tracking-wider text-[9px]">{selectedItem.category}</span>
               </div>
               <div className="space-y-2">
                 <p className="flex justify-between">
                   <span className="text-slate-400">Current Price:</span>
-                  <span className="font-bold text-[#334155]">KES {selectedItem.price.toLocaleString()}</span>
+                  <span className="font-bold text-ink">KES {selectedItem.price.toLocaleString()}</span>
                 </p>
                 {selectedItem.description && (
                   <p className="flex flex-col gap-1">
                     <span className="text-slate-400">Description:</span>
-                    <span className="font-semibold text-slate-650 bg-white rounded-lg p-2 border border-slate-100 leading-normal">{selectedItem.description}</span>
+                    <span className="font-semibold text-slate-650 bg-surface rounded-lg p-2 border border-sand leading-normal">{selectedItem.description}</span>
                   </p>
                 )}
               </div>
               <button
                  type="button"
                  onClick={() => setTab("update")}
-                 className="w-full py-2.5 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-bold text-xs transition duration-200 shadow-sm"
+                 className="w-full py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-bold text-xs transition duration-200 shadow-sm"
                >
                  Proceed to Update Details →
                </button>
@@ -923,18 +923,18 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       {tab === "update" && (
         <form
           onSubmit={handleUpdate}
-          className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm"
+          className="bg-surface rounded-card p-6 border border-sand space-y-4 max-w-lg shadow-sm"
         >
-          <h3 className="font-extrabold text-[#334155] text-lg">Update Menu Item</h3>
+          <h3 className="font-extrabold text-ink text-lg">Update Item</h3>
 
           {!selectedId && (
-            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200/50 rounded-xl p-3 leading-normal font-semibold">
-              ⚠️ No item selected. Please choose a menu item from the list below to begin editing.
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200/50 rounded-control p-3 leading-normal font-semibold">
+              ⚠️ No item selected. Please choose a item from the list below to begin editing.
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Menu Item</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Target Item</label>
             <select
               value={selectedId}
               onChange={(e) => {
@@ -945,9 +945,9 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                   setDraft(EMPTY_FORM);
                 }
               }}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
             >
-              <option value="">Select menu item</option>
+              <option value="">Select item</option>
               {items.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.name} ({i.category})
@@ -963,48 +963,48 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           />
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Item Name</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">New Item Name</label>
             <input
               placeholder="Item name"
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
               required
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Description</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">New Description</label>
             <input
               placeholder="Description (optional)"
               value={draft.description}
               onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Price (KES)</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">New Price (KES)</label>
               <input
                 type="number"
                 placeholder="Price"
                 value={draft.price}
                 onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50 font-semibold"
                 disabled={!selectedId}
                 required
                 min="0"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">New Category</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">New Category</label>
               <select
                 value={draft.category}
                 onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50 font-semibold"
                 disabled={!selectedId}
                 required
               >
@@ -1022,23 +1022,23 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stock (portions)</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Stock (portions)</label>
             <input
               type="number"
               min="0"
               placeholder="Leave blank for unlimited"
               value={draft.stockLevel}
               onChange={(e) => setDraft({ ...draft, stockLevel: e.target.value })}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 disabled:opacity-50"
               disabled={!selectedId}
             />
-            <p className="text-[10px] text-gray-400">Increase to restock. Stock decreases automatically when orders are placed.</p>
+            <p className="text-[10px] text-muted">Increase to restock. Stock decreases automatically when orders are placed.</p>
           </div>
 
           <button
             type="submit"
             disabled={!selectedId || submitting}
-            className="w-full py-3 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-extrabold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 shadow-sm"
+            className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 shadow-sm"
           >
             {submitting ? "Updating Item..." : "Save Changes"}
           </button>
@@ -1046,20 +1046,20 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
       )}
 
       {tab === "delete" && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 max-w-lg shadow-sm">
-          <h3 className="font-extrabold text-red-750 text-lg">Delete Menu Item</h3>
-          <p className="text-xs text-gray-400 leading-normal">
+        <div className="bg-surface rounded-card p-6 border border-sand space-y-4 max-w-lg shadow-sm">
+          <h3 className="font-extrabold text-red-750 text-lg">Delete Item</h3>
+          <p className="text-xs text-muted leading-normal">
             Select an item to remove from the system.
           </p>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Select Item to Remove</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Select Item to Remove</label>
             <select
               value={deleteId}
               onChange={(e) => setDeleteId(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
             >
-              <option value="">Select menu item</option>
+              <option value="">Select item</option>
               {items.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.name} ({i.category}) - KES {i.price}
@@ -1069,12 +1069,12 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
           </div>
 
           {deleteTarget && (
-            <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-5 space-y-4 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="rounded-card border border-rose-100 bg-rose-50/50 p-5 space-y-4 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
               {deleteTarget.imageUrl && (
                 <img
                   src={deleteTarget.imageUrl}
                   alt={deleteTarget.name}
-                  className="w-full h-32 object-cover rounded-xl border border-rose-100 opacity-80"
+                  className="w-full h-32 object-cover rounded-control border border-rose-100 opacity-80"
                 />
               )}
               <div className="flex justify-between items-start border-b border-rose-100 pb-2">
@@ -1090,7 +1090,7 @@ const MenuManagement = ({ initialTab = "list", showTabs = true }: Props) => {
                 type="button"
                 onClick={handleDelete}
                 disabled={submitting}
-                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-extrabold text-xs transition duration-200 shadow-sm"
+                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-control font-extrabold text-xs transition duration-200 shadow-sm"
               >
                 {submitting ? "Deleting permanently..." : "Delete Permanently"}
               </button>

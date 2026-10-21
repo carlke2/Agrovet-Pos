@@ -49,7 +49,7 @@ const emptySupplier = {
 };
 
 const inputCls =
-  "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#334155] outline-none";
+  "w-full px-3 py-2 border border-sand rounded-lg text-sm focus:ring-2 focus:ring-primary-700 outline-none";
 
 const SuppliersPage = () => {
   const { user } = useAuth();
@@ -201,11 +201,11 @@ const SuppliersPage = () => {
   }
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black flex items-center gap-2">
-            <Truck className="text-[#334155]" /> Suppliers
+            <Truck className="text-ink" /> Suppliers
           </h2>
           <p className="text-white/80 text-sm mt-1">
             Register suppliers and link them when recording stock purchases.
@@ -214,7 +214,7 @@ const SuppliersPage = () => {
         {canEdit && (
           <button
             onClick={openCreate}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#334155] hover:bg-[#0f172a] rounded-xl font-bold text-sm transition"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-700 hover:bg-primary-800 rounded-control font-bold text-sm transition"
           >
             <Plus size={16} /> Add Supplier
           </button>
@@ -222,45 +222,45 @@ const SuppliersPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">Active Suppliers</p>
-          <p className="text-2xl font-black text-[#334155] mt-1">{suppliers.length}</p>
+        <div className="bg-surface rounded-card p-5 border border-sand shadow-sm">
+          <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">Active Suppliers</p>
+          <p className="text-2xl font-black text-ink mt-1">{suppliers.length}</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">Purchase Records</p>
-          <p className="text-2xl font-black text-[#334155] mt-1">{totalPurchases}</p>
+        <div className="bg-surface rounded-card p-5 border border-sand shadow-sm">
+          <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">Purchase Records</p>
+          <p className="text-2xl font-black text-ink mt-1">{totalPurchases}</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">How it works</p>
-          <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+        <div className="bg-surface rounded-card p-5 border border-sand shadow-sm">
+          <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">How it works</p>
+          <p className="text-xs text-muted mt-2 leading-relaxed">
             Add supplier → Inventory → Stock IN (purchase) → pick supplier & invoice → stock increases with audit trail.
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-3">
+      <div className="bg-surface rounded-card p-4 border border-sand shadow-sm flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, phone, email, contact..."
-            className="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155]"
+            className="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700"
           />
         </div>
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-[#334155] flex items-center gap-1"
+            className="px-4 py-2 text-sm font-bold text-muted hover:text-ink flex items-center gap-1"
           >
             <Filter size={14} /> Clear
           </button>
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+      <div className="bg-surface rounded-card border border-sand overflow-hidden shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-gray-500 uppercase text-[10px] border-b border-slate-100">
+          <thead className="bg-slate-50 text-muted uppercase text-[10px] border-b border-sand">
             <tr>
               <th className="px-5 py-4 text-left font-extrabold tracking-wider">Supplier</th>
               <th className="px-5 py-4 text-left font-extrabold tracking-wider">Contact</th>
@@ -272,7 +272,7 @@ const SuppliersPage = () => {
           <tbody className="divide-y divide-slate-100">
             {filteredSuppliers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-gray-400">
+                <td colSpan={5} className="px-5 py-10 text-center text-muted">
                   {suppliers.length === 0
                     ? "No suppliers yet. Add your first vendor to track purchases."
                     : "No suppliers match your search."}
@@ -282,14 +282,14 @@ const SuppliersPage = () => {
               filteredSuppliers.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-50/50">
                   <td className="px-5 py-4">
-                    <p className="font-extrabold text-[#334155]">{s.name}</p>
+                    <p className="font-extrabold text-ink">{s.name}</p>
                     {s.address && (
-                      <p className="text-xs text-gray-500 mt-0.5 flex items-start gap-1">
+                      <p className="text-xs text-muted mt-0.5 flex items-start gap-1">
                         <MapPin size={12} className="shrink-0 mt-0.5" /> {s.address}
                       </p>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-gray-600">
+                  <td className="px-5 py-4 text-muted">
                     {s.contactPerson ? (
                       <span className="inline-flex items-center gap-1">
                         <User size={14} /> {s.contactPerson}
@@ -298,7 +298,7 @@ const SuppliersPage = () => {
                       "—"
                     )}
                   </td>
-                  <td className="px-5 py-4 text-gray-600 space-y-0.5">
+                  <td className="px-5 py-4 text-muted space-y-0.5">
                     {s.phone && (
                       <p className="flex items-center gap-1">
                         <Phone size={14} /> {s.phone}
@@ -311,14 +311,14 @@ const SuppliersPage = () => {
                     )}
                     {!s.phone && !s.email && "—"}
                   </td>
-                  <td className="px-5 py-4 text-right font-bold text-[#334155]">
+                  <td className="px-5 py-4 text-right font-bold text-ink">
                     {s._count?.stockMovements ?? 0}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => toggleHistory(s.id)}
-                        className="p-2 rounded-lg text-[#0f172a] hover:bg-[#f8fafc]"
+                        className="p-2 rounded-lg text-ink hover:bg-background"
                         title="Purchase history"
                       >
                         <Package size={16} />
@@ -351,9 +351,9 @@ const SuppliersPage = () => {
       </div>
 
       {historySupplierId && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-extrabold text-[#334155]">
+        <div className="bg-surface rounded-card border border-sand shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-sand flex items-center justify-between">
+            <h3 className="font-extrabold text-ink">
               Purchase history - {historySupplier?.name}
             </h3>
             <button
@@ -361,20 +361,20 @@ const SuppliersPage = () => {
                 setHistorySupplierId(null);
                 setMovements([]);
               }}
-              className="p-1.5 rounded-lg hover:bg-slate-100 text-gray-500"
+              className="p-1.5 rounded-lg hover:bg-slate-100 text-muted"
             >
               <X size={18} />
             </button>
           </div>
           {loadingMovements ? (
-            <p className="px-5 py-8 text-center text-gray-400 text-sm">Loading purchases...</p>
+            <p className="px-5 py-8 text-center text-muted text-sm">Loading purchases...</p>
           ) : movements.length === 0 ? (
-            <p className="px-5 py-8 text-center text-gray-400 text-sm">
+            <p className="px-5 py-8 text-center text-muted text-sm">
               No stock-in purchases recorded for this supplier yet.
             </p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-gray-500 uppercase text-[10px]">
+              <thead className="bg-slate-50 text-muted uppercase text-[10px]">
                 <tr>
                   <th className="px-5 py-3 text-left font-extrabold">Date</th>
                   <th className="px-5 py-3 text-left font-extrabold">Item</th>
@@ -386,15 +386,15 @@ const SuppliersPage = () => {
               <tbody className="divide-y divide-slate-100">
                 {movements.map((m) => (
                   <tr key={m.id}>
-                    <td className="px-5 py-3 text-gray-600">
+                    <td className="px-5 py-3 text-muted">
                       {new Date(m.createdAt).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 font-semibold text-[#334155]">{m.inventoryItem.name}</td>
+                    <td className="px-5 py-3 font-semibold text-ink">{m.inventoryItem.name}</td>
                     <td className="px-5 py-3 text-right">
                       {m.quantity} {m.inventoryItem.unit}
                     </td>
-                    <td className="px-5 py-3 text-gray-600">{m.reference || "—"}</td>
-                    <td className="px-5 py-3 text-gray-500">{m.notes || "—"}</td>
+                    <td className="px-5 py-3 text-muted">{m.reference || "—"}</td>
+                    <td className="px-5 py-3 text-muted">{m.notes || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -407,10 +407,10 @@ const SuppliersPage = () => {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <form
             onSubmit={saveSupplier}
-            className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl"
+            className="bg-surface rounded-card w-full max-w-md p-6 space-y-4 shadow-xl"
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-[#334155]">
+              <h3 className="font-extrabold text-ink">
                 {editId ? "Edit Supplier" : "Add Supplier"}
               </h3>
               <button type="button" onClick={closeForm} className="p-1 rounded-lg hover:bg-gray-100">
@@ -418,7 +418,7 @@ const SuppliersPage = () => {
               </button>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase">Business name *</label>
+              <label className="text-[10px] font-bold text-muted uppercase">Business name *</label>
               <input
                 className={inputCls}
                 value={form.name}
@@ -427,7 +427,7 @@ const SuppliersPage = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase">Contact person</label>
+              <label className="text-[10px] font-bold text-muted uppercase">Contact person</label>
               <input
                 className={inputCls}
                 value={form.contactPerson}
@@ -436,7 +436,7 @@ const SuppliersPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Phone</label>
+                <label className="text-[10px] font-bold text-muted uppercase">Phone</label>
                 <input
                   className={inputCls}
                   value={form.phone}
@@ -444,7 +444,7 @@ const SuppliersPage = () => {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Email</label>
+                <label className="text-[10px] font-bold text-muted uppercase">Email</label>
                 <input
                   type="email"
                   className={inputCls}
@@ -454,7 +454,7 @@ const SuppliersPage = () => {
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase">Address</label>
+              <label className="text-[10px] font-bold text-muted uppercase">Address</label>
               <textarea
                 className={`${inputCls} min-h-[72px] resize-y`}
                 value={form.address}
@@ -463,7 +463,7 @@ const SuppliersPage = () => {
             </div>
             <button
               type="submit"
-              className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm"
+              className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm"
             >
               {editId ? "Save Changes" : "Add Supplier"}
             </button>

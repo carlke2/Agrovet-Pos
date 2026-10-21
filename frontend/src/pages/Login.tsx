@@ -3,11 +3,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "@/services/toast";
 import API from "@/services/api";
-import Loader from "@/components/ui/loader";
+import Button from "@/components/ui/Button";
+import PageLoader from "@/components/ui/PageLoader";
 import { landingPathFor, useAuth } from "@/context/AuthContext";
 import type { AuthUser } from "@/services/authStorage";
-
-const BRAND = "#334155";
 
 const Login: React.FC = () => {
   const { status, user, login, refreshSession } = useAuth();
@@ -25,7 +24,7 @@ const Login: React.FC = () => {
 
   if (status === "loading") {
     return (
-      <Loader size="sm" title="Loading Agrovet POS..." subtitle="Checking your session" className="min-h-screen py-24" />
+      <PageLoader label="Loading Agrovet POS..." detail="Checking your session" className="min-h-screen py-24" />
     );
   }
 
@@ -78,20 +77,20 @@ const Login: React.FC = () => {
   };
 
   const inputCls =
-    "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-[#334155]/30 focus:bg-white rounded-xl outline-none text-sm transition";
+    "w-full px-3 py-3 bg-gray-100 border-2 border-transparent focus:border-primary-700/30 focus:bg-surface rounded-control outline-none text-sm transition";
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 font-sans relative overflow-y-auto">
+    <div className="min-h-screen bg-background p-4 font-sans relative overflow-y-auto">
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-[#334155]/10 blur-[120px]" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-[#334155]/5 blur-[120px]" />
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary-700/10 blur-[120px]" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary-700/5 blur-[120px]" />
       </div>
 
       <div className="min-h-screen flex items-center justify-center py-8">
         <div className="w-full max-w-[380px] relative my-auto">
-          <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100">
+          <div className="bg-surface rounded-3xl shadow-xl p-6 md:p-8 border border-sand">
             <div className="flex flex-col items-center mb-6">
-              <h2 className="text-xl font-bold text-[#334155]">Agrovet POS</h2>
+              <h2 className="text-xl font-bold text-ink">Agrovet POS</h2>
               <p className="text-slate-500 text-xs mt-1 text-center">
                 Staff login with your email and password
               </p>
@@ -121,42 +120,30 @@ const Login: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#334155]"
-                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                style={{ backgroundColor: BRAND }}
-                className="w-full py-3 text-sm font-bold rounded-xl text-white hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader size="xs" showText={false} />
-                    Authenticating...
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </button>
+              <Button type="submit" size="lg" className="w-full" loading={loading}>
+                {loading ? "Authenticating..." : "Sign in"}
+              </Button>
 
               <p className="text-center">
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-semibold text-[#334155] hover:underline"
+                  className="text-xs font-semibold text-ink hover:underline"
                 >
                   Forgot password?
                 </Link>
               </p>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-              <p className="text-[10px] text-gray-400">
+            <div className="mt-6 pt-4 border-t border-sand text-center">
+              <p className="text-[10px] text-muted">
                 © {new Date().getFullYear()} Agrovet POS
               </p>
             </div>

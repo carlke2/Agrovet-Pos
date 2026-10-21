@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Package, AlertTriangle, ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
+import { Package, Boxes, AlertTriangle, ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
 
@@ -106,17 +106,17 @@ const InventoryPage = () => {
   const totalItems = items.length;
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black flex items-center gap-2"><Package className="text-[#334155]" /> Inventory</h2>
+          <h2 className="text-2xl font-black flex items-center gap-2"><Package className="text-ink" /> Inventory</h2>
           <p className="text-white/80 text-sm mt-1">Stock levels, reorder thresholds, and stock movements</p>
         </div>
       </div>
 
       {/* Low Stock Banner */}
       {lowStock.length > 0 && (
-        <div className="bg-amber-50 border border-amber-250 rounded-2xl p-4 flex items-start gap-3 animate-in fade-in duration-200">
+        <div className="bg-amber-50 border border-amber-250 rounded-card p-4 flex items-start gap-3 animate-in fade-in duration-200">
           <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
           <div>
             <p className="font-extrabold text-amber-900 text-sm">Low Stock Warning</p>
@@ -131,36 +131,36 @@ const InventoryPage = () => {
       {/* KPI Cards Section */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* KPI 1: Total Items */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between select-none">
+        <div className="bg-surface rounded-card p-5 border border-sand shadow-sm flex items-center justify-between select-none">
           <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">Total Items</p>
-            <p className="text-2xl font-black text-[#334155] mt-1">{totalItems}</p>
+            <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">Total Items</p>
+            <p className="text-2xl font-black text-ink mt-1">{totalItems}</p>
           </div>
-          <div className="h-10 w-10 bg-[#f8fafc] rounded-xl flex items-center justify-center text-[#0f172a]">
+          <div className="h-10 w-10 bg-background rounded-control flex items-center justify-center text-ink">
             <Boxes size={20} />
           </div>
         </div>
 
         {/* KPI 2: Low Stock Warning */}
-        <div className={`bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between select-none`}>
+        <div className={`bg-surface rounded-card p-5 border border-sand shadow-sm flex items-center justify-between select-none`}>
           <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">Low Stock Warning</p>
-            <p className={`text-2xl font-black mt-1 ${lowStock.length > 0 ? "text-amber-600 animate-pulse" : "text-[#334155]"}`}>
+            <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">Low Stock Warning</p>
+            <p className={`text-2xl font-black mt-1 ${lowStock.length > 0 ? "text-amber-600 animate-pulse" : "text-ink"}`}>
               {lowStock.length}
             </p>
           </div>
-          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${lowStock.length > 0 ? "bg-amber-50 text-amber-600" : "bg-[#f8fafc] text-[#334155]"}`}>
+          <div className={`h-10 w-10 rounded-control flex items-center justify-center ${lowStock.length > 0 ? "bg-amber-50 text-amber-600" : "bg-background text-ink"}`}>
             <AlertTriangle size={20} />
           </div>
         </div>
 
         {/* KPI 3: Estimated Stock Value */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between select-none">
+        <div className="bg-surface rounded-card p-5 border border-sand shadow-sm flex items-center justify-between select-none">
           <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">Stock Valuation</p>
-            <p className="text-xl font-black text-[#334155] mt-1.5">KES {totalValue.toLocaleString()}</p>
+            <p className="text-[10px] text-muted uppercase tracking-wider font-extrabold">Stock Valuation</p>
+            <p className="text-xl font-black text-ink mt-1.5">KES {totalValue.toLocaleString()}</p>
           </div>
-          <div className="h-10 w-10 bg-[#f8fafc] rounded-xl flex items-center justify-center text-[#334155]">
+          <div className="h-10 w-10 bg-background rounded-control flex items-center justify-center text-ink">
             <TrendingUp size={20} />
           </div>
         </div>
@@ -169,37 +169,37 @@ const InventoryPage = () => {
       {/* Forms Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form 1: Add Inventory */}
-        <form onSubmit={addItem} className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm">
-          <h3 className="font-extrabold text-[#334155] text-base">Add Inventory Item</h3>
+        <form onSubmit={addItem} className="bg-surface rounded-card p-6 border border-sand space-y-4 shadow-sm">
+          <h3 className="font-extrabold text-ink text-base">Add Inventory Item</h3>
           
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Item Name</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Item Name</label>
             <input 
               placeholder="Item name" 
               value={newItem.name} 
               onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} 
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200" 
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200" 
               required 
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Category</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Category</label>
               <select 
                 value={newItem.category} 
                 onChange={(e) => setNewItem({ ...newItem, category: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
               >
                 {["General", "Vegetables", "Meat", "Dairy", "Spices", "Other"].map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Unit of Measure</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Unit of Measure</label>
               <select 
                 value={newItem.unit} 
                 onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
               >
                 {["kg", "liters", "pieces", "bags"].map((u) => <option key={u}>{u}</option>)}
               </select>
@@ -208,45 +208,45 @@ const InventoryPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Reorder Level Alert</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Reorder Level Alert</label>
               <input 
                 type="number" 
                 placeholder="10" 
                 value={newItem.reorderLevel} 
                 onChange={(e) => setNewItem({ ...newItem, reorderLevel: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold" 
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold" 
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Unit Cost (KES)</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Unit Cost (KES)</label>
               <input 
                 type="number" 
                 placeholder="Unit Cost" 
                 value={newItem.unitCost} 
                 onChange={(e) => setNewItem({ ...newItem, unitCost: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold" 
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold" 
               />
             </div>
           </div>
 
           <button 
             type="submit" 
-            className="w-full py-3 bg-[#334155] hover:bg-[#334155]/90 text-white rounded-xl font-extrabold text-sm transition duration-200 shadow-sm"
+            className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm transition duration-200 shadow-sm"
           >
             Add Inventory Item
           </button>
         </form>
 
         {/* Form 2: Record Movement */}
-        <form onSubmit={recordMovement} className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4 shadow-sm">
-          <h3 className="font-extrabold text-[#334155] text-base">Record Stock Movement</h3>
+        <form onSubmit={recordMovement} className="bg-surface rounded-card p-6 border border-sand space-y-4 shadow-sm">
+          <h3 className="font-extrabold text-ink text-base">Record Stock Movement</h3>
           
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Inventory Item</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Inventory Item</label>
             <select 
               value={movement.inventoryItemId} 
               onChange={(e) => setMovement({ ...movement, inventoryItemId: e.target.value })} 
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold" 
+              className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold" 
               required
             >
               <option value="">Select item to adjust</option>
@@ -256,24 +256,24 @@ const InventoryPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Adjustment Type</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Adjustment Type</label>
               <select 
                 value={movement.type} 
                 onChange={(e) => setMovement({ ...movement, type: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
               >
                 <option value="IN">Stock IN (+)</option>
                 <option value="OUT">Stock OUT (-)</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quantity</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Quantity</label>
               <input 
                 type="number" 
                 placeholder="Quantity" 
                 value={movement.quantity} 
                 onChange={(e) => setMovement({ ...movement, quantity: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold" 
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold" 
                 required 
               />
             </div>
@@ -281,34 +281,34 @@ const InventoryPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Reason</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Reason</label>
               <select 
                 value={movement.reason} 
                 onChange={(e) => setMovement({ ...movement, reason: e.target.value, supplierId: "" })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200 font-semibold"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200 font-semibold"
               >
                 {["purchase", "usage", "spoilage", "adjustment"].map((r) => <option key={r}>{r}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Notes (optional)</label>
+              <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Notes (optional)</label>
               <input 
                 placeholder="Add receipt info..." 
                 value={movement.notes} 
                 onChange={(e) => setMovement({ ...movement, notes: e.target.value })} 
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] focus:bg-white transition-all duration-200" 
+                className="w-full px-3 py-2.5 bg-gray-50 border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 focus:bg-surface transition-all duration-200" 
               />
             </div>
           </div>
 
           {showSupplierFields && (
-            <div className="grid grid-cols-2 gap-4 p-3 bg-[#f8fafc]/50 rounded-xl border border-[#cbd5e1]">
+            <div className="grid grid-cols-2 gap-4 p-3 bg-background/50 rounded-control border border-sand">
               <div className="space-y-1 col-span-2 sm:col-span-1">
-                <label className="text-[10px] font-bold text-[#0f172a] uppercase tracking-wider">Supplier *</label>
+                <label className="text-[10px] font-bold text-ink uppercase tracking-wider">Supplier *</label>
                 <select
                   value={movement.supplierId}
                   onChange={(e) => setMovement({ ...movement, supplierId: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white border border-[#cbd5e1] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155] font-semibold"
+                  className="w-full px-3 py-2.5 bg-surface border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700 font-semibold"
                   required
                 >
                   <option value="">Select supplier</option>
@@ -317,16 +317,16 @@ const InventoryPage = () => {
                   ))}
                 </select>
                 {suppliers.length === 0 && (
-                  <p className="text-[10px] text-[#0f172a] mt-1">Add suppliers first under Suppliers menu.</p>
+                  <p className="text-[10px] text-ink mt-1">Add suppliers first under Suppliers menu.</p>
                 )}
               </div>
               <div className="space-y-1 col-span-2 sm:col-span-1">
-                <label className="text-[10px] font-bold text-[#0f172a] uppercase tracking-wider">Invoice / LPO #</label>
+                <label className="text-[10px] font-bold text-ink uppercase tracking-wider">Invoice / LPO #</label>
                 <input
                   placeholder="e.g. INV-2026-042"
                   value={movement.reference}
                   onChange={(e) => setMovement({ ...movement, reference: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white border border-[#cbd5e1] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#334155]"
+                  className="w-full px-3 py-2.5 bg-surface border border-sand rounded-control text-sm focus:outline-none focus:ring-2 focus:ring-primary-700"
                 />
               </div>
             </div>
@@ -334,7 +334,7 @@ const InventoryPage = () => {
 
           <button 
             type="submit" 
-            className="w-full py-3 bg-[#334155] hover:bg-[#0f172a] text-white rounded-xl font-extrabold text-sm transition duration-200 shadow-sm"
+            className="w-full py-3 bg-primary-700 hover:bg-primary-800 text-white rounded-control font-extrabold text-sm transition duration-200 shadow-sm"
           >
             Record Stock Movement
           </button>
@@ -342,9 +342,9 @@ const InventoryPage = () => {
       </div>
 
       {/* Inventory Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+      <div className="bg-surface rounded-card border border-sand overflow-hidden shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-gray-500 uppercase text-[10px] border-b border-slate-100">
+          <thead className="bg-slate-50 text-muted uppercase text-[10px] border-b border-sand">
             <tr>
               <th className="px-5 py-4 text-left font-extrabold tracking-wider">Item</th>
               <th className="px-5 py-4 text-left font-extrabold tracking-wider">Category</th>
@@ -356,7 +356,7 @@ const InventoryPage = () => {
           <tbody className="divide-y divide-slate-100">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-gray-400">
+                <td colSpan={5} className="px-5 py-10 text-center text-muted">
                   No inventory items cataloged yet.
                 </td>
               </tr>
@@ -365,18 +365,18 @@ const InventoryPage = () => {
                 const isLow = item.stockLevel <= item.reorderLevel;
                 return (
                   <tr key={item.id} className={`hover:bg-slate-50/50 transition duration-150 ${isLow ? "bg-amber-50/20" : ""}`}>
-                    <td className="px-5 py-4 font-extrabold text-[#334155]">{item.name}</td>
+                    <td className="px-5 py-4 font-extrabold text-ink">{item.name}</td>
                     <td className="px-5 py-4">
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-wider">{item.category}</span>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${isLow ? "text-amber-700 bg-amber-50" : "text-[#0f172a] bg-[#f8fafc]"}`}>
-                        {isLow ? <ArrowDownCircle size={14} className="text-amber-500 animate-bounce" /> : <ArrowUpCircle size={14} className="text-[#334155]" />}
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${isLow ? "text-amber-700 bg-amber-50" : "text-ink bg-background"}`}>
+                        {isLow ? <ArrowDownCircle size={14} className="text-amber-500 animate-bounce" /> : <ArrowUpCircle size={14} className="text-ink" />}
                         {item.stockLevel} {item.unit}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right text-gray-500 font-semibold">{item.reorderLevel} {item.unit}</td>
-                    <td className="px-5 py-4 text-right font-black text-[#334155]">KES {(item.stockLevel * item.unitCost).toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right text-muted font-semibold">{item.reorderLevel} {item.unit}</td>
+                    <td className="px-5 py-4 text-right font-black text-ink">KES {(item.stockLevel * item.unitCost).toLocaleString()}</td>
                   </tr>
                 );
               })

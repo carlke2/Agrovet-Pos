@@ -43,8 +43,8 @@ const ExpensesPage = () => {
   const total = expenses.reduce((s, e) => s + e.amount, 0);
 
   return (
-    <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans space-y-6">
-      <div className="bg-[#334155] text-white rounded-2xl p-6 flex justify-between items-center">
+    <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="bg-primary-700 text-white rounded-card p-6 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2"><ClipboardList /> Expenses</h2>
           <p className="text-white/80 text-sm mt-1">Record and track operational expenses</p>
@@ -55,20 +55,20 @@ const ExpensesPage = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <form onSubmit={handleSubmit} className="bg-surface rounded-card p-6 border border-sand grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="px-3 py-2 border rounded-lg text-sm">
           {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
         </select>
         <input type="number" placeholder="Amount (KES)" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="px-3 py-2 border rounded-lg text-sm" required />
         <input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="px-3 py-2 border rounded-lg text-sm sm:col-span-2" required />
-        <button type="submit" className="flex items-center justify-center gap-2 bg-[#334155] text-white rounded-lg py-2 font-semibold text-sm">
+        <button type="submit" className="flex items-center justify-center gap-2 bg-primary-700 text-white rounded-lg py-2 font-semibold text-sm">
           <Plus size={16} /> Record
         </button>
       </form>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-surface rounded-card border border-sand overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+          <thead className="bg-gray-50 text-muted uppercase text-xs">
             <tr>
               <th className="px-4 py-3 text-left">Date</th>
               <th className="px-4 py-3 text-left">Category</th>
@@ -79,9 +79,9 @@ const ExpensesPage = () => {
           <tbody>
             {expenses.map((exp) => (
               <tr key={exp.id} className="border-t border-gray-50 hover:bg-gray-50/50">
-                <td className="px-4 py-3 text-gray-600">{new Date(exp.date).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-muted">{new Date(exp.date).toLocaleDateString()}</td>
                 <td className="px-4 py-3"><span className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium">{exp.category}</span></td>
-                <td className="px-4 py-3 text-gray-700">{exp.description}</td>
+                <td className="px-4 py-3 text-ink">{exp.description}</td>
                 <td className="px-4 py-3 text-right font-semibold text-red-600">KES {exp.amount.toLocaleString()}</td>
               </tr>
             ))}

@@ -92,64 +92,64 @@ const AdminProfile = () => {
   }
 
   return (
-    <div className="max-w-lg mx-auto mt-12 bg-white p-8 rounded-xl shadow-md border border-gray-100">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 text-center">
+    <div className="max-w-lg mx-auto mt-12 bg-surface p-8 rounded-control shadow-md border border-sand">
+      <h2 className="text-2xl font-semibold mb-6 text-ink text-center">
         Admin Profile
       </h2>
 
       <form onSubmit={save} className="flex flex-col gap-5">
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">Full Name</label>
+          <label className="text-sm text-muted mb-1 block">Full Name</label>
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full border border-gray-300 focus:ring-2 focus:ring-[#334155] focus:outline-none p-2.5 rounded-md"
+            className="w-full border border-gray-300 focus:ring-2 focus:ring-primary-700 focus:outline-none p-2.5 rounded-md"
             placeholder="Enter your full name"
             required
           />
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">Email</label>
+          <label className="text-sm text-muted mb-1 block">Email</label>
           <input
             type="email"
             value={form.email}
             readOnly
-            className="w-full border border-gray-300 bg-gray-50 text-gray-500 p-2.5 rounded-md cursor-not-allowed"
+            className="w-full border border-gray-300 bg-gray-50 text-muted p-2.5 rounded-md cursor-not-allowed"
           />
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">Current Password</label>
+          <label className="text-sm text-muted mb-1 block">Current Password</label>
           <input
             type="password"
             value={form.currentPassword}
             onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-            className="w-full border border-gray-300 focus:ring-2 focus:ring-[#334155] focus:outline-none p-2.5 rounded-md"
+            className="w-full border border-gray-300 focus:ring-2 focus:ring-primary-700 focus:outline-none p-2.5 rounded-md"
             placeholder="Required only when changing password"
             autoComplete="current-password"
           />
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">New Password</label>
+          <label className="text-sm text-muted mb-1 block">New Password</label>
           <input
             type="password"
             value={form.newPassword}
             onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-            className="w-full border border-gray-300 focus:ring-2 focus:ring-[#334155] focus:outline-none p-2.5 rounded-md"
+            className="w-full border border-gray-300 focus:ring-2 focus:ring-primary-700 focus:outline-none p-2.5 rounded-md"
             placeholder="Leave blank to keep current password"
             autoComplete="new-password"
           />
         </div>
 
         <div>
-          <label className="text-sm text-gray-600 mb-1 block">Confirm New Password</label>
+          <label className="text-sm text-muted mb-1 block">Confirm New Password</label>
           <input
             type="password"
             value={form.confirmPassword}
             onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-            className="w-full border border-gray-300 focus:ring-2 focus:ring-[#334155] focus:outline-none p-2.5 rounded-md"
+            className="w-full border border-gray-300 focus:ring-2 focus:ring-primary-700 focus:outline-none p-2.5 rounded-md"
             autoComplete="new-password"
           />
         </div>
@@ -157,7 +157,7 @@ const AdminProfile = () => {
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-[#0f172a] disabled:opacity-60 text-white py-2.5 rounded-md transition"
+          className="flex items-center justify-center gap-2 bg-primary-800 hover:bg-primary-800 disabled:opacity-60 text-white py-2.5 rounded-md transition"
         >
           <Save size={18} />
           {saving ? "Saving..." : "Save Changes"}
