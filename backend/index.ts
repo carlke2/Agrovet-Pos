@@ -8,6 +8,7 @@ import { Server } from 'socket.io';
 import authRoutes from '@/routes/auth';
 import adminRoutes from '@/routes/admin';
 import userRoutes from '@/routes/users';
+import roleRoutes from '@/routes/roles';
 import auditRoutes from '@/routes/audit';
 import menuRoutes from '@/routes/menu';
 import posRoutes from '@/routes/pos';
@@ -102,6 +103,7 @@ app.get('/health', async (_req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/roles', roleRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/pos', posRoutes);

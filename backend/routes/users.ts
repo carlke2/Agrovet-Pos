@@ -5,6 +5,7 @@ import { ensureAuthenticated, hasPermission, requirePermission } from '@/middlew
 import { logAuditEvent } from '@/services/audit';
 
 const router = Router();
+const ADMIN_ROLE = 'Admin';
 
 const userSelect = {
   id: true,
@@ -38,6 +39,27 @@ function presentUser(user: UserRow) {
     _id: user.id,
     role: user.role.name,
   };
+}
+
+async function lastActiveAdminMessage(
+  userId: string,
+  next: { roleId?: string; status?: string },
+): Promise<string | null> {
+  const current = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: { select: { id: true, name: true } } },
+  });
+  if (!current || current.status !== 'active' || current.role.name !== ADMIN_ROLE) return null;
+
+  const leavesAdmin =
+    (next.roleId !== undefined && next.roleId !== current.role.id) || next.status === 'inactive';
+  if (!leavesAdmin) return null;
+
+  const otherActiveAdmins = await prisma.user.count({
+    where: { status: 'active', id: { not: userId }, role: { name: ADMIN_ROLE } },
+  });
+  if (otherActiveAdmins > 0) return null;
+  return 'Cannot deactivate or change the role of the last active Admin.';
 }
 
 // ─── GET /api/users ───────────────────────────────────────────────────────────
@@ -136,11 +158,17 @@ router.put('/:id', requirePermission('manage_users'), async (req: Request, res: 
     if (email) data.email = String(email).trim().toLowerCase();
     if (phone !== undefined) data.phone = phone;
     if (roleId) {
-      const role = await prisma.role.findUnique({ where: { id: String(roleId) }, select: { id: true } });
+      const role = await prisma.role.findUnique({ where: { id: String(roleId) }, select: { id: true, name: true } });
       if (!role) return res.status(422).json({ message: 'Role not found' });
       data.roleId = role.id;
     }
     if (status && ['active', 'inactive'].includes(status)) data.status = status;
+
+    const blocked = await lastActiveAdminMessage(req.params.id as string, {
+      roleId: typeof data.roleId === 'string' ? data.roleId : undefined,
+      status: typeof data.status === 'string' ? data.status : undefined,
+    });
+    if (blocked) return res.status(422).json({ message: blocked });
     if (password) data.password = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.update({
@@ -175,6 +203,9 @@ router.patch('/:id/status', requirePermission('manage_users'), async (req: Reque
   }
 
   try {
+    const blocked = await lastActiveAdminMessage(req.params.id as string, { status });
+    if (blocked) return res.status(422).json({ message: blocked });
+
     const user = await prisma.user.update({
       where: { id: req.params.id as string },
       data: { status },
@@ -193,36 +224,6 @@ router.patch('/:id/status', requirePermission('manage_users'), async (req: Reque
     });
 
     return res.json(presentUser(user));
-  } catch (error: any) {
-    if (error.code === 'P2025') return res.status(404).json({ message: 'User not found' });
-    return res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
-// ─── DELETE /api/users/:id ────────────────────────────────────────────────────
-router.delete('/:id', requirePermission('manage_users'), async (req: Request, res: Response): Promise<any> => {
-  try {
-    if (req.params.id === req.user!.id) {
-      return res.status(422).json({ message: 'Cannot delete your own account' });
-    }
-
-    const user = await prisma.user.delete({
-      where: { id: req.params.id as string },
-      include: { role: { select: { name: true } } },
-    });
-
-    await logAuditEvent({
-      eventType: 'user_deleted',
-      userType: req.user!.role.name,
-      userId: req.user!.id,
-      userName: req.user!.name,
-      userEmail: req.user!.email,
-      action: 'Delete user',
-      description: `${req.user!.name} deleted ${user.role.name} ${user.name} (${user.email})`,
-      ipAddress: req.ip,
-    });
-
-    return res.json({ message: 'User deleted successfully' });
   } catch (error: any) {
     if (error.code === 'P2025') return res.status(404).json({ message: 'User not found' });
     return res.status(500).json({ message: 'Something went wrong' });
