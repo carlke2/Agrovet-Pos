@@ -106,3 +106,19 @@ input[inputmode="numeric"] {
   border-color: var(--warning);
   color: var(--warning);
 }
+
+/* Floating sidebar. Solid cream unless the browser can blur just this panel. */
+.shell-sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) {
+  .shell-sidebar {
+    background: color-mix(in srgb, var(--surface) 75%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+}

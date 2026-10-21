@@ -7,8 +7,7 @@ import PageLoader from "@/components/ui/PageLoader";
 import { ToastProvider } from "@/components/ui/Toast";
 import PermissionProtectedRoute from "@/components/PermissionProtectedRoute";
 import GuestRoute from "@/components/GuestRoute";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
+import Shell from "@/components/shell/AppShell";
 import Dashboard from "@/pages/Dashboard";
 import Staffs from "@/pages/admin/Staffs";
 import RolesPage from "@/pages/admin/RolesPage";
@@ -74,11 +73,7 @@ function AppShell() {
     );
   }
 
-  return (
-    <div className="flex">
-      {showShell && <Sidebar />}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {showShell && <Navbar />}
+  const routes = (
         <Routes>
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
           <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
@@ -133,9 +128,10 @@ function AppShell() {
             }
           />
         </Routes>
-      </div>
-    </div>
   );
+
+  if (!showShell) return routes;
+  return <Shell>{routes}</Shell>;
 }
 
 function App() {
