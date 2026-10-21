@@ -61,10 +61,6 @@ export function hasValidStoredSession(): boolean {
 export function persistAuthSession(user: AuthUser, token: string) {
   localStorage.setItem("token", token);
   localStorage.setItem("role", user.role);
-  localStorage.setItem("userName", user.name);
-  if (user.role === "owner") {
-    localStorage.setItem("adminName", user.name);
-  }
 }
 
 export function clearAuthSession() {

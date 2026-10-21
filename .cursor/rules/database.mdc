@@ -1,0 +1,13 @@
+---
+description: Supabase Postgres is the only database for agrovet-pos
+alwaysApply: true
+---
+
+# Database
+
+- The only database is the Supabase Postgres provided via DATABASE_URL and DIRECT_URL in backend/.env.
+- Never use SQLite, a local Postgres/MySQL, in-memory databases, JSON files, localStorage/sessionStorage as a data source, or hardcoded or mock users/products/customers.
+- Never add fallback connection strings or default values for the database URL. If it is missing, fail with a clear error.
+- Never create seed scripts that run automatically. Any initial data (such as the first admin user) goes in an explicit, manually run script that targets Supabase only.
+- Never run prisma migrate reset, db push --force-reset, or any destructive command without asking me first.
+- All users, roles, products, customers and transactions are read from and written to Supabase through the backend API only.

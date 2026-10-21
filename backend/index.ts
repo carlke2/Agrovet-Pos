@@ -1,7 +1,6 @@
 import './loadEnv';
 
 import express, { Request, Response } from 'express';
-import path from 'path';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -81,7 +80,6 @@ app.use(express.json({
     }
   },
 }));
-app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
 app.use(cors({
   origin: corsOrigin,
   credentials: true,
@@ -128,6 +126,6 @@ server.listen(PORT, async () => {
     console.error('Check Supabase is not paused and DATABASE_URL in backend/.env is correct.\n');
   }
   if (!isSupabaseConfigured()) {
-    console.warn('Supabase storage is not configured. Menu images will be stored on this server.');
+    console.warn('Supabase storage is not configured. Product image upload will fail until SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.');
   }
 });

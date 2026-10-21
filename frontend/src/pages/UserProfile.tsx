@@ -7,7 +7,7 @@ const UserProfile = () => {
   const { user } = useAuth();
   const role = user?.role || "";
   const [profile, setProfile] = useState<Record<string, any>>({});
-  const name = user?.name || localStorage.getItem("userName") || "User";
+  const name = user?.name || "User";
 
   useEffect(() => {
     const load = async () => {

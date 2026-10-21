@@ -201,3 +201,12 @@ model KopoPayment {
 
   @@map("kopo_payments")
 }
+
+// Single app settings row. Stored in Supabase, not a local file.
+model SystemSetting {
+  id          String   @id @default("app")
+  smsDisabled Boolean  @default(false) @map("sms_disabled")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}

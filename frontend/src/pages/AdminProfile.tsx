@@ -66,7 +66,6 @@ const AdminProfile = () => {
       if (user) {
         persistAuthSession({ ...user, name: data.name }, localStorage.getItem("token") || "");
       }
-      localStorage.setItem("adminName", data.name);
       setForm((f) => ({
         ...f,
         name: data.name,

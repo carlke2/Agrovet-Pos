@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express';
-import fs from 'fs';
-import path from 'path';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '@/services/prisma';
 import { ensureAuthenticated } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
+import { getSupabase, getSupabaseConfigError } from '@/services/supabase';
 
 function devErrorDetail(error: unknown): string | undefined {
   if (process.env.NODE_ENV === 'production') return undefined;
@@ -223,11 +222,20 @@ router.post(
 
       const ext = (req.file.mimetype.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
       const filename = `${uuidv4()}.${ext}`;
-      const dir = path.resolve(__dirname, '..', 'uploads', 'menu');
-      fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, filename), req.file.buffer);
-      const url = `${req.protocol}://${req.get('host')}/uploads/menu/${filename}`;
-      return res.json({ url });
+      const configError = getSupabaseConfigError();
+      if (configError) {
+        return res.status(503).json({ message: configError });
+      }
+      const storage = getSupabase().storage.from('menu-images');
+      const uploaded = await storage.upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false,
+      });
+      if (uploaded.error) {
+        return res.status(502).json({ message: uploaded.error.message });
+      }
+      const { data } = storage.getPublicUrl(filename);
+      return res.json({ url: data.publicUrl });
     } catch (err: any) {
       console.error('Upload image handler error:', err);
       return res.status(500).json({

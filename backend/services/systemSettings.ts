@@ -1,47 +1,40 @@
-import fs from 'fs';
-import path from 'path';
+import prisma from '@/services/prisma';
 
 export type SystemSettings = {
   /** When true, no Advanta SMS is sent system-wide. */
   smsDisabled: boolean;
 };
 
-const DEFAULTS: SystemSettings = {
-  smsDisabled: false,
-};
+const ROW_ID = 'app';
 
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'system-settings.json');
-
-let cache: SystemSettings | null = null;
-
-function readFromDisk(): SystemSettings {
+export async function getSystemSettings(): Promise<SystemSettings> {
   try {
-    const raw = fs.readFileSync(SETTINGS_PATH, 'utf8');
-    const parsed = JSON.parse(raw) as Partial<SystemSettings>;
-    return {
-      smsDisabled: Boolean(parsed.smsDisabled),
-    };
-  } catch {
-    return { ...DEFAULTS };
+    const row = await prisma.systemSetting.upsert({
+      where: { id: ROW_ID },
+      update: {},
+      create: { id: ROW_ID, smsDisabled: false },
+    });
+    return { smsDisabled: row.smsDisabled };
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    if (code === 'P2021') {
+      throw new Error('system_settings is missing in Supabase. Apply the Prisma schema before reading settings.');
+    }
+    throw error;
   }
 }
 
-export function getSystemSettings(): SystemSettings {
-  if (!cache) cache = readFromDisk();
-  return { ...cache };
+export async function setSystemSettings(patch: Partial<SystemSettings>): Promise<SystemSettings> {
+  const current = await getSystemSettings();
+  const smsDisabled = patch.smsDisabled ?? current.smsDisabled;
+  const row = await prisma.systemSetting.update({
+    where: { id: ROW_ID },
+    data: { smsDisabled },
+  });
+  return { smsDisabled: row.smsDisabled };
 }
 
-export function setSystemSettings(patch: Partial<SystemSettings>): SystemSettings {
-  const next: SystemSettings = {
-    ...getSystemSettings(),
-    ...patch,
-  };
-  fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(next, null, 2), 'utf8');
-  cache = next;
-  return { ...next };
-}
-
-export function isSmsGloballyDisabled(): boolean {
-  return getSystemSettings().smsDisabled === true;
+export async function isSmsGloballyDisabled(): Promise<boolean> {
+  const settings = await getSystemSettings();
+  return settings.smsDisabled === true;
 }

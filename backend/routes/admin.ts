@@ -124,7 +124,7 @@ router.put('/profile', ensureOwner, async (req: Request, res: Response): Promise
 // ─── GET /api/admin/settings ──────────────────────────────────────────────────
 router.get('/settings', ensureOwner, async (_req: Request, res: Response): Promise<any> => {
   try {
-    const settings = getSystemSettings();
+    const settings = await getSystemSettings();
     return res.json({
       ...settings,
       smsConfigured: isAdvantaSmsConfigured(),
@@ -144,7 +144,7 @@ router.put('/settings', ensureOwner, async (req: Request, res: Response): Promis
       return res.status(422).json({ message: 'smsDisabled (boolean) is required' });
     }
 
-    const settings = setSystemSettings({ smsDisabled });
+    const settings = await setSystemSettings({ smsDisabled });
 
     await logAuditEvent({
       eventType: 'settings',
@@ -177,7 +177,7 @@ router.post('/notifications/test', ensureOwner, async (_req: Request, res: Respo
   const config = {
     mailConfigured: isMailConfigured(),
     smsConfigured: isAdvantaSmsConfigured(),
-    smsDisabled: getSystemSettings().smsDisabled,
+    smsDisabled: (await getSystemSettings()).smsDisabled,
   };
 
   return res.json({

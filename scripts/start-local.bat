@@ -7,7 +7,7 @@ echo 2. Frontend:   cd frontend ^&^& npm run dev         (http://localhost:5173)
 echo 3. Scanner:    cd FingerprintScanner ^&^& dotnet run (http://127.0.0.1:17890)
 echo.
 echo First-time only:
-echo   cd backend ^&^& npm install ^&^& npx prisma db push ^&^& npm run db:seed
+echo   cd backend ^&^& npm install ^&^& npm run db:create-admin
 echo   cd frontend ^&^& npm install
 echo.
 echo Fingerprint: scanner must run on the same Windows PC as the USB device.

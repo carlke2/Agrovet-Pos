@@ -13,8 +13,8 @@ export function isAdvantaSmsConfigured(): boolean {
 }
 
 /** Configured and not turned off by admin Settings → Disable SMS. */
-export function isSmsSendingEnabled(): boolean {
-  return isAdvantaSmsConfigured() && !isSmsGloballyDisabled();
+export async function isSmsSendingEnabled(): Promise<boolean> {
+  return isAdvantaSmsConfigured() && !(await isSmsGloballyDisabled());
 }
 
 export function normalizeKenyanMobile(raw: string): string | null {
@@ -33,7 +33,7 @@ export function normalizeKenyanMobile(raw: string): string | null {
 }
 
 export async function sendAdvantaSms(toPhone: string, message: string): Promise<void> {
-  if (isSmsGloballyDisabled()) {
+  if (await isSmsGloballyDisabled()) {
     throw new Error('SMS is disabled by admin');
   }
   if (!isAdvantaSmsConfigured()) {
