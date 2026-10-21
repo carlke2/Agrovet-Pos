@@ -4,6 +4,8 @@ export const PERMISSIONS = [
   'manage_roles',
   'manage_settings',
   'view_audit_log',
+  'view_catalog',
+  'manage_catalog',
   'legacy_full_access',
   'legacy_pos_access',
 ] as const;
@@ -23,7 +25,7 @@ export type RoleDefinition = {
 /**
  * legacy_full_access covers routes that used to require owner.
  * legacy_pos_access covers routes that used to allow owner or cashier.
- * Stock keeper has no keys until inventory gets its own permission.
+ * view_catalog reads product categories. manage_catalog creates and edits them.
  */
 export const ROLE_MATRIX: readonly RoleDefinition[] = [
   {
@@ -33,22 +35,22 @@ export const ROLE_MATRIX: readonly RoleDefinition[] = [
   },
   {
     name: 'Manager',
-    description: 'Back office and point of sale. Cannot manage users, roles, settings, or the audit log.',
-    permissions: ['legacy_full_access', 'legacy_pos_access'],
+    description: 'Back office, point of sale, and the product catalog. Cannot manage users, roles, settings, or the audit log.',
+    permissions: ['legacy_full_access', 'legacy_pos_access', 'view_catalog', 'manage_catalog'],
   },
   {
     name: 'Cashier',
-    description: 'Point of sale, M-Pesa sales, own attendance clock, and own profile.',
-    permissions: ['legacy_pos_access'],
+    description: 'Point of sale, M-Pesa sales, own attendance clock, own profile, and a read-only catalog.',
+    permissions: ['legacy_pos_access', 'view_catalog'],
   },
   {
     name: 'Stock keeper',
-    description: 'No permissions yet.',
-    permissions: [],
+    description: 'Read and manage the product catalog.',
+    permissions: ['view_catalog', 'manage_catalog'],
   },
   {
     name: 'Accountant',
-    description: 'Read-only access to the audit log.',
-    permissions: ['view_audit_log'],
+    description: 'Read-only access to the audit log and the product catalog.',
+    permissions: ['view_audit_log', 'view_catalog'],
   },
 ];
