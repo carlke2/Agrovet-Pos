@@ -1,0 +1,850 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Receipt, FileJson, X, Copy, Check, Search, Filter, Wallet, AlertTriangle } from "lucide-react";
+import API from "@/services/api";
+import Loader from "@/components/ui/loader";
+import { toast } from "@/services/toast";
+
+type CollectionRow = {
+  id?: string;
+  source?: string;
+  channel?: string;
+  mpesaNumber: string;
+  date: string;
+  name: string;
+  admNo: string;
+  method: string;
+  amount: number;
+  attemptedAmount?: number;
+  status: string;
+  type: string;
+  metadata: string;
+  transactionRef?: string;
+  walletCredited?: boolean;
+  allocatable?: boolean;
+  payload?: Record<string, unknown>;
+};
+
+type CollectionsSummary = {
+  tillInflow: number;
+  walletTopUps: number;
+  cashSales: number;
+  usage: number;
+  recordCount: number;
+  uniqueTillPayments?: number;
+};
+
+type KopoSearchResult = {
+  id: string;
+  amount: number;
+  phone: string;
+  status: string;
+  purpose: string;
+  transactionReference: string;
+  date: string;
+  payerName: string | null;
+  payerPhone: string | null;
+  allocatable: boolean;
+};
+
+const formatKes = (n: number) => `KES ${Number(n || 0).toLocaleString()}`;
+
+const statusBadge = (status: string) => {
+  const s = (status || "").toLowerCase();
+  if (["success", "received", "complete", "completed", "paid"].includes(s)) {
+    return "bg-[#FFA29D] text-[#5C0101]";
+  }
+  if (["failed", "error", "reversed", "cancelled", "superseded"].includes(s)) {
+    return "bg-rose-100 text-rose-700";
+  }
+  return "bg-amber-100 text-amber-800";
+};
+
+type StatusFilter = "all" | "success" | "pending" | "failed";
+type SourceFilter =
+  | "all"
+  | "till"
+  | "stk"
+  | "guest"
+  | "cash"
+  | "unallocated";
+
+const SOURCE_FILTERS: { value: SourceFilter; label: string; hint: string }[] = [
+  { value: "all", label: "All", hint: "Every collection record" },
+  { value: "till", label: "Till (Buy Goods)", hint: "Lipa na M-Pesa till payments" },
+  { value: "stk", label: "STK Push", hint: "M-Pesa STK payments at the till" },
+  { value: "guest", label: "Guest POS", hint: "Guest M-Pesa and cash sales" },
+  { value: "cash", label: "Cash only", hint: "Guest cash POS" },
+];
+
+const isGuestPosRow = (row: CollectionRow) =>
+  row.source === "pos_mpesa" ||
+  row.source === "pos_cash" ||
+  (row.source === "kopo" && row.type === "pos_sale");
+
+const statusBucket = (status: string): StatusFilter => {
+  const s = (status || "").toLowerCase();
+  if (["success", "received", "complete", "completed", "paid"].includes(s)) return "success";
+  if (["failed", "error", "reversed", "cancelled", "superseded"].includes(s)) return "failed";
+  return "pending";
+};
+
+const isWalletTopUpRow = (row: CollectionRow) =>
+  (row.source === "kopo" && row.type === "wallet_topup") ||
+  (row.source === "wallet" && row.type === "deposit");
+
+const isWalletUsageRow = (row: CollectionRow) =>
+  row.source === "wallet" && (row.type === "purchase" || row.type === "refund");
+
+const rowChannel = (row: CollectionRow): string => {
+  const fromPayload = typeof row.payload?.channel === "string" ? row.payload.channel : "";
+  if (fromPayload) return fromPayload;
+  if (row.channel) return row.channel;
+  if (row.source === "pos_cash") return "cash";
+  if (row.source === "pos_mpesa" || (row.source === "kopo" && row.type === "pos_sale")) return "stk";
+  if (row.source === "wallet") return "wallet";
+  if (row.source === "kopo" && row.type === "wallet_topup") {
+    return /till → student wallet|manual allocation/i.test(`${row.method} ${row.metadata}`)
+      ? "wallet"
+      : "stk";
+  }
+  if (row.source === "kopo") return "till";
+  return "other";
+};
+
+const isTillBuyGoodsRow = (row: CollectionRow) =>
+  rowChannel(row) === "till" ||
+  (row.source === "kopo" && row.type !== "wallet_topup" && row.type !== "pos_sale");
+
+const isStkPushRow = (row: CollectionRow) =>
+  rowChannel(row) === "stk" ||
+  row.source === "pos_mpesa" ||
+  (row.source === "kopo" && row.type === "pos_sale") ||
+  (row.source === "kopo" &&
+    row.type === "wallet_topup" &&
+    !/till → student wallet|manual allocation/i.test(`${row.method} ${row.metadata}`));
+
+const matchesSource = (row: CollectionRow, source: SourceFilter): boolean => {
+  if (source === "all") return true;
+  if (source === "till") return isTillBuyGoodsRow(row);
+  if (source === "stk") return isStkPushRow(row);
+  if (source === "unallocated") return Boolean(row.allocatable);
+  if (source === "cash") return row.source === "pos_cash";
+  if (source === "guest") return isGuestPosRow(row);
+  return true;
+};
+
+const channelBadge = (channel: string) => {
+  switch (channel) {
+    case "till":
+      return "bg-[#FBF4D0] text-[#5C0101] border-[#E5C48D]";
+    case "stk":
+      return "bg-[#FBF4D0] text-[#5C0101] border-[#E5C48D]";
+    case "wallet":
+      return "bg-sky-50 text-sky-700 border-sky-100";
+    case "cash":
+      return "bg-amber-50 text-amber-800 border-amber-100";
+    default:
+      return "bg-gray-50 text-gray-600 border-gray-100";
+  }
+};
+
+const channelLabel = (channel: string) => {
+  switch (channel) {
+    case "till":
+      return "Till";
+    case "stk":
+      return "STK";
+    case "wallet":
+      return "Wallet";
+    case "cash":
+      return "Cash";
+    default:
+      return channel || "Other";
+  }
+};
+
+const PayloadModal = ({
+  rows,
+  selectedId,
+  onClose,
+  onSelect,
+}: {
+  rows: CollectionRow[];
+  selectedId: string | null;
+  onClose: () => void;
+  onSelect: (id: string) => void;
+}) => {
+  const [query, setQuery] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) =>
+      [r.name, r.admNo, r.metadata, r.method, r.status, r.transactionRef, r.mpesaNumber]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [rows, query]);
+
+  const selected =
+    rows.find((r) => r.id === selectedId) ?? filtered[0] ?? null;
+
+  const json = selected?.payload
+    ? JSON.stringify(selected.payload, null, 2)
+    : "No payload available for this record.";
+
+  const copyJson = async () => {
+    try {
+      await navigator.clipboard.writeText(json);
+      setCopied(true);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+          <div>
+            <h3 className="font-bold text-[#B91D2D] flex items-center gap-2">
+              <FileJson size={18} /> Transaction payloads
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {rows.length} records · metadata and Kopokopo responses
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex flex-1 min-h-0 flex-col md:flex-row">
+          <div className="md:w-2/5 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col min-h-0">
+            <div className="p-3 border-b border-gray-50">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search name, adm no, ref..."
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#B91D2D] outline-none"
+                />
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 max-h-64 md:max-h-none">
+              {filtered.length === 0 ? (
+                <p className="p-4 text-sm text-gray-400 text-center">No matches</p>
+              ) : (
+                filtered.map((r) => (
+                  <button
+                    key={r.id || r.date}
+                    type="button"
+                    onClick={() => r.id && onSelect(r.id)}
+                    className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition ${
+                      selected?.id === r.id ? "bg-[#FBF4D0] border-l-4 border-l-[#B91D2D]" : ""
+                    }`}
+                  >
+                    <p className="font-semibold text-sm text-[#B91D2D] truncate">
+                      {r.name || r.method || "Transaction"}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {r.admNo ? `${r.admNo} · ` : ""}
+                      {new Date(r.date).toLocaleString()}
+                    </p>
+                    <span className={`inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded-full capitalize ${statusBadge(r.status)}`}>
+                      {r.status}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col min-h-0 min-w-0">
+            {selected && (
+              <div className="px-4 py-2 border-b border-gray-50 bg-gray-50/80 text-xs text-gray-600 shrink-0">
+                <span className="font-semibold text-[#B91D2D]">{selected.name || "—"}</span>
+                {selected.admNo && <span> · {selected.admNo}</span>}
+                <span> · {selected.method}</span>
+              </div>
+            )}
+            <div className="flex-1 overflow-auto p-4 bg-slate-950">
+              <pre className="text-xs text-[#FFA29D] font-mono whitespace-pre-wrap break-words">{json}</pre>
+            </div>
+            <div className="p-3 border-t border-gray-100 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={copyJson}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#B91D2D] border border-[#B91D2D]/20 rounded-lg hover:bg-[#B91D2D]/5"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? "Copied" : "Copy JSON"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const FindPaymentModal = ({
+  onClose,
+}: {
+  onClose: () => void;
+}) => {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<KopoSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setResults([]);
+      return;
+    }
+    setSearching(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const { data } = await API.get<KopoSearchResult[]>("/kopokopo/search", { params: { q } });
+        setResults(data);
+      } catch {
+        setResults([]);
+        toast.error("Search failed", "Could not search payments");
+      } finally {
+        setSearching(false);
+      }
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div>
+            <h3 className="font-bold text-[#B91D2D] flex items-center gap-2">
+              <Search size={18} /> Find M-Pesa payment
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">Search by M-Pesa code, phone, or reference</p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="e.g. QGH7XABCD or 2547..."
+              autoFocus
+              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            />
+          </div>
+
+          {searching && <p className="text-xs text-gray-400">Searching...</p>}
+
+          <div className="max-h-64 overflow-y-auto space-y-2">
+            {query.trim().length >= 2 && !searching && results.length === 0 && (
+              <div className="text-center py-4 space-y-3">
+                <p className="text-sm text-gray-500">
+                  No payment found in the system for <span className="font-mono font-semibold">{query.trim()}</span>.
+                </p>
+                <p className="text-xs text-gray-400 px-4">
+                  Slow Rise Co records M-Pesa when the Daraja callback reaches this server.
+                </p>
+              </div>
+            )}
+            {results.map((r) => (
+              <div
+                key={r.id}
+                className="w-full text-left p-3 border border-gray-100 rounded-xl"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-[#B91D2D]">{formatKes(r.amount)}</p>
+                    <p className="text-xs font-mono text-gray-500">{r.transactionReference || r.id}</p>
+                    <p className="text-xs text-gray-400">{r.phone || "—"} · {new Date(r.date).toLocaleString()}</p>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize ${statusBadge(r.status)}`}>
+                    {r.allocatable ? "unallocated" : r.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CollectionsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sourceFromUrl = searchParams.get("source") as SourceFilter | null;
+  const initialSource: SourceFilter =
+    sourceFromUrl && SOURCE_FILTERS.some((f) => f.value === sourceFromUrl)
+      ? sourceFromUrl
+      : "all";
+
+  const [rows, setRows] = useState<CollectionRow[]>([]);
+  const [serverSummary, setServerSummary] = useState<CollectionsSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [payloadOpen, setPayloadOpen] = useState(false);
+  const [selectedPayloadId, setSelectedPayloadId] = useState<string | null>(null);
+  const [findPaymentOpen, setFindPaymentOpen] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<{
+    paymentsToday: number;
+    hoursSinceLastPayment: number | null;
+    webhookLikelyStale: boolean;
+    tillNumber: string;
+  } | null>(null);
+  const [filters, setFilters] = useState({
+    search: "",
+    source: initialSource,
+    status: "all" as StatusFilter,
+    startDate: "",
+    endDate: "",
+  });
+
+  useEffect(() => {
+    const src = searchParams.get("source") as SourceFilter | null;
+    if (src && SOURCE_FILTERS.some((f) => f.value === src) && src !== filters.source) {
+      setFilters((f) => ({ ...f, source: src }));
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (filters.source === "all") next.delete("source");
+    else next.set("source", filters.source);
+    setSearchParams(next, { replace: true });
+  }, [filters.source]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchRows = useCallback(async () => {
+    setLoading(true);
+    const params: Record<string, string> = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+
+    try {
+      const r = await API.get<CollectionRow[] | { rows: CollectionRow[]; summary: CollectionsSummary }>(
+        "/finance/collections",
+        { params },
+      );
+      const data = r.data;
+      if (Array.isArray(data)) {
+        setRows(data);
+        setServerSummary(null);
+      } else {
+        setRows(data.rows || []);
+        setServerSummary(data.summary || null);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, [filters.startDate, filters.endDate]);
+
+  useEffect(() => {
+    fetchRows();
+  }, [fetchRows]);
+
+  useEffect(() => {
+    API.get("/kopokopo/webhook-status")
+      .then((r) => setWebhookStatus(r.data))
+      .catch(() => setWebhookStatus(null));
+  }, [rows.length]);
+
+  const filteredRows = useMemo(() => {
+    let list = rows;
+
+    if (filters.source !== "all") {
+      list = list.filter((r) => matchesSource(r, filters.source));
+    }
+
+    if (filters.status !== "all") {
+      list = list.filter((r) => statusBucket(r.status) === filters.status);
+    }
+
+    const q = filters.search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((r) =>
+        [r.name, r.admNo, r.metadata, r.method, r.status, r.transactionRef, r.mpesaNumber, r.type]
+          .join(" ")
+          .toLowerCase()
+          .includes(q),
+      );
+    }
+
+    return list;
+  }, [rows, filters.search, filters.source, filters.status]);
+
+  const hasActiveFilters =
+    filters.search !== "" ||
+    filters.source !== "all" ||
+    filters.status !== "all" ||
+    filters.startDate !== "" ||
+    filters.endDate !== "";
+
+  const clearFilters = () => {
+    setFilters({
+      search: "",
+      source: "all",
+      status: "all",
+      startDate: "",
+      endDate: "",
+    });
+  };
+
+  const openPayloads = (rowId?: string) => {
+    setSelectedPayloadId(rowId ?? filteredRows.find((r) => r.id)?.id ?? null);
+    setPayloadOpen(true);
+  };
+
+  const totals = useMemo(() => {
+    // When filters are active, recompute from visible rows; otherwise prefer server unique totals.
+    const useServer = !hasActiveFilters && serverSummary;
+
+    const tillInflowFromRows = () => {
+      const seen = new Set<string>();
+      let sum = 0;
+      for (const r of filteredRows) {
+        const isTill =
+          (r.source === "kopo" && r.amount > 0) ||
+          r.source === "pos_mpesa";
+        if (!isTill) continue;
+        const key = (r.transactionRef || r.id || `${r.name}-${r.amount}-${r.date}`)
+          .toString()
+          .trim()
+          .toUpperCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        sum += Math.abs(r.amount);
+      }
+      return sum;
+    };
+
+    const topUps = useServer ? serverSummary!.tillInflow : tillInflowFromRows();
+    const walletTopUps = useServer
+      ? serverSummary!.walletTopUps
+      : filteredRows.filter(isWalletTopUpRow).reduce((s, r) => s + Math.abs(r.amount), 0);
+    const cashSales = useServer
+      ? serverSummary!.cashSales
+      : filteredRows.filter((r) => r.source === "pos_cash").reduce((s, r) => s + r.amount, 0);
+    const usage = useServer
+      ? serverSummary!.usage
+      : filteredRows
+          .filter((r) => r.type === "purchase" || isWalletUsageRow(r))
+          .reduce((s, r) => s + Math.abs(r.amount), 0);
+    const tillAttempts = filteredRows.filter(
+      (r) => r.source === "kopo" || r.source === "pos_mpesa" || r.source === "pos_cash" || isWalletUsageRow(r),
+    ).length;
+    return { topUps, walletTopUps, cashSales, usage, tillAttempts };
+  }, [filteredRows, hasActiveFilters, serverSummary]);
+
+  return (
+    <div className="p-4 md:p-8 bg-[#FBF4D0] min-h-screen font-sans space-y-6">
+      {webhookStatus && (webhookStatus.webhookLikelyStale || webhookStatus.paymentsToday === 0) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+          <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
+          <div className="text-sm text-amber-900 space-y-1">
+            <p className="font-semibold">Manual till payments may not appear automatically</p>
+            <p>
+              Till <strong>{webhookStatus.tillNumber}</strong> payments only sync when KopoKopo webhooks reach your server.
+              {webhookStatus.hoursSinceLastPayment != null
+                ? ` Last recorded payment was ${webhookStatus.hoursSinceLastPayment}h ago.`
+                : " No payments recorded yet."}
+              {" "}Use <strong>Register till payment</strong> with the M-Pesa code from the SMS.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-[#B91D2D] text-white rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Receipt /> Collections Report
+          </h2>
+          <p className="text-white/80 text-sm mt-1">
+            Slow Rise Co till M-Pesa, guest cash, and STK sales
+          </p>
+        </div>
+        <div className="flex flex-col sm:items-end gap-3">
+          <div className="flex flex-wrap gap-2 justify-end">
+            <button
+              type="button"
+              onClick={fetchRows}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold"
+              title="Refresh collections"
+            >
+              Refresh
+            </button>
+            <button
+              type="button"
+              onClick={() => setFindPaymentOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#FFA29D] hover:bg-[#E5C48D] text-[#5C0101] rounded-xl text-sm font-semibold"
+            >
+              <Search size={16} /> Find M-Pesa payment
+            </button>
+            <button
+              type="button"
+              onClick={() => openPayloads()}
+              disabled={filteredRows.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-semibold disabled:opacity-40"
+            >
+              <FileJson size={16} /> View all payloads
+            </button>
+          </div>
+          <div className="text-right space-y-1">
+            <p className="text-white/80 text-xs">
+              Till inflow / Cash POS · Records
+              {hasActiveFilters && filteredRows.length !== rows.length ? (
+                <span className="ml-1">({filteredRows.length} shown)</span>
+              ) : null}
+            </p>
+            <p className="text-lg font-bold">
+              <span className="text-[#FBF4D0]" title="Unique M-Pesa till receipts">
+                {formatKes(totals.topUps)}
+              </span>
+              <span className="text-white/80"> · </span>
+              <span className="text-sky-300" title="M-Pesa STK sales">
+                {formatKes(totals.walletTopUps)}
+              </span>
+              <span className="text-white/80"> · </span>
+              <span className="text-amber-300" title="Guest cash POS">
+                {formatKes(totals.cashSales)}
+              </span>
+              <span className="text-white/80"> · </span>
+              <span className="text-rose-300" title="Other recorded amounts">
+                {formatKes(totals.usage)}
+              </span>
+              <span className="text-white/80"> · </span>
+              <span className="text-white">{filteredRows.length}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Filter size={18} className="text-[#B91D2D]" />
+            <span className="font-semibold text-[#B91D2D]">Filters</span>
+          </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-xs font-semibold text-gray-500 hover:text-[#B91D2D]"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {SOURCE_FILTERS.map((opt) => {
+            const active = filters.source === opt.value;
+            const count =
+              opt.value === "all"
+                ? rows.length
+                : rows.filter((r) => matchesSource(r, opt.value)).length;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                title={opt.hint}
+                onClick={() => setFilters((f) => ({ ...f, source: opt.value }))}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  active
+                    ? "bg-[#B91D2D] text-white border-[#B91D2D]"
+                    : "bg-white text-[#B91D2D] border-gray-200 hover:border-[#B91D2D]/40"
+                }`}
+              >
+                {opt.label}
+                <span className={`ml-1 ${active ? "text-white/80" : "text-gray-400"}`}>
+                  ({count})
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="relative lg:col-span-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+              placeholder="Search name, adm no, ref, phone..."
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            />
+          </div>
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value as StatusFilter }))}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none"
+          >
+            <option value="all">All statuses</option>
+            <option value="success">Success</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+          <input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            title="From date"
+          />
+          <input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#B91D2D] outline-none"
+            title="To date"
+          />
+        </div>
+        {!loading && rows.length > 0 && (
+          <p className="text-xs text-gray-500">
+            Showing {filteredRows.length} of {rows.length} records
+            {filters.startDate || filters.endDate
+              ? ` · ${filters.startDate || "…"} to ${filters.endDate || "…"}`
+              : ""}
+          </p>
+        )}
+      </div>
+
+      {loading ? (
+        <Loader size="sm" title="Loading collections..." subtitle="Fetching till and wallet records" className="py-8" />
+      ) : rows.length === 0 ? (
+        <div className="bg-white rounded-2xl p-8 text-center text-gray-500">No collections found</div>
+      ) : filteredRows.length === 0 ? (
+        <div className="bg-white rounded-2xl p-8 text-center text-gray-500">
+          No records match your filters.{" "}
+          <button type="button" onClick={clearFilters} className="text-[#B91D2D] font-semibold hover:underline">
+            Clear filters
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+          <table className="w-full text-sm min-w-[1020px]">
+            <thead className="text-gray-500 uppercase text-xs bg-gray-50">
+              <tr>
+                <th className="text-left py-3 px-4">No</th>
+                <th className="text-left py-3 px-4">Name</th>
+                <th className="text-left py-3 px-4">Reference</th>
+                <th className="text-left py-3 px-4">M-Pesa Number</th>
+                <th className="text-left py-3 px-4">Date</th>
+                <th className="text-left py-3 px-4">Method</th>
+                <th className="text-left py-3 px-4">Status</th>
+                <th className="text-left py-3 px-4">Metadata</th>
+                <th className="text-right py-3 px-4">Amount</th>
+                <th className="text-center py-3 px-4">Actions</th>
+                <th className="text-center py-3 px-4">Payload</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.map((r, idx) => {
+                const failedUnsettled =
+                  r.source === "kopo" &&
+                  r.amount === 0 &&
+                  (r.attemptedAmount ?? 0) > 0;
+
+                return (
+                  <tr key={`${r.id || r.transactionRef || r.date}-${idx}`} className="border-t border-gray-100 align-top">
+                    <td className="py-3 px-4 text-gray-500">{idx + 1}</td>
+                    <td className="py-3 px-4 font-semibold text-[#B91D2D]">{r.name || "-"}</td>
+                    <td className="py-3 px-4 text-gray-600 font-mono text-xs">{r.admNo || "-"}</td>
+                    <td className="py-3 px-4">{r.mpesaNumber || "-"}</td>
+                    <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
+                      {new Date(r.date).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">
+                      <div className="space-y-1">
+                        <span
+                          className={`inline-flex text-[10px] px-2 py-0.5 rounded-full font-semibold border ${channelBadge(rowChannel(r))}`}
+                        >
+                          {channelLabel(rowChannel(r))}
+                        </span>
+                        <p>{r.method || "-"}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize ${statusBadge(r.status)}`}>
+                        {r.status || "-"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 text-xs max-w-xs">
+                      <p className="line-clamp-2" title={r.metadata}>{r.metadata || "-"}</p>
+                      {r.transactionRef && (
+                        <p className="text-[10px] text-gray-400 mt-1 font-mono truncate" title={r.transactionRef}>
+                          Ref: {r.transactionRef}
+                        </p>
+                      )}
+                    </td>
+                    <td className={`py-3 px-4 text-right font-bold whitespace-nowrap ${
+                      r.amount >= 0 ? "text-[#B91D2D]" : "text-rose-600"
+                    }`}>
+                      {r.amount !== 0 ? (
+                        <>
+                          {r.amount >= 0 ? "+" : "−"} {formatKes(Math.abs(r.amount))}
+                        </>
+                      ) : failedUnsettled ? (
+                        <span className="text-gray-400 font-normal text-xs">
+                          {formatKes(r.attemptedAmount || 0)} (not settled)
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-center text-gray-300">—</td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => r.id && openPayloads(r.id)}
+                        disabled={!r.payload}
+                        title="View metadata payload"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-[#B91D2D] border border-[#B91D2D]/20 rounded-lg hover:bg-[#B91D2D]/5 disabled:opacity-30"
+                      >
+                        <FileJson size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {payloadOpen && (
+        <PayloadModal
+          rows={filteredRows.filter((r) => r.payload)}
+          selectedId={selectedPayloadId}
+          onClose={() => setPayloadOpen(false)}
+          onSelect={setSelectedPayloadId}
+        />
+      )}
+
+      {findPaymentOpen && (
+        <FindPaymentModal
+          onClose={() => setFindPaymentOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CollectionsPage;

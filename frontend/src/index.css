@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 48 86% 90%;
+    --foreground: 0 98% 18%;
+
+    --card: 48 86% 96%;
+    --card-foreground: 0 98% 18%;
+
+    --popover: 48 86% 96%;
+    --popover-foreground: 0 98% 18%;
+
+    --primary: 354 73% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 62% 73%;
+    --secondary-foreground: 0 98% 18%;
+
+    --muted: 48 60% 94%;
+    --muted-foreground: 0 30% 30%;
+
+    --accent: 3 100% 81%;
+    --accent-foreground: 0 98% 18%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 36 62% 73%;
+    --input: 36 62% 73%;
+    --ring: 354 73% 42%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 354 60% 55%;
+    --primary-foreground: 48 86% 96%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 354 60% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* SweetAlert2 success icon defaults to #a5dc86. Use maroon so it stays in the palette and stays distinct from the red error icon. */
+.swal2-icon.swal2-success {
+  border-color: #5c0101;
+  color: #5c0101;
+}
+.swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: #5c0101;
+}
+.swal2-icon.swal2-success .swal2-success-ring {
+  border: 0.25em solid rgba(92, 1, 1, 0.3);
+}
+.swal2-timer-progress-bar {
+  background: #b91d2d;
+}
+.swal2-icon.swal2-warning {
+  border-color: #b91d2d;
+  color: #b91d2d;
+}
