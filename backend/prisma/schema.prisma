@@ -229,6 +229,27 @@ model KopoPayment {
   @@map("kopo_payments")
 }
 
+// Product catalog categories. One level of children only. nameKey is computed in application code.
+model Category {
+  id                    String     @id @default(cuid())
+  name                  String
+  nameKey               String     @unique
+  description           String?
+  parentId              String?
+  parent                Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children              Category[] @relation("CategoryTree")
+  defaultMarkupPercent  Decimal?   @db.Decimal(7, 2)
+  tracksExpiryByDefault Boolean    @default(false)
+  icon                  String?
+  sortOrder             Int        @default(0)
+  isActive              Boolean    @default(true)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([parentId])
+  @@map("categories")
+}
+
 // Single app settings row. Stored in Supabase, not a local file.
 model SystemSetting {
   id          String   @id @default("app")
