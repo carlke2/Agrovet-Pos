@@ -27,7 +27,7 @@ export default function QuantityStepper({ value, onChange, min = 1, max = 9999, 
       <input
         aria-label={label}
         inputMode="numeric"
-        className="tabular h-12 w-14 border-x border-sand bg-transparent text-center text-sm font-semibold text-ink outline-none"
+        className="tabular h-12 w-14 border-x border-sand bg-transparent text-center text-sm font-semibold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-700"
         value={value}
         onChange={(event) => {
           const parsed = Number(event.target.value);

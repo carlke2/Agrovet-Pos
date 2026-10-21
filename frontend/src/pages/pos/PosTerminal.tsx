@@ -2,9 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ShoppingCart,
   Search,
-  Trash2,
-  Plus,
-  Minus,
   X,
   TrendingUp,
   Receipt,
@@ -15,14 +12,18 @@ import {
   Download,
   Printer,
   CheckCircle2,
-  Banknote,
 } from "lucide-react";
 import API from "@/services/api";
 import { toast } from "@/services/toast";
 import Button from "@/components/ui/Button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Drawer from "@/components/ui/Drawer";
 import EmptyState from "@/components/ui/EmptyState";
 import Money from "@/components/ui/Money";
 import PageLoader from "@/components/ui/PageLoader";
+import { formatLongDateTime } from "@/lib/datetime";
+import PaymentMethodDialog from "@/pages/pos/PaymentMethodDialog";
+import SalePanel from "@/pages/pos/SalePanel";
 import { displayReceiptNo } from "@/lib/receipt";
 import {
   downloadOrderReceipt,
@@ -122,6 +123,12 @@ const PosTerminal = () => {
   const [lastReceipt, setLastReceipt] = useState<OrderReceiptData | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showMpesa, setShowMpesa] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [cartDrawer, setCartDrawer] = useState(false);
+  const [narrow, setNarrow] = useState(() => window.innerWidth < 1024);
+  const [now, setNow] = useState(() => new Date());
+  const saleLock = useRef(false);
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [mpesaLoading, setMpesaLoading] = useState(false);
   const [cashLoading, setCashLoading] = useState(false);
@@ -198,6 +205,30 @@ const PosTerminal = () => {
   useEffect(() => {
     if (view === "checkout") searchRef.current?.focus();
   }, [view]);
+
+  useEffect(() => {
+    const onResize = () => {
+      const next = window.innerWidth < 1024;
+      setNarrow(next);
+      if (!next) setCartDrawer(false);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const previousCartCount = useRef(cart.length);
+  useEffect(() => {
+    if (previousCartCount.current > 0 && cart.length === 0) {
+      setPayOpen(false);
+      setCartDrawer(false);
+    }
+    previousCartCount.current = cart.length;
+  }, [cart.length]);
 
   useEffect(() => {
     if (view === "sales") {
@@ -350,6 +381,48 @@ const PosTerminal = () => {
       setMpesaLoading(false);
     }
   };
+
+  const startCash = () => {
+    if (saleLock.current || cashLoading || mpesaLoading || cart.length === 0) return;
+    saleLock.current = true;
+    void payWithCash().finally(() => {
+      saleLock.current = false;
+    });
+  };
+
+  const openMpesa = () => {
+    if (saleLock.current || cashLoading || mpesaLoading || cart.length === 0) return;
+    setPayOpen(false);
+    setShowMpesa(true);
+  };
+
+  const itemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
+  const salePanel = (
+    <SalePanel
+      lines={cart}
+      total={total}
+      cashierName={staffName}
+      when={formatLongDateTime(now)}
+      paying={cashLoading || mpesaLoading}
+      onClear={() => {
+        if (cart.length > 0 && !cashLoading && !mpesaLoading) setClearOpen(true);
+      }}
+      onQuantity={(id, quantity) => {
+        const line = cart.find((item) => item.menuItemId === id);
+        if (!line || cashLoading || mpesaLoading) return;
+        updateQty(id, quantity - line.quantity);
+      }}
+      onRemove={(id) => {
+        const line = cart.find((item) => item.menuItemId === id);
+        if (!line || cashLoading || mpesaLoading) return;
+        updateQty(id, -line.quantity);
+      }}
+      onPay={() => {
+        if (cart.length === 0 || cashLoading || mpesaLoading) return;
+        setPayOpen(true);
+      }}
+    />
+  );
 
   const receiptLabel = (r: ReceiptItem) => {
     const method = (r.paymentMethod || "").toLowerCase();
@@ -605,7 +678,8 @@ const PosTerminal = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+        <>
+        <div className="grid grid-cols-1 gap-6 items-start pb-24 lg:grid-cols-5 lg:pb-0">
           <div className="lg:col-span-3 space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-surface rounded-card p-3 border border-sand shadow-sm">
               <div className="flex gap-1.5 flex-wrap">
@@ -702,107 +776,54 @@ const PosTerminal = () => {
             )}
           </div>
 
-          <div className="lg:col-span-2 bg-surface rounded-card border border-sand p-5 space-y-5 shadow-sm h-fit sticky top-6">
-            <div className="space-y-2 flex flex-col">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-extrabold text-muted uppercase tracking-wider">
-                  Cart Items
-                </span>
-                {cart.length > 0 && (
-                  <button
-                    onClick={() => setCart([])}
-                    className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline transition"
-                  >
-                    Clear Cart
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-2 overflow-y-auto max-h-56 pr-1">
-                {cart.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 text-center text-gray-300">
-                    <ShoppingCart size={28} strokeWidth={1.5} className="mb-1" />
-                    <p className="text-[11px] font-bold">No items in cart</p>
-                  </div>
-                ) : (
-                  cart.map((item) => (
-                    <div
-                      key={item.menuItemId}
-                      className="flex items-center gap-2 p-2 bg-gray-50 border border-sand rounded-control select-none"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-extrabold text-ink text-xs truncate leading-tight">
-                          {item.name}
-                        </p>
-                        <p className="text-[9px] text-muted font-semibold mt-0.5">
-                          KES {item.price.toLocaleString()} each
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 bg-surface border border-gray-150 rounded-lg p-0.5 shadow-sm shrink-0">
-                        <button
-                          onClick={() => updateQty(item.menuItemId, -1)}
-                          className="p-1 hover:bg-gray-50 rounded text-gray-650 hover:text-ink transition"
-                        >
-                          <Minus size={10} />
-                        </button>
-                        <span className="w-4 text-center font-black text-[11px] text-ink">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQty(item.menuItemId, 1)}
-                          className="p-1 hover:bg-gray-50 rounded transition"
-                        >
-                          <Plus size={10} />
-                        </button>
-                      </div>
-                      <div className="w-16 text-right font-black text-ink text-xs shrink-0">
-                        KES {(item.price * item.quantity).toLocaleString()}
-                      </div>
-                      <button
-                        onClick={() => updateQty(item.menuItemId, -item.quantity)}
-                        className="p-1 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition shrink-0"
-                        title="Remove item"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-sand pt-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-muted">Checkout Total</span>
-                <span className="font-black text-lg text-ink"><Money amount={total} /></span>
-              </div>
-
-              <Button
-                type="button"
-                variant="accent"
-                size="lg"
-                className="w-full"
-                loading={cashLoading}
-                disabled={mpesaLoading || cart.length === 0}
-                onClick={payWithCash}
-              >
-                <Banknote size={16} />
-                Cash sale
-              </Button>
-
-              <button
-                type="button"
-                onClick={() => setShowMpesa(true)}
-                disabled={mpesaLoading || cashLoading || cart.length === 0}
-                className="w-full py-3 bg-primary-700 text-white rounded-control font-extrabold hover:bg-primary-800 disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2 shadow-sm"
-              >
-                <Smartphone size={16} />
-                <span>M-Pesa STK</span>
-              </button>
-            </div>
-          </div>
+          {!narrow && (
+            <div className="lg:col-span-2 lg:sticky lg:top-6 lg:h-[calc(100vh-7rem)]">{salePanel}</div>
+          )}
         </div>
+        {narrow && (
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-sand bg-surface p-3 shadow-md">
+            <button
+              type="button"
+              className="flex min-h-14 w-full items-center justify-between rounded-control bg-primary-700 px-4 text-white"
+              onClick={() => setCartDrawer(true)}
+            >
+              <span className="font-semibold">
+                {itemCount} {itemCount === 1 ? "item" : "items"}
+              </span>
+              <Money amount={total} className="text-lg font-bold" />
+            </button>
+          </div>
+        )}
+        </>
       )}
+
+      <Drawer open={narrow && cartDrawer} title="Current sale" side="bottom" onClose={() => setCartDrawer(false)}>
+        {salePanel}
+      </Drawer>
+
+      <ConfirmDialog
+        open={clearOpen}
+        title="Clear this sale?"
+        message="Every item will be removed from the cart."
+        confirmLabel="Clear"
+        danger
+        onCancel={() => setClearOpen(false)}
+        onConfirm={() => {
+          setCart([]);
+          setClearOpen(false);
+        }}
+      />
+
+      <PaymentMethodDialog
+        open={payOpen}
+        onClose={() => {
+          if (!cashLoading && !mpesaLoading) setPayOpen(false);
+        }}
+        onCash={startCash}
+        onMpesa={openMpesa}
+        cashLoading={cashLoading}
+        mpesaLoading={mpesaLoading}
+      />
 
       {showMpesa && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -814,6 +835,7 @@ const PosTerminal = () => {
               </div>
               <button
                 type="button"
+                aria-label="Close M-Pesa payment"
                 onClick={() => !mpesaLoading && setShowMpesa(false)}
                 className="p-1.5 rounded-lg hover:bg-surface/10"
               >
@@ -840,7 +862,13 @@ const PosTerminal = () => {
                 size="lg"
                 className="w-full"
                 loading={mpesaLoading}
-                onClick={payWithMpesa}
+                onClick={() => {
+                  if (saleLock.current || mpesaLoading || cashLoading) return;
+                  saleLock.current = true;
+                  void payWithMpesa().finally(() => {
+                    saleLock.current = false;
+                  });
+                }}
               >
                 <Smartphone size={18} />
                 {mpesaLoading ? "Awaiting M-Pesa PIN..." : "Send STK"}

@@ -33,3 +33,17 @@ export function formatDateTime(value: Date | string | number | null | undefined)
   if (!date) return "—";
   return `${formatDate(date)} ${formatTime(date)}`;
 }
+
+/** "Wed, 21 Oct 2026, 14:30" in Africa/Nairobi. */
+export function formatLongDateTime(value: Date | string | number | null | undefined): string {
+  const date = asDate(value);
+  if (!date) return "—";
+  const datePart = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ZONE,
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+  return `${datePart}, ${formatTime(date)}`;
+}

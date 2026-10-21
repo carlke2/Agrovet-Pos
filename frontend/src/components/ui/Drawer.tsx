@@ -8,7 +8,7 @@ type DrawerProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
-  side?: "left" | "right";
+  side?: "left" | "right" | "bottom";
 };
 
 export default function Drawer({ open, title, onClose, children, side = "left" }: DrawerProps) {
@@ -37,8 +37,10 @@ export default function Drawer({ open, title, onClose, children, side = "left" }
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          "absolute top-0 flex h-full w-[min(100%,20rem)] flex-col bg-surface shadow-md outline-none",
-          side === "left" ? "left-0" : "right-0",
+          "absolute flex flex-col bg-surface shadow-md outline-none",
+          side === "bottom"
+            ? "inset-x-0 bottom-0 h-[min(85vh,40rem)] w-full rounded-t-[16px]"
+            : cn("top-0 h-full w-[min(100%,20rem)]", side === "left" ? "left-0" : "right-0"),
         )}
       >
         <div className="border-b border-sand px-4 py-3">
@@ -46,7 +48,7 @@ export default function Drawer({ open, title, onClose, children, side = "left" }
             {title}
           </h2>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        <div className={cn("min-h-0 flex-1 p-4", side === "bottom" ? "flex flex-col overflow-hidden" : "overflow-y-auto")}>{children}</div>
       </aside>
     </div>,
     document.body,
