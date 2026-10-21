@@ -10,12 +10,6 @@ import {
 } from '@/services/daraja.service';
 import { executeGuestMpesaSale } from '@/routes/pos';
 import { displayReceiptNo } from '@/services/receipt';
-import { confirmShopPayment } from '@/services/shopOrders';
-import {
-  AvailabilityError,
-  createReservation,
-  releaseReservationForPayment,
-} from '@/services/stockReservation';
 import type { AuthPayload } from '@/middlewares/auth';
 import { canManageOps } from '@/middlewares/auth';
 
@@ -94,7 +88,6 @@ async function completePosSale(paymentId: string, mpesaReference: string) {
       cart.cashierId,
       cart.items,
       mpesaReference,
-      payment.reservationId || undefined,
     );
     await prisma.kopoPayment.update({
       where: { id: paymentId },
@@ -126,17 +119,7 @@ async function markPaid(
     },
   });
   if (payment.purpose === 'shop_order') {
-    const order = await confirmShopPayment(payment.id, receipt);
-    const payload = {
-      ...paymentView(payment),
-      status: 'success',
-      transactionReference: receipt,
-      shopOrderId: order?.id,
-      shopReceiptNo: order?.receiptNo,
-      posCompleted: false,
-    };
-    emitMpesaUpdate(req, payload);
-    return payload;
+    return paymentView(payment);
   }
   const sale = await completePosSale(payment.id, receipt);
   const payload = {
@@ -207,32 +190,6 @@ router.post('/stkpush', async (req: Request, res: Response) => {
       },
     });
 
-    try {
-      const reserved = await createReservation({
-        items,
-        customerRef: user.id,
-        paymentId: pending.id,
-        scope: 'pos_sale',
-      });
-      await prisma.kopoPayment.update({
-        where: { id: pending.id },
-        data: { reservationId: reserved.reservation.id },
-      });
-    } catch (reserveErr) {
-      await prisma.kopoPayment.update({
-        where: { id: pending.id },
-        data: { status: 'failed' },
-      }).catch(() => {});
-      if (reserveErr instanceof AvailabilityError) {
-        res.status(409).json({
-          error: 'Some items are not available in the requested quantity',
-          availability: reserveErr.result,
-        });
-        return;
-      }
-      throw reserveErr;
-    }
-
     let stk;
     try {
       stk = await initiateDarajaStk({
@@ -252,7 +209,6 @@ router.post('/stkpush', async (req: Request, res: Response) => {
         where: { id: pending.id },
         data: { status: 'failed', rawPayload: darajaBody || { message } },
       }).catch(() => {});
-      await releaseReservationForPayment(pending.id, 'payment_failed');
       console.error('[Daraja] STK push error:', darajaBody || stkErr.message);
       res.status(422).json({ error: message });
       return;
@@ -311,19 +267,6 @@ router.get('/status', async (req: Request, res: Response) => {
       return;
     }
     if (query.success) {
-      if (payment.reservationId) {
-        const reservation = await prisma.stockReservation.findUnique({
-          where: { id: payment.reservationId },
-        });
-        if (reservation && reservation.status !== 'active') {
-          const expired = await prisma.kopoPayment.update({
-            where: { id: payment.id },
-            data: { status: 'expired', description: 'Payment arrived after the stock reservation expired' },
-          });
-          res.json(paymentView(expired));
-          return;
-        }
-      }
       const receipt = payment.transactionReference || payment.location;
       const updated = await markPaid(req, payment.id, receipt);
       res.json(updated);
@@ -333,7 +276,6 @@ router.get('/status', async (req: Request, res: Response) => {
       where: { id: payment.id },
       data: { status: 'failed', description: query.resultDesc || payment.description },
     });
-    await releaseReservationForPayment(payment.id, 'payment_failed');
     const payload = paymentView(failed);
     emitMpesaUpdate(req, payload);
     res.json(payload);
@@ -382,25 +324,7 @@ router.post('/callback', async (req: Request, res: Response) => {
       },
     });
     emitMpesaUpdate(req, paymentView(failed));
-    await releaseReservationForPayment(payment.id, 'payment_failed');
     return;
-  }
-
-  if (payment.reservationId) {
-    const reservation = await prisma.stockReservation.findUnique({
-      where: { id: payment.reservationId },
-    });
-    if (reservation && reservation.status !== 'active') {
-      await prisma.kopoPayment.update({
-        where: { id: payment.id },
-        data: {
-          status: 'expired',
-          description: 'Payment arrived after the stock reservation expired',
-          rawPayload: req.body,
-        },
-      });
-      return;
-    }
   }
 
   await markPaid(req, payment.id, receipt || checkoutRequestId, req.body);

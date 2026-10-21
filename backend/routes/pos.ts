@@ -4,7 +4,6 @@ import { ensureAuthenticated, canManageOps } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 import { displayReceiptNo, generateReceiptNo } from '@/services/receipt';
 import { deductStockForOrder } from '@/services/inventoryDeduction';
-import { settleReservation } from '@/services/stockReservation';
 
 const router = Router();
 
@@ -68,10 +67,6 @@ const mapSaleError = (message: string): { status: number; body: { message: strin
     const name = message.split(':')[1];
     return { status: 422, body: { message: name ? `Not enough stock for ${name}` : 'Insufficient stock for one or more items' } };
   }
-  if (message.startsWith('INSUFFICIENT_INGREDIENT')) {
-    const name = message.split(':')[1];
-    return { status: 422, body: { message: name ? `Insufficient ingredient stock: ${name}` : 'Insufficient ingredient stock' } };
-  }
   return null;
 };
 
@@ -92,12 +87,11 @@ const todayDateString = () => {
   return `${y}-${m}-${d}`;
 };
 
-/** Guest walk-in sale (cash or M-Pesa) — Slow Rise Co bakery POS. */
+/** Guest walk-in sale (cash or M-Pesa). */
 export async function executeGuestSale(
   cashierId: string,
   items: CartLine[],
   paymentMethod: 'cash' | 'mpesa',
-  reservationId?: string,
 ) {
   if (paymentMethod !== 'cash' && paymentMethod !== 'mpesa') {
     throw new Error('INVALID_PAYMENT_METHOD');
@@ -126,10 +120,7 @@ export async function executeGuestSale(
       ),
     );
 
-    await deductStockForOrder(tx, orderLines, { userId: cashierId, receiptNo, reservationId });
-    if (reservationId) {
-      await settleReservation(tx, reservationId);
-    }
+    await deductStockForOrder(tx, orderLines, { userId: cashierId, receiptNo });
 
     const posTx = await tx.posTransaction.create({
       data: {
@@ -151,9 +142,8 @@ export async function executeGuestMpesaSale(
   cashierId: string,
   items: CartLine[],
   _mpesaReference: string,
-  reservationId?: string,
 ) {
-  return executeGuestSale(cashierId, items, 'mpesa', reservationId);
+  return executeGuestSale(cashierId, items, 'mpesa');
 }
 
 function respondSaleError(res: Response, error: unknown, logLabel: string) {

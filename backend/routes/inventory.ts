@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
 import { ensureAuthenticated } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
-import { snapQty } from '@/services/stockReservation';
 
 const router = Router();
 
@@ -21,10 +20,7 @@ router.get('/items', ensureAuthenticated, async (req: Request, res: Response): P
         const items = await prisma.inventoryItem.findMany({
           orderBy: { category: 'asc' },
         });
-        return res.json(items.map((item) => ({
-          ...item,
-          available: snapQty(item.stockLevel - item.reservedQuantity),
-        })));
+        return res.json(items);
   } catch (error) {
     console.error('GET /inventory/items error:', error);
     return res.status(500).json({

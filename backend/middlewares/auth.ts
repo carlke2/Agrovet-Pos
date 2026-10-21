@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'slowrise-secret-key';
 
-export type StaffRole = 'owner' | 'cashier' | 'delivery';
+export type StaffRole = 'owner' | 'cashier';
 
-const STAFF_ROLES = new Set<string>(['owner', 'cashier', 'delivery']);
+const STAFF_ROLES = new Set<string>(['owner', 'cashier']);
 
 export interface AuthPayload {
   id: string;
