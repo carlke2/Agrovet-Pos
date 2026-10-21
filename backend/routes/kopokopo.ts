@@ -470,7 +470,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
     return;
   }
 
-  if (!user || !hasPermission(user, 'legacy_full_access')) {
+  if (!user || !hasPermission(user, 'legacy_pos_access')) {
     res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }
@@ -920,7 +920,7 @@ router.post('/reconcile-pos', async (_req: Request, res: Response) => {
 });
 
 // GET /api/kopokopo/webhook-status
-router.get('/webhook-status', requirePermission('legacy_full_access'), async (req: Request, res: Response) => {
+router.get('/webhook-status', requirePermission('legacy_pos_access'), async (req: Request, res: Response) => {
 
   res.json({
     callbackUrl: process.env.KOPOKOPO_CALLBACK_URL || null,

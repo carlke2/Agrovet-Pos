@@ -31,6 +31,7 @@ import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
 import ReceiptsPage from "@/pages/finance/ReceiptsPage";
 import CollectionsPage from "@/pages/finance/CollectionsPage";
+import NoAccess from "@/pages/NoAccess";
 import StaffAttendanceTerminal from "@/pages/attendance/StaffAttendanceTerminal";
 import StaffAttendanceReport from "@/pages/attendance/StaffAttendanceReport";
 
@@ -88,7 +89,7 @@ function AppShell() {
           <Route path="/admin-profile" element={R("legacy_full_access", <AdminProfile />)} />
           <Route path="/settings" element={R("manage_settings", <Settings />)} />
 
-          <Route path="/pos" element={R("legacy_full_access", <PosTerminal />)} />
+          <Route path="/pos" element={R("legacy_pos_access", <PosTerminal />)} />
           <Route path="/menu-management" element={R("legacy_full_access", <MenuManagement />)} />
           <Route path="/menu-management/list" element={R("legacy_full_access", <MenuListPage />)} />
           <Route path="/menu-management/add" element={R("legacy_full_access", <MenuAddPage />)} />
@@ -98,14 +99,15 @@ function AppShell() {
           <Route path="/menu-management/categories" element={R("legacy_full_access", <MenuCategoriesPage />)} />
           <Route path="/inventory" element={R("legacy_full_access", <InventoryPage />)} />
           <Route path="/suppliers" element={R("legacy_full_access", <SuppliersPage />)} />
-          <Route path="/my-attendance" element={R(undefined, <StaffAttendanceReport />)} />
+          <Route path="/my-attendance" element={R("legacy_pos_access", <StaffAttendanceReport />)} />
 
           <Route path="/finance" element={R("legacy_full_access", <FinanceDashboard />)} />
           <Route path="/expenses" element={R("legacy_full_access", <ExpensesPage />)} />
           <Route path="/receipts" element={R("legacy_full_access", <ReceiptsPage />)} />
           <Route path="/collections" element={R("legacy_full_access", <CollectionsPage />)} />
 
-          <Route path="/user-profile" element={R(undefined, <UserProfile />)} />
+          <Route path="/user-profile" element={R("legacy_pos_access", <UserProfile />)} />
+          <Route path="/no-access" element={<NoAccess />} />
 
           <Route
             path="*"

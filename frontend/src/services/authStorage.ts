@@ -3,7 +3,8 @@ export type Permission =
   | "manage_roles"
   | "manage_settings"
   | "view_audit_log"
-  | "legacy_full_access";
+  | "legacy_full_access"
+  | "legacy_pos_access";
 
 export type AuthUser = {
   id: string;

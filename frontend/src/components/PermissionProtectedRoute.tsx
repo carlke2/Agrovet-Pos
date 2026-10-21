@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import Loader from "@/components/ui/loader";
 import { landingPathFor, useAuth } from "@/context/AuthContext";
 import type { Permission } from "@/services/authStorage";
+import { NO_ACCESS_PATH } from "@/services/navigation";
 
 type Props = {
   children: JSX.Element;
@@ -28,7 +29,11 @@ const PermissionProtectedRoute = ({ children, permission }: Props) => {
   }
 
   if (permission && !user.permissions.includes(permission)) {
-    return <Navigate to={landingPathFor(user)} replace />;
+    const next = landingPathFor(user);
+    if (next === location.pathname || next === NO_ACCESS_PATH) {
+      return <Navigate to={NO_ACCESS_PATH} replace />;
+    }
+    return <Navigate to={next} replace />;
   }
 
   return children;

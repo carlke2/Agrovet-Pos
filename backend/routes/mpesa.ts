@@ -146,7 +146,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
     res.status(422).json({ error: 'amount must be a positive number' });
     return;
   }
-  if (!user || !hasPermission(user, 'legacy_full_access')) {
+  if (!user || !hasPermission(user, 'legacy_pos_access')) {
     res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }

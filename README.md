@@ -11,7 +11,7 @@ Point of sale for an agrovet shop: staff login, counter sales, receipts, invento
 | Inventory | Stock levels, reorder thresholds, stock movements |
 | Suppliers | Supplier records and purchase tracking |
 | Reporting | Revenue, expenses, receipts, audit log |
-| Access | Owner and cashier roles, JWT sessions |
+| Access | Five roles. See Access below. JWT login, 12 hours |
 
 ## Tech stack
 
@@ -41,6 +41,20 @@ npm run dev
 ```
 
 Frontend runs at `http://localhost:5173`. Backend runs at `http://localhost:5000`.
+
+## Access
+
+Sign-in uses this app's users table and a JWT. These are the five system roles:
+
+| Role | Access |
+|------|--------|
+| Admin | Every permission: users, roles, settings, the audit log, back office, and point of sale |
+| Manager | Back office and point of sale |
+| Cashier | Point of sale, starting an M-Pesa sale, own attendance clock, and own profile |
+| Stock keeper | No pages yet |
+| Accountant | Audit log only |
+
+Back office is the temporary `legacy_full_access` permission (menu changes, inventory, suppliers, finance, expenses, reports, and the dashboard). Point of sale is `legacy_pos_access`. A role with nothing to open sees "No access yet".
 
 ## Project structure
 

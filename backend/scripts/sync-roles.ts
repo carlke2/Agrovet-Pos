@@ -23,7 +23,10 @@ async function main() {
       select: { id: true, permission: true },
     });
 
-    const staleIds = existing.filter((row) => !desired.has(row.permission)).map((row) => row.id);
+    // Admin keeps any extra permission already stored. Other system roles drop keys that left the matrix.
+    const staleIds = role.name === 'Admin'
+      ? []
+      : existing.filter((row) => !desired.has(row.permission)).map((row) => row.id);
     if (staleIds.length > 0) {
       await prisma.rolePermission.deleteMany({ where: { id: { in: staleIds } } });
     }
@@ -36,7 +39,11 @@ async function main() {
       });
     }
 
-    console.log(`${definition.name}: ${definition.permissions.join(', ')}`);
+    const kept = role.name === 'Admin'
+      ? existing.map((row) => row.permission).filter((permission) => !desired.has(permission))
+      : [];
+    const listed = [...definition.permissions, ...kept];
+    console.log(`${definition.name}: ${listed.length > 0 ? listed.join(', ') : '(none)'}`);
   }
 
   console.log('Roles and permissions are in sync with ROLE_MATRIX.');

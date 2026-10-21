@@ -172,7 +172,7 @@ router.post('/clock', async (req: Request, res: Response): Promise<any> => {
 
 // POST /api/attendance/me/clock — authenticated self clock-in/out
 router.post('/me/clock', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!hasPermission(req.user, 'legacy_full_access')) {
+  if (!hasPermission(req.user, 'legacy_pos_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
@@ -196,7 +196,7 @@ router.post('/me/clock', ensureAuthenticated, async (req: Request, res: Response
 
 // GET /api/attendance/records
 router.get('/records', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!hasPermission(req.user, 'legacy_full_access')) {
+  if (!hasPermission(req.user, 'legacy_pos_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
@@ -207,7 +207,7 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
   const createdAt =
     dateFilter && Object.keys(dateFilter).length > 0 ? dateFilter : undefined;
 
-  const canSeeAll = hasPermission(req.user, 'manage_users');
+  const canSeeAll = hasPermission(req.user, 'legacy_full_access');
 
   try {
     const records = await prisma.staffAttendance.findMany({
@@ -245,13 +245,13 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
 
 // GET /api/attendance/today — summary for today
 router.get('/today', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!hasPermission(req.user, 'legacy_full_access')) {
+  if (!hasPermission(req.user, 'legacy_pos_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
   const dayStart = startOfLocalDay(new Date());
   const dayEnd = endOfLocalDay(new Date());
-  const canSeeAll = hasPermission(req.user, 'manage_users');
+  const canSeeAll = hasPermission(req.user, 'legacy_full_access');
 
   try {
     const records = await prisma.staffAttendance.findMany({

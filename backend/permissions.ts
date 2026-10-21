@@ -5,6 +5,7 @@ export const PERMISSIONS = [
   'manage_settings',
   'view_audit_log',
   'legacy_full_access',
+  'legacy_pos_access',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -20,32 +21,30 @@ export type RoleDefinition = {
 };
 
 /**
- * System roles. Admin has every key. Accountant has view_audit_log only.
- * Manager, Cashier, and Stock keeper are not split further yet:
- * Cashier and Stock keeper share legacy_full_access so the existing
- * screens keep working until those areas get their own keys.
- * Manager also manages users, settings, and the audit log, but not roles.
+ * legacy_full_access covers routes that used to require owner.
+ * legacy_pos_access covers routes that used to allow owner or cashier.
+ * Stock keeper has no keys until inventory gets its own permission.
  */
 export const ROLE_MATRIX: readonly RoleDefinition[] = [
   {
     name: 'Admin',
-    description: 'Full access to users, roles, settings, the audit log, and day-to-day operations.',
+    description: 'Every permission, including back office and point of sale.',
     permissions: PERMISSIONS,
   },
   {
     name: 'Manager',
-    description: 'Day-to-day operations, plus users, settings, and the audit log.',
-    permissions: ['manage_users', 'manage_settings', 'view_audit_log', 'legacy_full_access'],
+    description: 'Back office and point of sale. Cannot manage users, roles, settings, or the audit log.',
+    permissions: ['legacy_full_access', 'legacy_pos_access'],
   },
   {
     name: 'Cashier',
-    description: 'Point of sale and the other existing operational screens.',
-    permissions: ['legacy_full_access'],
+    description: 'Point of sale, M-Pesa sales, own attendance clock, and own profile.',
+    permissions: ['legacy_pos_access'],
   },
   {
     name: 'Stock keeper',
-    description: 'Inventory and the other existing operational screens.',
-    permissions: ['legacy_full_access'],
+    description: 'No permissions yet.',
+    permissions: [],
   },
   {
     name: 'Accountant',

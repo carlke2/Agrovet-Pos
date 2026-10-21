@@ -42,7 +42,7 @@ const SECTIONS: MenuSection[] = [
   {
     title: "Operations",
     items: [
-      { name: "POS", icon: Monitor, path: "/pos", permission: "legacy_full_access" },
+      { name: "POS", icon: Monitor, path: "/pos", permission: "legacy_pos_access" },
       { name: "Staff", icon: Users, path: "/staffs", permission: "manage_users" },
       { name: "Roles", icon: Shield, path: "/roles", permission: "manage_roles" },
       { name: "Menu", icon: UtensilsCrossed, path: "/menu-management", permission: "legacy_full_access" },
@@ -64,14 +64,14 @@ const SECTIONS: MenuSection[] = [
     items: [
       { name: "Reports", icon: TrendingUp, path: "/reports", permission: "legacy_full_access" },
       { name: "Staff Attendance", icon: Clock, path: "/staff-attendance", permission: "legacy_full_access" },
-      { name: "My Attendance", icon: Clock, path: "/my-attendance" },
+      { name: "My Attendance", icon: Clock, path: "/my-attendance", permission: "legacy_pos_access" },
       { name: "Audit Logs", icon: Activity, path: "/audit-logs", permission: "view_audit_log" },
       { name: "Settings", icon: Sliders, path: "/settings", permission: "manage_settings" },
     ],
   },
   {
     title: "Account",
-    items: [{ name: "Profile", icon: UserCircle2, path: "/user-profile" }],
+    items: [{ name: "Profile", icon: UserCircle2, path: "/user-profile", permission: "legacy_pos_access" }],
   },
 ];
 

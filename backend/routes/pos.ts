@@ -158,7 +158,7 @@ function respondSaleError(res: Response, error: unknown, logLabel: string) {
 }
 
 // ─── POST /api/pos/sale ───────────────────────────────────────────────────────
-router.post('/sale', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
+router.post('/sale', requirePermission('legacy_pos_access'), async (req: Request, res: Response): Promise<void> => {
   const { items, paymentMethod } = req.body as {
     items?: CartLine[];
     paymentMethod?: string;
@@ -202,7 +202,7 @@ router.post('/sale', requirePermission('legacy_full_access'), async (req: Reques
 });
 
 // ─── POST /api/pos/cash-sale ──────────────────────────────────────────────────
-router.post('/cash-sale', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
+router.post('/cash-sale', requirePermission('legacy_pos_access'), async (req: Request, res: Response): Promise<void> => {
   const { items } = req.body as { items?: CartLine[] };
   if (!Array.isArray(items) || items.length === 0) {
     res.status(422).json({ message: 'Cart items are required' });
@@ -236,7 +236,7 @@ router.post('/cash-sale', requirePermission('legacy_full_access'), async (req: R
 });
 
 // ─── GET /api/pos/sales/summary ───────────────────────────────────────────────
-router.get('/sales/summary', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
+router.get('/sales/summary', requirePermission('legacy_pos_access'), async (req: Request, res: Response): Promise<void> => {
   const dateStr = String(req.query.date || '').trim() || todayDateString();
   const bounds = parseDayBounds(dateStr);
   if (!bounds) {
@@ -396,7 +396,7 @@ router.get('/sales/summary', requirePermission('legacy_full_access'), async (req
 });
 
 // ─── GET /api/pos/receipts/:id ────────────────────────────────────────────────
-router.get('/receipts/:id', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
+router.get('/receipts/:id', requirePermission('legacy_pos_access'), async (req: Request, res: Response): Promise<void> => {
   const receiptId = req.params.id as string;
 
   try {
@@ -419,7 +419,7 @@ router.get('/receipts/:id', requirePermission('legacy_full_access'), async (req:
 });
 
 // ─── GET /api/pos/receipts ────────────────────────────────────────────────────
-router.get('/receipts', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
+router.get('/receipts', requirePermission('legacy_pos_access'), async (req: Request, res: Response): Promise<void> => {
   const dateStr = String(req.query.date || '').trim();
   const bounds = dateStr ? parseDayBounds(dateStr) : null;
   if (dateStr && !bounds) {
