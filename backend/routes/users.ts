@@ -1,39 +1,71 @@
 ﻿import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '@/services/prisma';
-import { signToken, ensureOwner, ensureAuthenticated } from '@/middlewares/auth';
+import { ensureAuthenticated, hasPermission, requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 
 const router = Router();
 
-const ALLOWED_ROLES = ['owner', 'cashier'] as const;
-type AllowedRole = (typeof ALLOWED_ROLES)[number];
-
-const fmt = (u: { id: string; [key: string]: unknown }) => ({ ...u, _id: u.id });
-
-const userListSelect = {
+const userSelect = {
   id: true,
   name: true,
   email: true,
   phone: true,
-  role: true,
   status: true,
+  roleId: true,
+  mustChangePassword: true,
+  lastLoginAt: true,
   createdAt: true,
+  role: { select: { name: true } },
 } as const;
 
-// ─── POST /api/users (owner create) ───────────────────────────────────────────
-router.post('/', ensureOwner, async (req: Request, res: Response): Promise<any> => {
-  const { name, email, password, phone, role, status } = req.body;
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: string;
+  roleId: string;
+  mustChangePassword: boolean;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+  role: { name: string };
+};
 
-  if (!name || !email || !password || !role) {
-    return res.status(422).json({ message: 'Name, email, password and role are required' });
+function presentUser(user: UserRow) {
+  return {
+    ...user,
+    _id: user.id,
+    role: user.role.name,
+  };
+}
+
+// ─── GET /api/users ───────────────────────────────────────────────────────────
+router.get('/', requirePermission('manage_users'), async (_req: Request, res: Response): Promise<any> => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: userSelect,
+    });
+    return res.json(users.map(presentUser));
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Something went wrong' });
   }
+});
 
-  if (!ALLOWED_ROLES.includes(role as AllowedRole)) {
-    return res.status(422).json({ message: 'Role must be owner or cashier' });
+// ─── POST /api/users ──────────────────────────────────────────────────────────
+router.post('/', requirePermission('manage_users'), async (req: Request, res: Response): Promise<any> => {
+  const { name, email, password, phone, roleId, status } = req.body;
+
+  if (!name || !email || !password || !roleId) {
+    return res.status(422).json({ message: 'Name, email, password and roleId are required' });
   }
 
   try {
+    const role = await prisma.role.findUnique({ where: { id: String(roleId) }, select: { id: true, name: true } });
+    if (!role) return res.status(422).json({ message: 'Role not found' });
+
     const existing = await prisma.user.findUnique({ where: { email: String(email).trim().toLowerCase() } });
     if (existing) return res.status(409).json({ message: 'An account with this email already exists' });
 
@@ -44,103 +76,27 @@ router.post('/', ensureOwner, async (req: Request, res: Response): Promise<any> 
         email: String(email).trim().toLowerCase(),
         password: hashed,
         phone,
-        role,
+        roleId: role.id,
         status: status === 'inactive' ? 'inactive' : 'active',
       },
-      select: userListSelect,
+      select: userSelect,
     });
 
     await logAuditEvent({
       eventType: 'user_created',
-      userType: 'owner',
-      userId: req.user?.id,
-      userName: req.user?.name || 'Owner',
-      action: 'Create Staff User',
-      description: `Owner created ${role} account for ${name} (${email})`,
-      metadata: { role },
+      userType: req.user!.role.name,
+      userId: req.user!.id,
+      userName: req.user!.name,
+      userEmail: req.user!.email,
+      action: 'Create user',
+      description: `${req.user!.name} created a ${role.name} account for ${name} (${user.email})`,
+      metadata: { roleId: role.id, roleName: role.name },
       ipAddress: req.ip,
     });
 
-    return res.status(201).json(fmt(user));
+    return res.status(201).json(presentUser(user));
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
-// ─── POST /api/users/login (optional; auth.ts is primary) ─────────────────────
-router.post('/login', async (req: Request, res: Response): Promise<any> => {
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const password = String(req.body.password || '');
-  const role = req.body.role as string | undefined;
-
-  if (!email || !password) {
-    return res.status(422).json({ message: 'Email and password are required' });
-  }
-
-  try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-    if (role && user.role !== role) {
-      return res.status(401).json({ message: `No ${role} account found with this email` });
-    }
-    if (!ALLOWED_ROLES.includes(user.role as AllowedRole)) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-    if (user.status !== 'active') {
-      return res.status(403).json({ message: 'Account is inactive' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const token = signToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      name: user.name,
-      phone: user.phone || undefined,
-    });
-
-    await logAuditEvent({
-      eventType: 'login',
-      userType: user.role,
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      action: 'User login',
-      description: `${user.role} ${user.email} logged in`,
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'],
-    });
-
-    return res.json({
-      token,
-      id: user.id,
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
-// ─── GET /api/users ───────────────────────────────────────────────────────────
-router.get('/', ensureOwner, async (_req: Request, res: Response): Promise<any> => {
-  try {
-    const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: userListSelect,
-    });
-    return res.json(users.map(fmt));
-  } catch (error) {
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
@@ -150,23 +106,23 @@ router.get('/:id', ensureAuthenticated, async (req: Request, res: Response): Pro
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.params.id as string },
-      select: userListSelect,
+      select: userSelect,
     });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (req.user!.role !== 'owner' && req.user!.id !== user.id) {
+    if (!hasPermission(req.user, 'manage_users') && req.user!.id !== user.id) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    return res.json(fmt(user));
+    return res.json(presentUser(user));
   } catch {
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
 
 // ─── PUT /api/users/:id ───────────────────────────────────────────────────────
-router.put('/:id', ensureOwner, async (req: Request, res: Response): Promise<any> => {
-  const { name, email, phone, password, role, status } = req.body;
+router.put('/:id', requirePermission('manage_users'), async (req: Request, res: Response): Promise<any> => {
+  const { name, email, phone, password, roleId, status } = req.body;
   try {
     if (email) {
       const conflict = await prisma.user.findFirst({
@@ -179,27 +135,32 @@ router.put('/:id', ensureOwner, async (req: Request, res: Response): Promise<any
     if (name) data.name = name;
     if (email) data.email = String(email).trim().toLowerCase();
     if (phone !== undefined) data.phone = phone;
-    if (role && ALLOWED_ROLES.includes(role as AllowedRole)) data.role = role;
+    if (roleId) {
+      const role = await prisma.role.findUnique({ where: { id: String(roleId) }, select: { id: true } });
+      if (!role) return res.status(422).json({ message: 'Role not found' });
+      data.roleId = role.id;
+    }
     if (status && ['active', 'inactive'].includes(status)) data.status = status;
     if (password) data.password = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.update({
       where: { id: req.params.id as string },
       data,
-      select: userListSelect,
+      select: userSelect,
     });
 
     await logAuditEvent({
       eventType: 'user_updated',
-      userType: 'owner',
-      userId: req.user?.id,
-      userName: req.user?.name || 'Owner',
-      action: 'Update Staff User',
-      description: `Updated ${user.role} account for ${user.name}`,
+      userType: req.user!.role.name,
+      userId: req.user!.id,
+      userName: req.user!.name,
+      userEmail: req.user!.email,
+      action: 'Update user',
+      description: `${req.user!.name} updated the ${user.role.name} account for ${user.name}`,
       ipAddress: req.ip,
     });
 
-    return res.json(fmt(user));
+    return res.json(presentUser(user));
   } catch (error: any) {
     if (error.code === 'P2025') return res.status(404).json({ message: 'User not found' });
     return res.status(500).json({ message: 'Something went wrong' });
@@ -207,7 +168,7 @@ router.put('/:id', ensureOwner, async (req: Request, res: Response): Promise<any
 });
 
 // ─── PATCH /api/users/:id/status ──────────────────────────────────────────────
-router.patch('/:id/status', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.patch('/:id/status', requirePermission('manage_users'), async (req: Request, res: Response): Promise<any> => {
   const status = String(req.body.status || '').trim();
   if (!['active', 'inactive'].includes(status)) {
     return res.status(422).json({ message: 'status must be active or inactive' });
@@ -217,20 +178,21 @@ router.patch('/:id/status', ensureOwner, async (req: Request, res: Response): Pr
     const user = await prisma.user.update({
       where: { id: req.params.id as string },
       data: { status },
-      select: userListSelect,
+      select: userSelect,
     });
 
     await logAuditEvent({
       eventType: status === 'active' ? 'user_activated' : 'user_deactivated',
-      userType: 'owner',
-      userId: req.user?.id,
-      userName: req.user?.name || 'Owner',
-      action: status === 'active' ? 'Activate User' : 'Deactivate User',
-      description: `Set ${user.name} (${user.email}) to ${status}`,
+      userType: req.user!.role.name,
+      userId: req.user!.id,
+      userName: req.user!.name,
+      userEmail: req.user!.email,
+      action: status === 'active' ? 'Activate user' : 'Deactivate user',
+      description: `${req.user!.name} set ${user.name} (${user.email}) to ${status}`,
       ipAddress: req.ip,
     });
 
-    return res.json(fmt(user));
+    return res.json(presentUser(user));
   } catch (error: any) {
     if (error.code === 'P2025') return res.status(404).json({ message: 'User not found' });
     return res.status(500).json({ message: 'Something went wrong' });
@@ -238,21 +200,25 @@ router.patch('/:id/status', ensureOwner, async (req: Request, res: Response): Pr
 });
 
 // ─── DELETE /api/users/:id ────────────────────────────────────────────────────
-router.delete('/:id', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.delete('/:id', requirePermission('manage_users'), async (req: Request, res: Response): Promise<any> => {
   try {
     if (req.params.id === req.user!.id) {
       return res.status(422).json({ message: 'Cannot delete your own account' });
     }
 
-    const user = await prisma.user.delete({ where: { id: req.params.id as string } });
+    const user = await prisma.user.delete({
+      where: { id: req.params.id as string },
+      include: { role: { select: { name: true } } },
+    });
 
     await logAuditEvent({
       eventType: 'user_deleted',
-      userType: 'owner',
-      userId: req.user?.id,
-      userName: req.user?.name || 'Owner',
-      action: 'Delete User',
-      description: `Deleted user ${user.name} (${user.email})`,
+      userType: req.user!.role.name,
+      userId: req.user!.id,
+      userName: req.user!.name,
+      userEmail: req.user!.email,
+      action: 'Delete user',
+      description: `${req.user!.name} deleted ${user.role.name} ${user.name} (${user.email})`,
       ipAddress: req.ip,
     });
 

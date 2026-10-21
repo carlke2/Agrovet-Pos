@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
-import { ensureAuthenticated, canManageOps } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 import { displayReceiptNo, generateReceiptNo } from '@/services/receipt';
 import { deductStockForOrder } from '@/services/inventoryDeduction';
@@ -158,12 +158,7 @@ function respondSaleError(res: Response, error: unknown, logLabel: string) {
 }
 
 // ─── POST /api/pos/sale ───────────────────────────────────────────────────────
-router.post('/sale', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Only staff can process sales' });
-    return;
-  }
-
+router.post('/sale', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
   const { items, paymentMethod } = req.body as {
     items?: CartLine[];
     paymentMethod?: string;
@@ -187,7 +182,7 @@ router.post('/sale', ensureAuthenticated, async (req: Request, res: Response): P
 
     await logAuditEvent({
       eventType: 'pos_sale',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: method === 'cash' ? 'Cash Sale' : 'M-Pesa Sale',
@@ -207,12 +202,7 @@ router.post('/sale', ensureAuthenticated, async (req: Request, res: Response): P
 });
 
 // ─── POST /api/pos/cash-sale ──────────────────────────────────────────────────
-router.post('/cash-sale', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Only staff can process sales' });
-    return;
-  }
-
+router.post('/cash-sale', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
   const { items } = req.body as { items?: CartLine[] };
   if (!Array.isArray(items) || items.length === 0) {
     res.status(422).json({ message: 'Cart items are required' });
@@ -226,7 +216,7 @@ router.post('/cash-sale', ensureAuthenticated, async (req: Request, res: Respons
 
     await logAuditEvent({
       eventType: 'pos_cash_sale',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Cash Sale',
@@ -246,12 +236,7 @@ router.post('/cash-sale', ensureAuthenticated, async (req: Request, res: Respons
 });
 
 // ─── GET /api/pos/sales/summary ───────────────────────────────────────────────
-router.get('/sales/summary', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Not authorized' });
-    return;
-  }
-
+router.get('/sales/summary', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
   const dateStr = String(req.query.date || '').trim() || todayDateString();
   const bounds = parseDayBounds(dateStr);
   if (!bounds) {
@@ -411,12 +396,7 @@ router.get('/sales/summary', ensureAuthenticated, async (req: Request, res: Resp
 });
 
 // ─── GET /api/pos/receipts/:id ────────────────────────────────────────────────
-router.get('/receipts/:id', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Not authorized' });
-    return;
-  }
-
+router.get('/receipts/:id', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
   const receiptId = req.params.id as string;
 
   try {
@@ -439,12 +419,7 @@ router.get('/receipts/:id', ensureAuthenticated, async (req: Request, res: Respo
 });
 
 // ─── GET /api/pos/receipts ────────────────────────────────────────────────────
-router.get('/receipts', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ message: 'Not authorized' });
-    return;
-  }
-
+router.get('/receipts', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<void> => {
   const dateStr = String(req.query.date || '').trim();
   const bounds = dateStr ? parseDayBounds(dateStr) : null;
   if (dateStr && !bounds) {

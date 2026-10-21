@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import prisma from '@/services/prisma';
 import {
   darajaConfigError,
@@ -10,23 +9,17 @@ import {
 } from '@/services/daraja.service';
 import { executeGuestMpesaSale } from '@/routes/pos';
 import { displayReceiptNo } from '@/services/receipt';
-import type { AuthPayload } from '@/middlewares/auth';
-import { canManageOps } from '@/middlewares/auth';
+import { hasPermission, readTokenUserId, loadActiveUser, requirePermission } from '@/middlewares/auth';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 type PosCartLine = { menuItemId: string; quantity: number };
 type PosCartPayload = { cashierId: string; items: PosCartLine[] };
 
-function getOptionalUser(req: Request): AuthPayload | null {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  try {
-    return jwt.verify(authHeader.split(' ')[1], JWT_SECRET) as AuthPayload;
-  } catch {
-    return null;
-  }
+async function getActiveUser(req: Request) {
+  const userId = readTokenUserId(req);
+  if (!userId) return null;
+  return loadActiveUser(userId);
 }
 
 function emitMpesaUpdate(req: Request, payload: Record<string, unknown>) {
@@ -136,7 +129,7 @@ async function markPaid(
 
 // POST /api/mpesa/stkpush
 router.post('/stkpush', async (req: Request, res: Response) => {
-  const user = getOptionalUser(req);
+  const user = await getActiveUser(req);
   const { phone, amount, description, items } = req.body as {
     phone?: string;
     amount?: number;
@@ -153,7 +146,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
     res.status(422).json({ error: 'amount must be a positive number' });
     return;
   }
-  if (!user || !canManageOps(user.role)) {
+  if (!user || !hasPermission(user, 'legacy_full_access')) {
     res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }

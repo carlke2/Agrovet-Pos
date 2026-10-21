@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
-import { ensureOwner } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 
 const router = Router();
@@ -116,7 +116,7 @@ function formatKopoMetadata(description: string, meta: Record<string, string>, p
 }
 
 // ─── GET /api/finance/summary ─────────────────────────────────────────────────
-router.get('/summary', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.get('/summary', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { startDate, endDate } = req.query as Record<string, string>;
   const dateFilter = parseDateFilter(startDate, endDate);
   if (dateFilter === null) return res.status(422).json({ message: 'Invalid date range' });
@@ -142,7 +142,7 @@ router.get('/summary', ensureOwner, async (req: Request, res: Response): Promise
 });
 
 // ─── GET /api/finance/collections ─────────────────────────────────────────────
-router.get('/collections', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.get('/collections', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { startDate, endDate } = req.query as Record<string, string>;
   const dateFilter = parseDateFilter(startDate, endDate);
   if (dateFilter === null) return res.status(422).json({ message: 'Invalid date range' });
@@ -311,7 +311,7 @@ router.get('/collections', ensureOwner, async (req: Request, res: Response): Pro
 });
 
 // ─── GET /api/finance/expenses ────────────────────────────────────────────────
-router.get('/expenses', ensureOwner, async (_req: Request, res: Response): Promise<any> => {
+router.get('/expenses', requirePermission('legacy_full_access'), async (_req: Request, res: Response): Promise<any> => {
   try {
     const expenses = await prisma.expense.findMany({ orderBy: { date: 'desc' }, take: 100 });
     return res.json(expenses);
@@ -321,7 +321,7 @@ router.get('/expenses', ensureOwner, async (_req: Request, res: Response): Promi
 });
 
 // ─── POST /api/finance/expenses ───────────────────────────────────────────────
-router.post('/expenses', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.post('/expenses', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { category, amount, description, date } = req.body;
   if (!category || !amount || !description) {
     return res.status(422).json({ message: 'Category, amount, and description are required' });
@@ -340,7 +340,7 @@ router.post('/expenses', ensureOwner, async (req: Request, res: Response): Promi
 
     await logAuditEvent({
       eventType: 'expense_recorded',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Record Expense',

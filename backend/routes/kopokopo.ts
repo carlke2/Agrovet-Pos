@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import prisma from '@/services/prisma';
 import {
   initiateSTKPush,
@@ -9,12 +8,10 @@ import {
 } from '@/services/kopokopo.service';
 import { executeGuestMpesaSale } from '@/routes/pos';
 import { displayReceiptNo } from '@/services/receipt';
-import type { AuthPayload } from '@/middlewares/auth';
-import { ensureAuthenticated, canManageOps, ensureOwner } from '@/middlewares/auth';
+import { hasPermission, loadActiveUser, readTokenUserId, requirePermission } from '@/middlewares/auth';
 import 'dotenv/config';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
 
 type PosCartLine = { menuItemId: string; quantity: number };
 
@@ -38,14 +35,10 @@ function parsePosCart(raw: unknown): PosCartPayload | null {
   return null;
 }
 
-function getOptionalUser(req: Request): AuthPayload | null {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  try {
-    return jwt.verify(authHeader.split(' ')[1], JWT_SECRET) as AuthPayload;
-  } catch {
-    return null;
-  }
+async function getActiveUser(req: Request) {
+  const userId = readTokenUserId(req);
+  if (!userId) return null;
+  return loadActiveUser(userId);
 }
 
 const SUCCESS_STATUSES = new Set(['success', 'received', 'complete', 'completed', 'paid']);
@@ -453,7 +446,7 @@ function emitKopokopoUpdate(req: Request, payload: Record<string, unknown>) {
 
 // POST /api/kopokopo/stkpush — POS guest sales only
 router.post('/stkpush', async (req: Request, res: Response) => {
-  const user = getOptionalUser(req);
+  const user = await getActiveUser(req);
   const {
     phone,
     amount,
@@ -477,7 +470,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
     return;
   }
 
-  if (!user || !canManageOps(user.role)) {
+  if (!user || !hasPermission(user, 'legacy_full_access')) {
     res.status(403).json({ error: 'Only staff can initiate POS M-Pesa sales' });
     return;
   }
@@ -495,7 +488,7 @@ router.post('/stkpush', async (req: Request, res: Response) => {
       phone,
       amount: numericAmount,
       purpose,
-      user: user.role,
+      user: user.role.name,
     });
 
     const existingPending = await resolvePhonePendingBlock(phone);
@@ -927,11 +920,7 @@ router.post('/reconcile-pos', async (_req: Request, res: Response) => {
 });
 
 // GET /api/kopokopo/webhook-status
-router.get('/webhook-status', ensureAuthenticated, async (req: Request, res: Response) => {
-  if (!canManageOps(req.user!.role)) {
-    res.status(403).json({ error: 'Not authorized' });
-    return;
-  }
+router.get('/webhook-status', requirePermission('legacy_full_access'), async (req: Request, res: Response) => {
 
   res.json({
     callbackUrl: process.env.KOPOKOPO_CALLBACK_URL || null,
@@ -946,7 +935,7 @@ router.get('/webhook-status', ensureAuthenticated, async (req: Request, res: Res
 });
 
 // GET /api/kopokopo/transactions
-router.get('/transactions', ensureOwner, async (req: Request, res: Response) => {
+router.get('/transactions', requirePermission('legacy_full_access'), async (req: Request, res: Response) => {
   const take = Math.min(Number(req.query.limit) || 100, 500);
   try {
     const payments = await prisma.kopoPayment.findMany({

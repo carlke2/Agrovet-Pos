@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '@/services/prisma';
-import { signToken, ensureOwner } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 import { isMailConfigured } from '@/services/mail';
 import { isAdvantaSmsConfigured } from '@/services/sms';
@@ -9,89 +9,32 @@ import { getSystemSettings, setSystemSettings } from '@/services/systemSettings'
 
 const router = Router();
 
-// ─── POST /api/admin/login ────────────────────────────────────────────────────
-router.post('/login', async (req: Request, res: Response): Promise<any> => {
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const password = String(req.body.password || '');
-
-  if (!email || !password) {
-    return res.status(422).json({ message: 'Email and password are required' });
-  }
-
-  try {
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user || user.role !== 'owner') {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-    if (user.status !== 'active') {
-      return res.status(403).json({ message: 'Account is inactive' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const token = signToken({
-      id: user.id,
-      email: user.email,
-      role: 'owner',
-      name: user.name,
-      phone: user.phone || undefined,
-    });
-
-    await logAuditEvent({
-      eventType: 'login',
-      userType: 'owner',
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      action: 'Owner login',
-      description: `Owner ${user.email} logged in`,
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'],
-    });
-
-    return res.status(200).json({
-      token,
-      id: user.id,
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: 'owner',
-    });
-  } catch (error) {
-    console.error('Owner login error:', error);
-    return res.status(500).json({ message: 'Something went wrong' });
-  }
-});
+const legacy = requirePermission('legacy_full_access');
+const settings = requirePermission('manage_settings');
 
 // ─── GET /api/admin/profile ───────────────────────────────────────────────────
-router.get('/profile', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.get('/profile', legacy, async (req: Request, res: Response): Promise<any> => {
   try {
-    const user = await prisma.user.findFirst({
-      where: { id: req.user!.id, role: 'owner' },
-      select: { id: true, name: true, email: true, phone: true, createdAt: true },
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: { id: true, name: true, email: true, phone: true, createdAt: true, role: { select: { name: true } } },
     });
 
-    if (!user) return res.status(404).json({ message: 'Owner not found' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    return res.json({ ...user, _id: user.id, role: 'owner' });
+    return res.json({ ...user, _id: user.id, role: user.role.name });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
 
 // ─── PUT /api/admin/profile ───────────────────────────────────────────────────
-router.put('/profile', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.put('/profile', legacy, async (req: Request, res: Response): Promise<any> => {
   const { name, phone, currentPassword, newPassword } = req.body;
   try {
-    const user = await prisma.user.findFirst({
-      where: { id: req.user!.id, role: 'owner' },
-    });
-    if (!user) return res.status(404).json({ message: 'Owner not found' });
+    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     let passwordHash = user.password;
     if (newPassword) {
@@ -112,68 +55,68 @@ router.put('/profile', ensureOwner, async (req: Request, res: Response): Promise
         phone: phone !== undefined ? phone : user.phone,
         password: passwordHash,
       },
-      select: { id: true, name: true, email: true, phone: true, createdAt: true },
+      select: { id: true, name: true, email: true, phone: true, createdAt: true, role: { select: { name: true } } },
     });
 
-    return res.json({ ...updated, _id: updated.id, role: 'owner' });
+    return res.json({ ...updated, _id: updated.id, role: updated.role.name });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
 
 // ─── GET /api/admin/settings ──────────────────────────────────────────────────
-router.get('/settings', ensureOwner, async (_req: Request, res: Response): Promise<any> => {
+router.get('/settings', settings, async (_req: Request, res: Response): Promise<any> => {
   try {
-    const settings = await getSystemSettings();
+    const settingsRow = await getSystemSettings();
     return res.json({
-      ...settings,
+      ...settingsRow,
       smsConfigured: isAdvantaSmsConfigured(),
       mailConfigured: isMailConfigured(),
     });
   } catch (error) {
-    console.error('Owner settings get error:', error);
+    console.error('Settings get error:', error);
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
 
 // ─── PUT /api/admin/settings ──────────────────────────────────────────────────
-router.put('/settings', ensureOwner, async (req: Request, res: Response): Promise<any> => {
+router.put('/settings', settings, async (req: Request, res: Response): Promise<any> => {
   try {
     const { smsDisabled } = req.body || {};
     if (typeof smsDisabled !== 'boolean') {
       return res.status(422).json({ message: 'smsDisabled (boolean) is required' });
     }
 
-    const settings = await setSystemSettings({ smsDisabled });
+    const settingsRow = await setSystemSettings({ smsDisabled });
 
     await logAuditEvent({
       eventType: 'settings',
-      userType: 'owner',
+      userType: req.user!.role.name,
       userId: req.user!.id,
-      userName: req.user!.name || req.user!.email || 'Owner',
+      userName: req.user!.name,
       userEmail: req.user!.email,
       action: smsDisabled ? 'Disable SMS' : 'Enable SMS',
       description: smsDisabled
-        ? 'Owner disabled system-wide SMS'
-        : 'Owner enabled system-wide SMS',
+        ? `${req.user!.name} disabled system-wide SMS`
+        : `${req.user!.name} enabled system-wide SMS`,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     });
 
     return res.json({
-      ...settings,
+      ...settingsRow,
       smsConfigured: isAdvantaSmsConfigured(),
       mailConfigured: isMailConfigured(),
     });
   } catch (error) {
-    console.error('Owner settings put error:', error);
+    console.error('Settings put error:', error);
     return res.status(500).json({ message: 'Something went wrong' });
   }
 });
 
 // ─── POST /api/admin/notifications/test ───────────────────────────────────────
-// Returns SMS/mail configuration status (no parent-welcome send).
-router.post('/notifications/test', ensureOwner, async (_req: Request, res: Response): Promise<any> => {
+router.post('/notifications/test', settings, async (_req: Request, res: Response): Promise<any> => {
   const config = {
     mailConfigured: isMailConfigured(),
     smsConfigured: isAdvantaSmsConfigured(),

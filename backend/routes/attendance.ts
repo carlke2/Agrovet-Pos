@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '@/services/prisma';
-import { ensureAuthenticated, canManageOps, AuthPayload } from '@/middlewares/auth';
+import { ensureAuthenticated, hasPermission, AuthPayload } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'agrovet-pos-dev-secret';
@@ -102,7 +102,7 @@ router.get('/staff', async (_req: Request, res: Response): Promise<any> => {
           name: true,
           email: true,
           phone: true,
-          role: true,
+          role: { select: { name: true } },
         },
       }),
       prisma.staffAttendance.findMany({
@@ -128,7 +128,7 @@ router.get('/staff', async (_req: Request, res: Response): Promise<any> => {
           name: u.name,
           email: u.email,
           phone: u.phone,
-          role: u.role,
+          role: u.role.name,
           lastTypeToday: lastType,
           lastAtToday: last?.at ?? null,
           nextAction: lastType === 'check_in' ? 'check_out' : 'check_in',
@@ -153,13 +153,16 @@ router.post('/clock', async (req: Request, res: Response): Promise<any> => {
   try {
     const user = await prisma.user.findFirst({
       where: { id: targetId, status: 'active' },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: { select: { name: true } } },
     });
     if (!user) {
       return res.status(404).json({ message: 'Staff member not found' });
     }
 
-    const result = await clockUser(user, req);
+    const result = await clockUser(
+      { id: user.id, name: user.name, email: user.email, role: user.role.name },
+      req,
+    );
     return res.status(201).json(result);
   } catch (err) {
     console.error('Attendance clock error:', err);
@@ -169,18 +172,21 @@ router.post('/clock', async (req: Request, res: Response): Promise<any> => {
 
 // POST /api/attendance/me/clock — authenticated self clock-in/out
 router.post('/me/clock', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageOps(req.user!.role)) {
+  if (!hasPermission(req.user, 'legacy_full_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
   try {
     const user = await prisma.user.findFirst({
       where: { id: req.user!.id, status: 'active' },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: { select: { name: true } } },
     });
     if (!user) return res.status(404).json({ message: 'Staff member not found' });
 
-    const result = await clockUser(user, req);
+    const result = await clockUser(
+      { id: user.id, name: user.name, email: user.email, role: user.role.name },
+      req,
+    );
     return res.status(201).json(result);
   } catch (err) {
     console.error('Self clock error:', err);
@@ -190,7 +196,7 @@ router.post('/me/clock', ensureAuthenticated, async (req: Request, res: Response
 
 // GET /api/attendance/records
 router.get('/records', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageOps(req.user!.role)) {
+  if (!hasPermission(req.user, 'legacy_full_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
@@ -201,13 +207,13 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
   const createdAt =
     dateFilter && Object.keys(dateFilter).length > 0 ? dateFilter : undefined;
 
-  const isOwner = req.user!.role === 'owner';
+  const canSeeAll = hasPermission(req.user, 'manage_users');
 
   try {
     const records = await prisma.staffAttendance.findMany({
       where: {
         ...(createdAt ? { createdAt } : {}),
-        ...(isOwner
+        ...(canSeeAll
           ? userId
             ? { userId }
             : {}
@@ -216,7 +222,7 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
       orderBy: { createdAt: 'desc' },
       take: 500,
       include: {
-        user: { select: { id: true, name: true, email: true, role: true } },
+        user: { select: { id: true, name: true, email: true, role: { select: { name: true } } } },
       },
     });
 
@@ -229,7 +235,7 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
         userId: r.userId,
         name: r.user.name,
         email: r.user.email,
-        role: r.user.role,
+        role: r.user.role.name,
       })),
     );
   } catch {
@@ -239,23 +245,23 @@ router.get('/records', ensureAuthenticated, async (req: Request, res: Response):
 
 // GET /api/attendance/today — summary for today
 router.get('/today', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageOps(req.user!.role)) {
+  if (!hasPermission(req.user, 'legacy_full_access')) {
     return res.status(403).json({ message: 'Not authorized' });
   }
 
   const dayStart = startOfLocalDay(new Date());
   const dayEnd = endOfLocalDay(new Date());
-  const isOwner = req.user!.role === 'owner';
+  const canSeeAll = hasPermission(req.user, 'manage_users');
 
   try {
     const records = await prisma.staffAttendance.findMany({
       where: {
         createdAt: { gte: dayStart, lte: dayEnd },
-        ...(isOwner ? {} : { userId: req.user!.id }),
+        ...(canSeeAll ? {} : { userId: req.user!.id }),
       },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { id: true, name: true, email: true, role: true } },
+        user: { select: { id: true, name: true, email: true, role: { select: { name: true } } } },
       },
     });
 
@@ -270,7 +276,7 @@ router.get('/today', ensureAuthenticated, async (req: Request, res: Response): P
         byUser.set(key, {
           userId: r.userId,
           name: r.user.name,
-          role: r.user.role,
+          role: r.user.role.name,
           email: r.user.email,
           events: [],
         });
@@ -300,7 +306,7 @@ router.get('/today', ensureAuthenticated, async (req: Request, res: Response): P
         type: r.type,
         date: r.createdAt,
         name: r.user.name,
-        role: r.user.role,
+        role: r.user.role.name,
       })),
     });
   } catch {

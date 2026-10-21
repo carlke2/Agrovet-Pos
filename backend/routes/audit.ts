@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
-import { ensureAdmin } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 
 const router = Router();
 
 // ─── GET /api/audit/events ────────────────────────────────────────────────────
-router.get('/events', ensureAdmin, async (req: Request, res: Response): Promise<any> => {
+router.get('/events', requirePermission('view_audit_log'), async (req: Request, res: Response): Promise<any> => {
   try {
     const {
       eventType,

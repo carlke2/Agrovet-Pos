@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import prisma from '@/services/prisma';
-import { ensureAuthenticated } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 import { getSupabase, getSupabaseConfigError } from '@/services/supabase';
 
@@ -13,9 +13,7 @@ function devErrorDetail(error: unknown): string | undefined {
 
 const router = Router();
 
-function canManageMenu(role: string | undefined): boolean {
-  return role === 'owner';
-}
+const legacy = requirePermission('legacy_full_access');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -28,7 +26,7 @@ const upload = multer({
 });
 
 // ─── GET /api/menu/categories ─────────────────────────────────────────────────
-router.get('/categories', ensureAuthenticated, async (_req: Request, res: Response): Promise<any> => {
+router.get('/categories', legacy, async (_req: Request, res: Response): Promise<any> => {
   try {
     const categories = await prisma.menuCategory.findMany({
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
@@ -44,11 +42,7 @@ router.get('/categories', ensureAuthenticated, async (_req: Request, res: Respon
 });
 
 // ─── POST /api/menu/categories ────────────────────────────────────────────────
-router.post('/categories', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageMenu(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.post('/categories', legacy, async (req: Request, res: Response): Promise<any> => {
   const name = String(req.body.name || '').trim();
   if (!name) {
     return res.status(422).json({ message: 'Category name is required' });
@@ -70,7 +64,7 @@ router.post('/categories', ensureAuthenticated, async (req: Request, res: Respon
 
     await logAuditEvent({
       eventType: 'menu_category_created',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Create Menu Category',
@@ -89,11 +83,7 @@ router.post('/categories', ensureAuthenticated, async (req: Request, res: Respon
 });
 
 // ─── PUT /api/menu/categories/:categoryId ─────────────────────────────────────
-router.put('/categories/:categoryId', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageMenu(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.put('/categories/:categoryId', legacy, async (req: Request, res: Response): Promise<any> => {
   const categoryId = req.params.categoryId as string;
   const name = req.body.name !== undefined ? String(req.body.name).trim() : undefined;
   const sortOrder = req.body.sortOrder !== undefined ? Number(req.body.sortOrder) : undefined;
@@ -136,7 +126,7 @@ router.put('/categories/:categoryId', ensureAuthenticated, async (req: Request, 
 
     await logAuditEvent({
       eventType: 'menu_category_updated',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Update Menu Category',
@@ -156,11 +146,7 @@ router.put('/categories/:categoryId', ensureAuthenticated, async (req: Request, 
 });
 
 // ─── DELETE /api/menu/categories/:categoryId ──────────────────────────────────
-router.delete('/categories/:categoryId', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!canManageMenu(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.delete('/categories/:categoryId', legacy, async (req: Request, res: Response): Promise<any> => {
   const categoryId = req.params.categoryId as string;
 
   try {
@@ -180,7 +166,7 @@ router.delete('/categories/:categoryId', ensureAuthenticated, async (req: Reques
 
     await logAuditEvent({
       eventType: 'menu_category_deleted',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Delete Menu Category',
@@ -202,7 +188,7 @@ router.delete('/categories/:categoryId', ensureAuthenticated, async (req: Reques
 // ─── POST /api/menu/upload-image ──────────────────────────────────────────────
 router.post(
   '/upload-image',
-  ensureAuthenticated,
+  legacy,
   (req: Request, res: Response, next) => {
     upload.single('image')(req, res, (err) => {
       if (err) {
@@ -213,9 +199,6 @@ router.post(
   },
   async (req: Request, res: Response): Promise<any> => {
     try {
-      if (!['owner'].includes(req.user!.role)) {
-        return res.status(403).json({ message: 'Not authorized' });
-      }
       if (!req.file) {
         return res.status(422).json({ message: 'No image file provided' });
       }
@@ -247,7 +230,7 @@ router.post(
 );
 
 // ─── GET /api/menu ────────────────────────────────────────────────────────────
-router.get('/', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
+router.get('/', legacy, async (req: Request, res: Response): Promise<any> => {
   try {
     const items = await prisma.menuItem.findMany({
       orderBy: { category: 'asc' },
@@ -266,10 +249,7 @@ router.get('/', ensureAuthenticated, async (req: Request, res: Response): Promis
 
 // ─── GET /api/menu/all ────────────────────────────────────────────────────────
 // Admin/Restaurant staff view including unavailable items
-router.get('/all', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
+router.get('/all', legacy, async (req: Request, res: Response): Promise<any> => {
   try {
     const items = await prisma.menuItem.findMany({
       orderBy: { createdAt: 'desc' },
@@ -285,11 +265,7 @@ router.get('/all', ensureAuthenticated, async (req: Request, res: Response): Pro
 });
 
 // ─── POST /api/menu ───────────────────────────────────────────────────────────
-router.post('/', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.post('/', legacy, async (req: Request, res: Response): Promise<any> => {
   const {
     name,
     description,
@@ -323,7 +299,7 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response): Promi
 
     await logAuditEvent({
       eventType: 'menu_item_created',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Create Menu Item',
@@ -338,11 +314,7 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response): Promi
 });
 
 // ─── PUT /api/menu/:id ────────────────────────────────────────────────────────
-router.put('/:id', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.put('/:id', legacy, async (req: Request, res: Response): Promise<any> => {
   const {
     name,
     description,
@@ -384,17 +356,13 @@ router.put('/:id', ensureAuthenticated, async (req: Request, res: Response): Pro
 });
 
 // ─── DELETE /api/menu/:id ─────────────────────────────────────────────────────
-router.delete('/:id', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.delete('/:id', legacy, async (req: Request, res: Response): Promise<any> => {
   try {
     const item = await prisma.menuItem.delete({ where: { id: req.params.id as string } });
 
     await logAuditEvent({
       eventType: 'menu_item_deleted',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Delete Menu Item',

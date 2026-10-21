@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
-import { ensureAuthenticated } from '@/middlewares/auth';
+import { requirePermission } from '@/middlewares/auth';
 import { logAuditEvent } from '@/services/audit';
 
 const router = Router();
@@ -11,11 +11,7 @@ function devErrorDetail(error: unknown): string | undefined {
 }
 
 // ─── GET /api/inventory/items ─────────────────────────────────────────────────
-router.get('/items', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.get('/items', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   try {
         const items = await prisma.inventoryItem.findMany({
           orderBy: { category: 'asc' },
@@ -31,11 +27,7 @@ router.get('/items', ensureAuthenticated, async (req: Request, res: Response): P
 });
 
 // ─── POST /api/inventory/items ────────────────────────────────────────────────
-router.post('/items', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.post('/items', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { name, category, unit, reorderLevel, unitCost } = req.body;
   if (!name || !category || !unit) {
     return res.status(422).json({ message: 'Name, category, and unit are required' });
@@ -61,11 +53,7 @@ router.post('/items', ensureAuthenticated, async (req: Request, res: Response): 
 
 // ─── POST /api/inventory/movements ────────────────────────────────────────────
 // Record stock coming in (purchases) or out (usage/spoilage)
-router.post('/movements', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.post('/movements', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { inventoryItemId, type, quantity, reason, reference, notes, supplierId } = req.body;
 
   if (!inventoryItemId || !type || !quantity || !reason) {
@@ -101,7 +89,7 @@ router.post('/movements', ensureAuthenticated, async (req: Request, res: Respons
 
     await logAuditEvent({
       eventType: 'stock_movement',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: `Stock ${type}`,
@@ -117,11 +105,7 @@ router.post('/movements', ensureAuthenticated, async (req: Request, res: Respons
 });
 
 // ─── GET /api/inventory/movements ─────────────────────────────────────────────
-router.get('/movements', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.get('/movements', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { supplierId, inventoryItemId, type, limit } = req.query;
   const take = Math.min(Number(limit) || 100, 500);
 
@@ -146,11 +130,7 @@ router.get('/movements', ensureAuthenticated, async (req: Request, res: Response
 });
 
 // ─── GET /api/inventory/suppliers ─────────────────────────────────────────────
-router.get('/suppliers', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.get('/suppliers', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   try {
     const suppliers = await prisma.supplier.findMany({
       orderBy: { name: 'asc' },
@@ -165,11 +145,7 @@ router.get('/suppliers', ensureAuthenticated, async (req: Request, res: Response
 });
 
 // ─── POST /api/inventory/suppliers ────────────────────────────────────────────
-router.post('/suppliers', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.post('/suppliers', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { name, contactPerson, email, phone, address } = req.body;
   if (!name?.trim()) return res.status(422).json({ message: 'Supplier name is required' });
 
@@ -189,7 +165,7 @@ router.post('/suppliers', ensureAuthenticated, async (req: Request, res: Respons
 
     await logAuditEvent({
       eventType: 'supplier_created',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Create supplier',
@@ -205,11 +181,7 @@ router.post('/suppliers', ensureAuthenticated, async (req: Request, res: Respons
 });
 
 // ─── PUT /api/inventory/suppliers/:id ─────────────────────────────────────────
-router.put('/suppliers/:id', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.put('/suppliers/:id', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const { name, contactPerson, email, phone, address } = req.body;
   if (!name?.trim()) return res.status(422).json({ message: 'Supplier name is required' });
 
@@ -232,7 +204,7 @@ router.put('/suppliers/:id', ensureAuthenticated, async (req: Request, res: Resp
 
     await logAuditEvent({
       eventType: 'supplier_updated',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Update supplier',
@@ -248,11 +220,7 @@ router.put('/suppliers/:id', ensureAuthenticated, async (req: Request, res: Resp
 });
 
 // ─── DELETE /api/inventory/suppliers/:id ──────────────────────────────────────
-router.delete('/suppliers/:id', ensureAuthenticated, async (req: Request, res: Response): Promise<any> => {
-  if (!['owner'].includes(req.user!.role)) {
-    return res.status(403).json({ message: 'Not authorized' });
-  }
-
+router.delete('/suppliers/:id', requirePermission('legacy_full_access'), async (req: Request, res: Response): Promise<any> => {
   const supplierId = req.params.id as string;
 
   try {
@@ -269,7 +237,7 @@ router.delete('/suppliers/:id', ensureAuthenticated, async (req: Request, res: R
 
     await logAuditEvent({
       eventType: 'supplier_deleted',
-      userType: req.user!.role,
+      userType: req.user!.role.name,
       userId: req.user!.id,
       userName: req.user!.name,
       action: 'Delete supplier',
