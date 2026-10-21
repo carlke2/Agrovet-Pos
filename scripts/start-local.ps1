@@ -1,9 +1,9 @@
-# Slow Rise Co — start all local services (Windows PowerShell)
+# Agrovet POS — start local services (Windows PowerShell)
 # Usage: .\scripts\start-local.ps1
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
-Write-Host "Slow Rise Co local stack" -ForegroundColor Cyan
+Write-Host "Agrovet POS local stack" -ForegroundColor Cyan
 Write-Host ""
 
 function Start-ServiceWindow {
@@ -15,12 +15,12 @@ function Start-ServiceWindow {
 }
 
 # Backend
-Start-ServiceWindow "Slow Rise Backend :5000" "$Root\backend" "npm run dev"
+Start-ServiceWindow "Agrovet POS Backend :5000" "$Root\backend" "npm run dev"
 
 Start-Sleep -Seconds 2
 
 # Frontend
-Start-ServiceWindow "Slow Rise Frontend :5173" "$Root\frontend" "npm run dev"
+Start-ServiceWindow "Agrovet POS Frontend :5173" "$Root\frontend" "npm run dev"
 
 Start-Sleep -Seconds 1
 

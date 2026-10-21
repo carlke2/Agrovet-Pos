@@ -1,6 +1,6 @@
 @echo off
-REM Slow Rise Co local stack — run each service in its own terminal, or use start-local.ps1
-echo Slow Rise Co local setup
+REM Agrovet POS local stack — run each service in its own terminal, or use start-local.ps1
+echo Agrovet POS local setup
 echo.
 echo 1. Backend:    cd backend ^&^& npm run dev          (http://localhost:5000)
 echo 2. Frontend:   cd frontend ^&^& npm run dev         (http://localhost:5173)

@@ -5,7 +5,7 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/home/pceaserver/SmartPOS}"
 BRANCH="${DEPLOY_BRANCH:-master}"
 
-echo "==> Slow Rise Co deploy (${BRANCH}) in ${APP_DIR}"
+echo "==> Agrovet POS deploy (${BRANCH}) in ${APP_DIR}"
 cd "$APP_DIR"
 
 # Keep server secrets out of git

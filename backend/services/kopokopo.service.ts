@@ -37,7 +37,7 @@ export const getAccessToken = async (): Promise<string> => {
     {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'SlowRiseCo/1.0',
+        'User-Agent': 'AgrovetPOS/1.0',
       },
       timeout: 12_000,
     },
@@ -120,7 +120,7 @@ export const initiateSTKPush = async (opts: StkPushOptions): Promise<StkPushResu
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'SlowRiseCo/1.0',
+        'User-Agent': 'AgrovetPOS/1.0',
       },
       timeout: 20_000,
     },
@@ -154,7 +154,7 @@ export const getPaymentStatus = async (location: string): Promise<PaymentStatus>
   const response = await axios.get(location, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'User-Agent': 'SlowRiseCo/1.0',
+      'User-Agent': 'AgrovetPOS/1.0',
     },
     timeout: 12_000,
   });
@@ -207,7 +207,7 @@ export const subscribeWebhook = async (eventType: string, url: string): Promise<
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'SlowRiseCo/1.0',
+        'User-Agent': 'AgrovetPOS/1.0',
       },
     },
   );

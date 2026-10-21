@@ -5,13 +5,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        velvet: {
-          DEFAULT: "#334155",
-          dark: "#0f172a",
-          coral: "#e2e8f0",
-          cream: "#f8fafc",
-          tan: "#cbd5e1",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -7,11 +7,11 @@ interface Expense {
   id: string; category: string; amount: number; description: string; date: string;
 }
 
-const CATEGORIES = ["Salaries", "Utilities", "Maintenance", "Ingredients", "Equipment", "Other"];
+const CATEGORIES = ["Salaries", "Utilities", "Maintenance", "Supplies", "Equipment", "Other"];
 
 const ExpensesPage = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [form, setForm] = useState({ category: "Ingredients", amount: "", description: "", date: "" });
+  const [form, setForm] = useState({ category: "Supplies", amount: "", description: "", date: "" });
 
   const fetchExpenses = async () => {
     try {
@@ -32,7 +32,7 @@ const ExpensesPage = () => {
         amount: Number(form.amount),
         date: form.date || undefined,
       });
-      setForm({ category: "Ingredients", amount: "", description: "", date: "" });
+      setForm({ category: "Supplies", amount: "", description: "", date: "" });
       fetchExpenses();
       toast.success("Expense recorded");
     } catch (e: any) {

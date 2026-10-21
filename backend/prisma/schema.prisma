@@ -148,7 +148,7 @@ model StockMovement {
 
 model Expense {
   id          String   @id @default(cuid())
-  category    String // Salaries, Utilities, Maintenance, Ingredients
+  category    String // Salaries, Utilities, Maintenance, Supplies
   amount      Float
   description String
   date        DateTime @default(now())

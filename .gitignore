@@ -4,8 +4,6 @@ node_modules/
 # Env / secrets
 .env
 .env.*
-!.env.example
-!.env.*.example
 
 # Build / caches
 dist/
