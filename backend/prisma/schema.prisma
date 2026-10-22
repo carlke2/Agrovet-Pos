@@ -290,7 +290,12 @@ model Item {
   tracksExpiry     Boolean   @default(false)
   reorderLevel     Decimal   @default(0) @db.Decimal(12, 3)
   brand            String?
+  activeIngredient String?
+  strength         String?
+  isRegulated      Boolean   @default(false)
+  imageUrl         String?
   isActive         Boolean   @default(true)
+  packs            ItemPack[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -298,6 +303,23 @@ model Item {
   @@index([categoryId])
   @@index([name])
   @@map("items")
+}
+
+model ItemPack {
+  id             String   @id @default(cuid())
+  itemId         String
+  item           Item     @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  name           String
+  nameKey        String
+  quantityInBase Decimal  @db.Decimal(12, 3)
+  barcode        String?  @unique
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([itemId, nameKey])
+  @@index([itemId])
+  @@map("item_packs")
 }
 
 // Catalog suppliers. The bakery Supplier model and suppliers table stay separate.
