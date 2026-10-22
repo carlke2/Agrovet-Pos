@@ -170,6 +170,36 @@ async function main() {
     `status ${blocked.status} ${blocked.json?.error || ''}`,
   );
 
+  const holding = await call('POST', '/api/categories', admin, categoryBody(`${PREFIX}Holding ${stamp}`, { icon: 'package' }));
+  const holdingId = holding.json?.id as string | undefined;
+  if (holdingId) {
+    const unit = await prisma.unit.create({
+      data: {
+        name: `${PREFIX}Measure ${stamp}`,
+        abbreviation: 'tu',
+        nameKey: `${PREFIX}measure ${stamp}`.toLowerCase(),
+      },
+    });
+    await prisma.item.create({
+      data: {
+        name: `${PREFIX}Blocking item ${stamp}`,
+        nameKey: `${PREFIX}blocking item ${stamp}`.toLowerCase(),
+        categoryId: holdingId,
+        unitId: unit.id,
+      },
+    });
+  }
+  const blockedByItem = holdingId
+    ? await call('PATCH', `/api/categories/${holdingId}/status`, admin, { isActive: false })
+    : { status: 0, json: null };
+  record(
+    'deactivate category with active item is refused',
+    blockedByItem.status === 400 &&
+      typeof blockedByItem.json?.error === 'string' &&
+      blockedByItem.json.error.toLowerCase().includes('item'),
+    `status ${blockedByItem.status} ${blockedByItem.json?.error || ''}`,
+  );
+
   const events = await prisma.auditEvent.findMany({
     where: { userId: { in: userIds }, eventType: 'category' },
     select: { description: true, action: true },
@@ -201,8 +231,10 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
+    await prisma.item.deleteMany({ where: { name: { startsWith: PREFIX } } });
     await prisma.category.deleteMany({ where: { name: { startsWith: PREFIX }, parentId: { not: null } } });
     await prisma.category.deleteMany({ where: { name: { startsWith: PREFIX } } });
+    await prisma.unit.deleteMany({ where: { name: { startsWith: PREFIX } } });
     await prisma.auditEvent.deleteMany({ where: { userName: { startsWith: PREFIX } } });
     await prisma.user.deleteMany({
       where: { OR: [{ name: { startsWith: PREFIX } }, { email: { startsWith: PREFIX } }] },

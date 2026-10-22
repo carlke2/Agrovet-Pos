@@ -6,6 +6,8 @@ export const PERMISSIONS = [
   'view_audit_log',
   'view_catalog',
   'manage_catalog',
+  'view_cost',
+  'manage_prices',
   'legacy_full_access',
   'legacy_pos_access',
 ] as const;
@@ -25,7 +27,8 @@ export type RoleDefinition = {
 /**
  * legacy_full_access covers routes that used to require owner.
  * legacy_pos_access covers routes that used to allow owner or cashier.
- * view_catalog reads product categories. manage_catalog creates and edits them.
+ * view_catalog reads the catalog. manage_catalog creates and edits categories, items, and units.
+ * view_cost reads cost and markup. manage_prices sets cost, markup, and selling price.
  */
 export const ROLE_MATRIX: readonly RoleDefinition[] = [
   {
@@ -35,8 +38,8 @@ export const ROLE_MATRIX: readonly RoleDefinition[] = [
   },
   {
     name: 'Manager',
-    description: 'Back office, point of sale, and the product catalog. Cannot manage users, roles, settings, or the audit log.',
-    permissions: ['legacy_full_access', 'legacy_pos_access', 'view_catalog', 'manage_catalog'],
+    description: 'Back office, point of sale, and the product catalog. Can view costs and set prices. Cannot manage users, roles, settings, or the audit log.',
+    permissions: ['legacy_full_access', 'legacy_pos_access', 'view_catalog', 'manage_catalog', 'view_cost', 'manage_prices'],
   },
   {
     name: 'Cashier',
@@ -45,12 +48,12 @@ export const ROLE_MATRIX: readonly RoleDefinition[] = [
   },
   {
     name: 'Stock keeper',
-    description: 'Read and manage the product catalog.',
-    permissions: ['view_catalog', 'manage_catalog'],
+    description: 'Read and manage the product catalog. Can view costs.',
+    permissions: ['view_catalog', 'manage_catalog', 'view_cost'],
   },
   {
     name: 'Accountant',
-    description: 'Read-only access to the audit log and the product catalog.',
-    permissions: ['view_audit_log', 'view_catalog'],
+    description: 'Read-only access to the audit log and the product catalog. Can view costs.',
+    permissions: ['view_audit_log', 'view_catalog', 'view_cost'],
   },
 ];

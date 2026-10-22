@@ -8,7 +8,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:sync-roles": "ts-node -r tsconfig-paths/register scripts/sync-roles.ts",
+    "db:create-default-units": "ts-node -r tsconfig-paths/register scripts/create-default-units.ts",
     "verify:categories": "ts-node -r tsconfig-paths/register scripts/verify-categories.ts",
+    "verify:items": "ts-node -r tsconfig-paths/register scripts/verify-items.ts",
     "db:create-admin": "ts-node -r tsconfig-paths/register scripts/create-admin.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"

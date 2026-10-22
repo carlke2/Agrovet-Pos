@@ -455,6 +455,16 @@ router.patch('/:id/status', requirePermission('manage_catalog'), async (req: Req
       );
       return;
     }
+    const activeItems = await prisma.item.count({ where: { categoryId: existing.id, isActive: true } });
+    if (activeItems > 0) {
+      fail(
+        res,
+        400,
+        `Cannot deactivate ${quote(existing.name)} while it still has active items.`,
+        'isActive',
+      );
+      return;
+    }
   } else if (existing.parent && !existing.parent.isActive) {
     fail(
       res,
