@@ -12,6 +12,7 @@
     "verify:categories": "ts-node -r tsconfig-paths/register scripts/verify-categories.ts",
     "verify:items": "ts-node -r tsconfig-paths/register scripts/verify-items.ts",
     "verify:suppliers": "ts-node -r tsconfig-paths/register scripts/verify-suppliers.ts",
+    "verify:packs": "ts-node -r tsconfig-paths/register scripts/verify-packs.ts",
     "db:create-admin": "ts-node -r tsconfig-paths/register scripts/create-admin.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
