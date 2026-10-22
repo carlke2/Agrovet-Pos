@@ -362,7 +362,6 @@ async function main() {
       byGenerated.json.items.some((item: any) => item.id === unpriced.json?.id),
     `status ${byGenerated.status} sku ${unpriced.json?.effectiveSku}`,
   );
-  void generated;
 
   const inChild = await call('POST', '/api/items', admin, {
     name: `${PREFIX}Nested ${stamp}`,

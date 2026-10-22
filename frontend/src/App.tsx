@@ -29,6 +29,7 @@ import MenuCategoriesPage from "@/pages/pos/MenuCategoriesPage";
 import InventoryPage from "@/pages/pos/InventoryPage";
 import LegacySuppliersPage from "@/pages/pos/SuppliersPage";
 import CategoriesPage from "@/pages/catalog/CategoriesPage";
+import ItemsPage from "@/pages/catalog/ItemsPage";
 import SuppliersPage from "@/pages/catalog/SuppliersPage";
 import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
@@ -99,6 +100,7 @@ function AppShell() {
           <Route path="/menu-management/delete" element={R("legacy_full_access", <MenuDeletePage />)} />
           <Route path="/menu-management/categories" element={R("legacy_full_access", <MenuCategoriesPage />)} />
           <Route path="/categories" element={R("view_catalog", <CategoriesPage />)} />
+          <Route path="/items" element={R("view_catalog", <ItemsPage />)} />
           <Route path="/inventory" element={R("legacy_full_access", <InventoryPage />)} />
           <Route path="/suppliers" element={R("view_suppliers", <SuppliersPage />)} />
           <Route path="/legacy/suppliers" element={R("legacy_full_access", <LegacySuppliersPage />)} />

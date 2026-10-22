@@ -20,6 +20,8 @@ const PERMISSION_OPTIONS: { key: Permission; label: string }[] = [
   { key: "view_audit_log", label: "View audit log" },
   { key: "view_catalog", label: "View catalog" },
   { key: "manage_catalog", label: "Manage catalog" },
+  { key: "view_cost", label: "View cost" },
+  { key: "manage_prices", label: "Manage prices" },
   { key: "view_suppliers", label: "View suppliers" },
   { key: "manage_suppliers", label: "Manage suppliers" },
   { key: "legacy_full_access", label: "Back office (menu, inventory, finance, reports)" },

@@ -53,7 +53,7 @@ const GROUPS: NavGroup[] = [
     label: "Inventory",
     items: [
       { name: "Categories", path: "/categories", icon: Tags, permission: "view_catalog" },
-      { name: "Items", path: "/menu-management", icon: Package, permission: "legacy_full_access" },
+      { name: "Items", path: "/items", icon: Package, permission: "view_catalog" },
       { name: "Inventory", path: "/inventory", icon: ClipboardList, permission: "legacy_full_access" },
       { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "view_suppliers" },
     ],
@@ -115,7 +115,8 @@ function pageMeta(pathname: string) {
   if (pathname === "/") return { title: "Dashboard", subtitle: "Shop overview" };
   if (pathname.startsWith("/pos")) return { title: "Point of Sale", subtitle: "Counter sales" };
   if (pathname.startsWith("/categories")) return { title: "Categories", subtitle: "Product groups" };
-  if (pathname.startsWith("/menu-management")) return { title: "Items", subtitle: "Products and categories" };
+  if (pathname.startsWith("/items")) return { title: "Items", subtitle: "Products for sale" };
+  if (pathname.startsWith("/menu-management")) return { title: "Items", subtitle: "Legacy menu" };
   if (pathname.startsWith("/inventory")) return { title: "Inventory", subtitle: "Stock on hand" };
   if (pathname.startsWith("/legacy/suppliers")) return { title: "Suppliers", subtitle: "Legacy bakery suppliers" };
   if (pathname.startsWith("/suppliers")) return { title: "Suppliers", subtitle: "Who you buy from" };
