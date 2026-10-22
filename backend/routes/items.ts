@@ -84,6 +84,7 @@ function present(row: ItemRow, canViewCost: boolean) {
     categoryId: row.categoryId,
     categoryName: row.category.name,
     brand: row.brand,
+    imageUrl: row.imageUrl,
     sku: row.sku,
     effectiveSku: effectiveSku(row.sku, row.itemNo),
     barcode: row.barcode,
@@ -367,6 +368,71 @@ router.get('/', requirePermission('view_catalog'), async (req: Request, res: Res
     });
   } catch (error) {
     console.error('GET /api/items error:', error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+router.post('/bulk-category', requirePermission('manage_catalog'), async (req: Request, res: Response): Promise<void> => {
+  const rawIds = req.body?.itemIds;
+  if (!Array.isArray(rawIds) || rawIds.length < 1 || rawIds.length > 200 || rawIds.some((id) => typeof id !== 'string' || !id.trim())) {
+    fail(res, 400, 'Choose between 1 and 200 items.', 'itemIds');
+    return;
+  }
+  const itemIds = [...new Set(rawIds.map((id: string) => id.trim()))];
+  const categoryId = typeof req.body?.categoryId === 'string' ? req.body.categoryId.trim() : '';
+  if (!categoryId) {
+    fail(res, 400, 'Category is required.', 'categoryId');
+    return;
+  }
+
+  try {
+    const category = await prisma.category.findUnique({ where: { id: categoryId }, select: { id: true, name: true, isActive: true } });
+    if (!category) {
+      fail(res, 400, 'Category was not found.', 'categoryId');
+      return;
+    }
+    if (!category.isActive) {
+      fail(res, 400, 'Choose an active category.', 'categoryId');
+      return;
+    }
+    const items = await prisma.item.findMany({
+      where: { id: { in: itemIds } },
+      include: { category: { select: { name: true } } },
+    });
+    if (items.length !== itemIds.length) {
+      fail(res, 400, 'One or more items were not found.', 'itemIds');
+      return;
+    }
+
+    const moving = items.filter((item) => item.categoryId !== categoryId);
+    const occupants = await prisma.item.findMany({
+      where: {
+        categoryId,
+        nameKey: { in: moving.map((item) => item.nameKey) },
+        id: { notIn: itemIds },
+      },
+      select: { nameKey: true },
+    });
+    const occupantKeys = new Set(occupants.map((row) => row.nameKey));
+    const batchCount = new Map<string, number>();
+    for (const item of moving) batchCount.set(item.nameKey, (batchCount.get(item.nameKey) || 0) + 1);
+    const colliding = moving.filter((item) => occupantKeys.has(item.nameKey) || (batchCount.get(item.nameKey) || 0) > 1);
+    if (colliding.length > 0) {
+      const names = [...new Set(colliding.map((item) => quote(item.name)))].join(', ');
+      fail(res, 409, `Cannot move these items because the names already exist in ${quote(category.name)}: ${names}.`, 'itemIds');
+      return;
+    }
+
+    await prisma.$transaction(moving.map((item) => prisma.item.update({ where: { id: item.id }, data: { categoryId } })));
+    const sources = [...new Set(moving.map((item) => item.category.name))];
+    const fromText = sources.length > 0 ? `from ${sources.map((name) => quote(name)).join(' and ')} ` : '';
+    await record(req, 'bulk-category', `Moved ${moving.length} items ${fromText}to ${quote(category.name)}`, {
+      itemIds: moving.map((item) => item.id),
+      categoryId,
+    });
+    res.json({ moved: moving.length, categoryId, categoryName: category.name });
+  } catch (error) {
+    console.error('POST /api/items/bulk-category error:', error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 });

@@ -50,6 +50,7 @@ type ItemRow = {
   reorderLevel: number | null;
   isActive: boolean;
   needsPrice: boolean;
+  imageUrl: string | null;
 };
 
 type ItemList = {
@@ -169,6 +170,12 @@ export default function ItemsPage() {
   const [statusId, setStatusId] = useState<string | null>(null);
   const [pendingItem, setPendingItem] = useState<ItemRow | null>(null);
   const [belowOpen, setBelowOpen] = useState(false);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [targetCategoryId, setTargetCategoryId] = useState("");
+  const [confirmMove, setConfirmMove] = useState(false);
+  const [moving, setMoving] = useState(false);
+  const [moveError, setMoveError] = useState("");
 
   const [unitsOpen, setUnitsOpen] = useState(false);
   const [unitName, setUnitName] = useState("");
@@ -213,6 +220,7 @@ export default function ItemsPage() {
       setRows(data.items);
       setPageCount(data.pageCount);
       setTotal(data.total);
+      setSelectedKeys([]);
     } catch (err) {
       setRows([]);
       setError(apiProblem(err).message);
@@ -347,6 +355,24 @@ export default function ItemsPage() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const moveCategory = async () => {
+    setMoving(true);
+    setMoveError("");
+    try {
+      await API.post("/items/bulk-category", { itemIds: selectedKeys, categoryId: targetCategoryId });
+      toast.success("Category updated");
+      setConfirmMove(false);
+      setCategoryModalOpen(false);
+      setSelectedKeys([]);
+      await load();
+    } catch (err) {
+      setMoveError(apiProblem(err).message);
+      setConfirmMove(false);
+    } finally {
+      setMoving(false);
     }
   };
 
@@ -608,6 +634,21 @@ export default function ItemsPage() {
         </div>
       </div>
 
+      {canManage && selectedKeys.length > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-sand bg-surface px-4 py-3">
+          <p className="text-sm font-semibold text-ink">{selectedKeys.length} selected</p>
+          <Button
+            onClick={() => {
+              setMoveError("");
+              setTargetCategoryId("");
+              setCategoryModalOpen(true);
+            }}
+          >
+            Change category
+          </Button>
+        </div>
+      ) : null}
+
       {error ? (
         <div className="rounded-card border border-sand bg-surface px-6 py-12 text-center">
           <p className="text-base font-semibold text-ink">Could not load items</p>
@@ -630,6 +671,9 @@ export default function ItemsPage() {
               <Button onClick={() => void openCreate()}>Add item</Button>
             ) : undefined
           }
+          selectable={canManage}
+          selectedKeys={selectedKeys}
+          onSelectedKeysChange={setSelectedKeys}
         />
       )}
 
@@ -847,6 +891,55 @@ export default function ItemsPage() {
           />
         </div>
       </Modal>
+
+      <Modal
+        open={categoryModalOpen}
+        title="Change category"
+        closeDisabled={moving}
+        onClose={() => {
+          if (!moving) setCategoryModalOpen(false);
+        }}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setCategoryModalOpen(false)} disabled={moving}>
+              Cancel
+            </Button>
+            <Button disabled={!targetCategoryId} loading={moving} onClick={() => setConfirmMove(true)}>
+              Change category
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <FormField label="Category" htmlFor="bulk-category">
+            <Select id="bulk-category" value={targetCategoryId} onChange={(event) => setTargetCategoryId(event.target.value)}>
+              <option value="">Select a category</option>
+              {categories
+                .filter((category) => category.isActive)
+                .map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {categoryLabel(category)}
+                  </option>
+                ))}
+            </Select>
+          </FormField>
+          {moveError ? <p className="text-sm font-medium text-danger">{moveError}</p> : null}
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={confirmMove}
+        title="Change category?"
+        message={`${selectedKeys.length} ${selectedKeys.length === 1 ? "item" : "items"} will move to ${
+          categories.find((category) => category.id === targetCategoryId)?.name || "the selected category"
+        }.`}
+        confirmLabel="Change category"
+        loading={moving}
+        onCancel={() => {
+          if (!moving) setConfirmMove(false);
+        }}
+        onConfirm={() => void moveCategory()}
+      />
 
       <ConfirmDialog
         open={pendingItem != null}
