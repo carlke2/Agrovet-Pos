@@ -189,19 +189,29 @@ const SuppliersPage = () => {
   const historySupplier = suppliers.find((s) => s.id === historySupplierId);
   const totalPurchases = suppliers.reduce((sum, s) => sum + (s._count?.stockMovements || 0), 0);
 
+  const legacyBanner = (
+    <div className="rounded-card border border-sand bg-warning-wash px-4 py-3 text-sm font-semibold text-warning-ink">
+      Legacy - removed when the POS is rebuilt
+    </div>
+  );
+
   if (loading) {
     return (
-      <Loader
-        size="sm"
-        title="Loading suppliers..."
-        subtitle="Fetching vendor directory"
-        className="min-h-screen py-24"
-      />
+      <div className="space-y-4 p-4 md:p-8">
+        {legacyBanner}
+        <Loader
+          size="sm"
+          title="Loading suppliers..."
+          subtitle="Fetching vendor directory"
+          className="min-h-screen py-24"
+        />
+      </div>
     );
   }
 
   return (
     <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      {legacyBanner}
       <div className="bg-primary-700 text-white rounded-card p-6 shadow-sm border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black flex items-center gap-2">

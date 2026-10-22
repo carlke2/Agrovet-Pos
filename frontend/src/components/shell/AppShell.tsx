@@ -55,7 +55,7 @@ const GROUPS: NavGroup[] = [
       { name: "Categories", path: "/categories", icon: Tags, permission: "view_catalog" },
       { name: "Items", path: "/menu-management", icon: Package, permission: "legacy_full_access" },
       { name: "Inventory", path: "/inventory", icon: ClipboardList, permission: "legacy_full_access" },
-      { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "legacy_full_access" },
+      { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "view_suppliers" },
     ],
   },
   { label: "Customers", items: [] },
@@ -117,7 +117,8 @@ function pageMeta(pathname: string) {
   if (pathname.startsWith("/categories")) return { title: "Categories", subtitle: "Product groups" };
   if (pathname.startsWith("/menu-management")) return { title: "Items", subtitle: "Products and categories" };
   if (pathname.startsWith("/inventory")) return { title: "Inventory", subtitle: "Stock on hand" };
-  if (pathname.startsWith("/suppliers")) return { title: "Suppliers" };
+  if (pathname.startsWith("/legacy/suppliers")) return { title: "Suppliers", subtitle: "Legacy bakery suppliers" };
+  if (pathname.startsWith("/suppliers")) return { title: "Suppliers", subtitle: "Who you buy from" };
   if (pathname.startsWith("/finance")) return { title: "Finance" };
   if (pathname.startsWith("/expenses")) return { title: "Expenses" };
   if (pathname.startsWith("/receipts")) return { title: "Receipts" };

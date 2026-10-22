@@ -5,6 +5,8 @@ export type Permission =
   | "view_audit_log"
   | "view_catalog"
   | "manage_catalog"
+  | "view_suppliers"
+  | "manage_suppliers"
   | "legacy_full_access"
   | "legacy_pos_access";
 

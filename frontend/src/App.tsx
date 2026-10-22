@@ -27,8 +27,9 @@ import MenuUpdatePage from "@/pages/pos/MenuUpdatePage";
 import MenuDeletePage from "@/pages/pos/MenuDeletePage";
 import MenuCategoriesPage from "@/pages/pos/MenuCategoriesPage";
 import InventoryPage from "@/pages/pos/InventoryPage";
-import SuppliersPage from "@/pages/pos/SuppliersPage";
+import LegacySuppliersPage from "@/pages/pos/SuppliersPage";
 import CategoriesPage from "@/pages/catalog/CategoriesPage";
+import SuppliersPage from "@/pages/catalog/SuppliersPage";
 import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
 import ReceiptsPage from "@/pages/finance/ReceiptsPage";
@@ -99,7 +100,8 @@ function AppShell() {
           <Route path="/menu-management/categories" element={R("legacy_full_access", <MenuCategoriesPage />)} />
           <Route path="/categories" element={R("view_catalog", <CategoriesPage />)} />
           <Route path="/inventory" element={R("legacy_full_access", <InventoryPage />)} />
-          <Route path="/suppliers" element={R("legacy_full_access", <SuppliersPage />)} />
+          <Route path="/suppliers" element={R("view_suppliers", <SuppliersPage />)} />
+          <Route path="/legacy/suppliers" element={R("legacy_full_access", <LegacySuppliersPage />)} />
           <Route path="/my-attendance" element={R("legacy_pos_access", <StaffAttendanceReport />)} />
 
           <Route path="/finance" element={R("legacy_full_access", <FinanceDashboard />)} />

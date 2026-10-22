@@ -317,7 +317,7 @@ const InventoryPage = () => {
                   ))}
                 </select>
                 {suppliers.length === 0 && (
-                  <p className="text-[10px] text-ink mt-1">Add suppliers first under Suppliers menu.</p>
+                  <p className="text-[10px] text-ink mt-1">Add bakery suppliers on the legacy suppliers page first.</p>
                 )}
               </div>
               <div className="space-y-1 col-span-2 sm:col-span-1">

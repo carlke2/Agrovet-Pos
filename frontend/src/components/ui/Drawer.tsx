@@ -9,9 +9,10 @@ type DrawerProps = {
   onClose: () => void;
   children: ReactNode;
   side?: "left" | "right" | "bottom";
+  widthClass?: string;
 };
 
-export default function Drawer({ open, title, onClose, children, side = "left" }: DrawerProps) {
+export default function Drawer({ open, title, onClose, children, side = "left", widthClass }: DrawerProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLElement>(null);
   useFocusTrap(open, panelRef, onClose);
@@ -40,7 +41,7 @@ export default function Drawer({ open, title, onClose, children, side = "left" }
           "absolute flex flex-col bg-surface shadow-md outline-none",
           side === "bottom"
             ? "inset-x-0 bottom-0 h-[min(85vh,40rem)] w-full rounded-t-[16px]"
-            : cn("top-0 h-full w-[min(100%,20rem)]", side === "left" ? "left-0" : "right-0"),
+            : cn("top-0 h-full", widthClass ?? "w-[min(100%,20rem)]", side === "left" ? "left-0" : "right-0"),
         )}
       >
         <div className="border-b border-sand px-4 py-3">
