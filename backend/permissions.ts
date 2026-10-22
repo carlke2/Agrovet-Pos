@@ -10,6 +10,9 @@ export const PERMISSIONS = [
   'manage_prices',
   'view_suppliers',
   'manage_suppliers',
+  'view_stock',
+  'view_receipts',
+  'manage_receiving',
   'legacy_full_access',
   'legacy_pos_access',
 ] as const;
@@ -32,6 +35,7 @@ export type RoleDefinition = {
  * view_catalog reads the catalog. manage_catalog creates and edits categories, items, and units.
  * view_cost reads cost and markup. manage_prices sets cost, markup, and selling price.
  * view_suppliers reads suppliers. manage_suppliers creates, edits, and changes supplier status.
+ * view_stock reads stock batches. view_receipts reads goods receipts. manage_receiving creates and confirms them.
  */
 export const ROLE_MATRIX: readonly RoleDefinition[] = [
   {
@@ -41,22 +45,22 @@ export const ROLE_MATRIX: readonly RoleDefinition[] = [
   },
   {
     name: 'Manager',
-    description: 'Back office, point of sale, and the product catalog. Can view costs, set prices, and manage suppliers. Cannot manage users, roles, settings, or the audit log.',
-    permissions: ['legacy_full_access', 'legacy_pos_access', 'view_catalog', 'manage_catalog', 'view_cost', 'manage_prices', 'view_suppliers', 'manage_suppliers'],
+    description: 'Back office, point of sale, and the product catalog. Can view costs, set prices, manage suppliers, and receive stock. Cannot manage users, roles, settings, or the audit log.',
+    permissions: ['legacy_full_access', 'legacy_pos_access', 'view_catalog', 'manage_catalog', 'view_cost', 'manage_prices', 'view_suppliers', 'manage_suppliers', 'view_stock', 'view_receipts', 'manage_receiving'],
   },
   {
     name: 'Cashier',
-    description: 'Point of sale, M-Pesa sales, own attendance clock, own profile, and a read-only catalog.',
-    permissions: ['legacy_pos_access', 'view_catalog'],
+    description: 'Point of sale, M-Pesa sales, own attendance clock, own profile, a read-only catalog, and stock on hand.',
+    permissions: ['legacy_pos_access', 'view_catalog', 'view_stock'],
   },
   {
     name: 'Stock keeper',
-    description: 'Read and manage the product catalog and suppliers. Can view costs.',
-    permissions: ['view_catalog', 'manage_catalog', 'view_cost', 'view_suppliers', 'manage_suppliers'],
+    description: 'Read and manage the product catalog, suppliers, and stock receipts. Can view costs and stock.',
+    permissions: ['view_catalog', 'manage_catalog', 'view_cost', 'view_suppliers', 'manage_suppliers', 'view_stock', 'view_receipts', 'manage_receiving'],
   },
   {
     name: 'Accountant',
-    description: 'Read-only access to the audit log, the product catalog, and suppliers. Can view costs.',
-    permissions: ['view_audit_log', 'view_catalog', 'view_cost', 'view_suppliers'],
+    description: 'Read-only access to the audit log, the product catalog, suppliers, receipts, and stock. Can view costs.',
+    permissions: ['view_audit_log', 'view_catalog', 'view_cost', 'view_suppliers', 'view_stock', 'view_receipts'],
   },
 ];

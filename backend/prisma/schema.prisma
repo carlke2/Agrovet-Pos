@@ -48,6 +48,8 @@ model User {
   mustChangePassword Boolean   @default(false)
 
   attendanceRecords StaffAttendance[]
+  receiptsCreated   GoodsReceipt[] @relation("ReceiptCreatedBy")
+  receiptsConfirmed GoodsReceipt[] @relation("ReceiptConfirmedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -296,6 +298,9 @@ model Item {
   imageUrl         String?
   isActive         Boolean   @default(true)
   packs            ItemPack[]
+  receiptLines     GoodsReceiptLine[]
+  batches          StockBatch[]
+  ledgerEntries    ItemLedgerEntry[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -314,6 +319,7 @@ model ItemPack {
   quantityInBase Decimal  @db.Decimal(12, 3)
   barcode        String?  @unique
   isActive       Boolean  @default(true)
+  receiptLines   GoodsReceiptLine[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -335,11 +341,126 @@ model Vendor {
   paymentTerms  String?
   notes         String?
   isActive      Boolean  @default(true)
+  receipts      GoodsReceipt[]
+  batches       StockBatch[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([name])
   @@map("vendors")
+}
+
+enum ReceiptType {
+  DELIVERY
+  OPENING
+}
+
+enum ReceiptStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+enum LedgerEntryType {
+  RECEIPT
+  OPENING
+  SALE
+  CUSTOMER_RETURN
+  SUPPLIER_RETURN
+  DAMAGED
+  EXPIRED
+  ADJUSTMENT
+}
+
+model GoodsReceipt {
+  id                String        @id @default(cuid())
+  receiptNo         Int           @unique @default(autoincrement())
+  type              ReceiptType
+  status            ReceiptStatus @default(DRAFT)
+  vendorId          String?
+  vendor            Vendor?       @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  supplierInvoiceNo String?
+  receivedDate      DateTime      @db.Date
+  notes             String?
+  totalCost         Decimal?      @db.Decimal(14, 2)
+  createdById       String
+  createdBy         User          @relation("ReceiptCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  confirmedById     String?
+  confirmedBy       User?         @relation("ReceiptConfirmedBy", fields: [confirmedById], references: [id], onDelete: Restrict)
+  confirmedAt       DateTime?
+  lines             GoodsReceiptLine[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([status])
+  @@index([vendorId])
+  @@index([receivedDate])
+  @@map("goods_receipts")
+}
+
+model GoodsReceiptLine {
+  id              String         @id @default(cuid())
+  receiptId       String
+  receipt         GoodsReceipt   @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            Item           @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  packId          String?
+  pack            ItemPack?      @relation(fields: [packId], references: [id], onDelete: Restrict)
+  quantityEntered Decimal        @db.Decimal(12, 3)
+  quantityInBase  Decimal        @db.Decimal(12, 3)
+  costEntered     Decimal        @db.Decimal(12, 2)
+  unitCostBase    Decimal        @db.Decimal(14, 4)
+  batchNo         String?
+  manufactureDate DateTime?      @db.Date
+  expiryDate      DateTime?      @db.Date
+  lineNo          Int
+  batch           StockBatch?
+  @@index([receiptId])
+  @@map("goods_receipt_lines")
+}
+
+model StockBatch {
+  id               String             @id @default(cuid())
+  itemId           String
+  item             Item               @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  vendorId         String?
+  vendor           Vendor?            @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  receiptLineId    String             @unique
+  receiptLine      GoodsReceiptLine   @relation(fields: [receiptLineId], references: [id], onDelete: Restrict)
+  batchNo          String?
+  manufactureDate  DateTime?          @db.Date
+  expiryDate       DateTime?          @db.Date
+  receivedDate     DateTime           @db.Date
+  quantityReceived Decimal            @db.Decimal(12, 3)
+  unitCost         Decimal            @db.Decimal(14, 4)
+  ledgerEntries    ItemLedgerEntry[]
+  createdAt        DateTime           @default(now())
+
+  @@index([itemId, expiryDate])
+  @@index([itemId, batchNo])
+  @@map("stock_batches")
+}
+
+model ItemLedgerEntry {
+  id        String          @id @default(cuid())
+  itemId    String
+  item      Item            @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  batchId   String?
+  batch     StockBatch?     @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  entryType LedgerEntryType
+  quantity  Decimal         @db.Decimal(12, 3)
+  unitCost  Decimal?        @db.Decimal(14, 4)
+  refType   String?
+  refId     String?
+  userId    String
+  note      String?
+  createdAt DateTime        @default(now())
+
+  @@index([itemId])
+  @@index([batchId])
+  @@index([refType, refId])
+  @@unique([refType, refId, batchId, entryType])
+  @@map("item_ledger_entries")
 }
 
 // Single app settings row. Stored in Supabase, not a local file.
