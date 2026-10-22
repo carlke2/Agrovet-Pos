@@ -422,20 +422,39 @@ function confirmDescription(label: string, header: PreparedHeader): string {
   return `Confirmed receipt ${label}${from}: ${header.lines.length} ${itemWord}, ${quantityLabel(units)} ${unitWord} added`;
 }
 
+async function previewLine(body: Record<string, unknown>, tx: Tx) {
+  if (typeof body.itemId !== 'string' || !body.itemId.trim()) {
+    throw new ReceiptError(400, 'Choose an item.', 'itemId', 1);
+  }
+  const item = await tx.item.findUnique({
+    where: { id: body.itemId.trim() },
+    include: { unit: { select: { abbreviation: true } } },
+  });
+  if (!item || !item.isActive) throw new ReceiptError(400, 'Choose an active item.', 'itemId', 1);
+  const packId = typeof body.packId === 'string' && body.packId.trim() ? body.packId.trim() : null;
+  let perEntered = new Prisma.Decimal(1);
+  if (packId) {
+    const pack = await tx.itemPack.findUnique({ where: { id: packId } });
+    if (!pack || pack.itemId !== item.id) {
+      throw new ReceiptError(400, 'That pack does not belong to this item.', 'packId', 1);
+    }
+    if (!pack.isActive) throw new ReceiptError(400, 'Choose an active pack.', 'packId', 1);
+    perEntered = pack.quantityInBase;
+  }
+  const quantityEntered = parseQuantity(body.quantity, 1);
+  const quantityInBase = packId ? toBaseQuantity(quantityEntered, { quantityInBase: perEntered }) : quantityEntered;
+  const costProvided = body.cost !== undefined && body.cost !== null && body.cost !== '';
+  const unitCostBase = costProvided ? unitCostPerBase(parseCost(body.cost, 1), perEntered) : null;
+  return { quantityInBase, baseUnit: item.unit.abbreviation, unitCostBase };
+}
+
 router.post('/lines/preview', requirePermission('manage_receiving'), async (req: Request, res: Response): Promise<void> => {
-  const body = (req.body || {}) as Record<string, unknown>;
   try {
-    const preview = await prisma.$transaction((tx) => prepare({
-      type: 'OPENING',
-      receivedDate: nairobiToday(),
-      lines: [body],
-    }, tx));
-    const line = preview.lines[0];
-    const costProvided = body.cost !== undefined && body.cost !== null && body.cost !== '';
+    const line = await prisma.$transaction((tx) => previewLine((req.body || {}) as Record<string, unknown>, tx));
     res.json({
       quantityInBase: fixed(line.quantityInBase, 3),
-      baseUnit: line.unitAbbreviation,
-      unitCostBase: costProvided ? fixed(line.unitCostBase, 4) : null,
+      baseUnit: line.baseUnit,
+      unitCostBase: fixed(line.unitCostBase, 4),
     });
   } catch (error) {
     sendError(res, error);
