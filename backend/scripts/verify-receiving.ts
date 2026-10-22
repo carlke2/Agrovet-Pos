@@ -333,6 +333,27 @@ async function main() {
     audits.some((event) => event.description?.includes('Confirmed receipt GR-') && event.description.includes(`${PREFIX}Kenya Agri Supplies ${stamp}`)),
     audits[0]?.description || 'none',
   );
+
+  const bulkLines = Array.from({ length: 100 }, () => ({ itemId: roleItemId, quantity: 1, cost: 1 }));
+  const bulk = await call('POST', '/api/receipts', admin, receiptBody(bulkLines, { notes: 'bulk', supplierInvoiceNo: `${PREFIX}BULK ${stamp}` }));
+  const started = Date.now();
+  const bulkConfirmed = await call('POST', `/api/receipts/${bulk.json?.id}/confirm`, admin);
+  const elapsed = Date.now() - started;
+  const bulkBatches = await prisma.stockBatch.count({ where: { receiptLine: { receiptId: bulk.json?.id } } });
+  const bulkEntries = await prisma.itemLedgerEntry.findMany({ where: { refType: 'GoodsReceipt', refId: bulk.json?.id } });
+  const bulkSum = bulkEntries.reduce((sum, entry) => sum.plus(entry.quantity), new Prisma.Decimal(0));
+  record(
+    'a 100-line receipt confirms in under 10 seconds with one batch and one ledger entry per line',
+    bulk.status === 201 && bulkConfirmed.status === 200 && elapsed < 10000 && bulkBatches === 100 && bulkEntries.length === 100,
+    `${bulkConfirmed.status} ${elapsed}ms batches ${bulkBatches} entries ${bulkEntries.length}`,
+  );
+  const bulkAgain = await call('POST', `/api/receipts/${bulk.json?.id}/confirm`, admin);
+  const bulkAfter = await prisma.itemLedgerEntry.count({ where: { refId: bulk.json?.id } });
+  record(
+    'a second confirm of the 100-line receipt is 409 and the ledger sum equals the base quantity',
+    bulkAgain.status === 409 && bulkAfter === 100 && bulkSum.equals(100),
+    `${bulkAgain.status} sum ${bulkSum.toString()} entries ${bulkAfter}`,
+  );
 }
 
 main()

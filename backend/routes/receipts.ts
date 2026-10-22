@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { Router, Request, Response } from 'express';
 import prisma from '@/services/prisma';
@@ -90,6 +91,10 @@ function fail(res: Response, status: number, error: string, field?: string, line
 function sendError(res: Response, error: unknown) {
   if (error instanceof ReceiptError) {
     fail(res, error.status, error.message, error.field, error.lineNo);
+    return;
+  }
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2028') {
+    res.status(503).json({ error: 'The database was too slow, nothing was saved. Please try again.' });
     return;
   }
   console.error(error);
@@ -297,26 +302,61 @@ async function prepare(body: Record<string, unknown>, tx: Tx): Promise<PreparedH
     throw new ReceiptError(400, 'A receipt can have at most 200 lines.', 'lines');
   }
 
-  const lines: PreparedLine[] = [];
-  const seen = new Map<string, { expiry: string | null; itemName: string; batchNo: string }>();
+  const sources: Record<string, unknown>[] = [];
   for (let index = 0; index < body.lines.length; index += 1) {
     const raw = body.lines[index];
+    if (!raw || typeof raw !== 'object') throw new ReceiptError(400, 'Each line must be an item.', 'lines', index + 1);
+    sources.push(raw as Record<string, unknown>);
+  }
+  const itemIds = [...new Set(sources.flatMap((source) => (typeof source.itemId === 'string' && source.itemId.trim() ? [source.itemId.trim()] : [])))];
+  const packIds = [...new Set(sources.flatMap((source) => (typeof source.packId === 'string' && source.packId.trim() ? [source.packId.trim()] : [])))];
+  const batchFilters = new Map<string, { itemId: string; batchNo: string }>();
+  for (const source of sources) {
+    const itemId = typeof source.itemId === 'string' ? source.itemId.trim() : '';
+    const batchNo = typeof source.batchNo === 'string' ? source.batchNo.trim() : '';
+    if (itemId && batchNo) batchFilters.set(`${itemId}::${batchNo}`, { itemId, batchNo });
+  }
+  const [items, packs, existingBatches] = await Promise.all([
+    itemIds.length
+      ? tx.item.findMany({
+          where: { id: { in: itemIds } },
+          include: { unit: { select: { abbreviation: true } } },
+        })
+      : Promise.resolve([]),
+    packIds.length ? tx.itemPack.findMany({ where: { id: { in: packIds } } }) : Promise.resolve([]),
+    batchFilters.size
+      ? tx.stockBatch.findMany({
+          where: { OR: [...batchFilters.values()] },
+          select: { itemId: true, batchNo: true, expiryDate: true, item: { select: { name: true } } },
+        })
+      : Promise.resolve([]),
+  ]);
+  const itemsById = new Map(items.map((item) => [item.id, item]));
+  const packsById = new Map(packs.map((pack) => [pack.id, pack]));
+  const existingByKey = new Map<string, { itemName: string; expiry: string | null }[]>();
+  for (const batch of existingBatches) {
+    if (!batch.batchNo) continue;
+    const key = `${batch.itemId}::${batch.batchNo}`;
+    const rows = existingByKey.get(key) || [];
+    rows.push({ itemName: batch.item.name, expiry: dateIso(batch.expiryDate) });
+    existingByKey.set(key, rows);
+  }
+
+  const lines: PreparedLine[] = [];
+  const seen = new Map<string, { expiry: string | null; itemName: string; batchNo: string }>();
+  for (let index = 0; index < sources.length; index += 1) {
+    const source = sources[index];
     const lineNo = index + 1;
-    if (!raw || typeof raw !== 'object') throw new ReceiptError(400, 'Each line must be an item.', 'lines', lineNo);
-    const source = raw as Record<string, unknown>;
     if (typeof source.itemId !== 'string' || !source.itemId.trim()) {
       throw new ReceiptError(400, 'Choose an item.', 'itemId', lineNo);
     }
-    const item = await tx.item.findUnique({
-      where: { id: source.itemId.trim() },
-      include: { unit: { select: { abbreviation: true } } },
-    });
+    const item = itemsById.get(source.itemId.trim());
     if (!item || !item.isActive) throw new ReceiptError(400, 'Choose an active item.', 'itemId', lineNo);
     const packId = typeof source.packId === 'string' && source.packId.trim() ? source.packId.trim() : null;
     let packName: string | null = null;
     let perEntered = new Prisma.Decimal(1);
     if (packId) {
-      const pack = await tx.itemPack.findUnique({ where: { id: packId } });
+      const pack = packsById.get(packId);
       if (!pack || pack.itemId !== item.id) {
         throw new ReceiptError(400, 'That pack does not belong to this item.', 'packId', lineNo);
       }
@@ -360,12 +400,9 @@ async function prepare(body: Record<string, unknown>, tx: Tx): Promise<PreparedH
         throw new ReceiptError(409, batchConflictMessage(previous.itemName, batchNo, previous.expiry), 'expiryDate', lineNo);
       }
       if (!previous) seen.set(key, { expiry: expiryIso, itemName: item.name, batchNo });
-      const existing = await tx.stockBatch.findFirst({
-        where: { itemId: item.id, batchNo, NOT: { expiryDate: expiryDate } },
-        include: { item: { select: { name: true } } },
-      });
-      if (existing) {
-        throw new ReceiptError(409, batchConflictMessage(existing.item.name, batchNo, dateIso(existing.expiryDate)), 'expiryDate', lineNo);
+      const conflict = (existingByKey.get(key) || []).find((row) => row.expiry !== expiryIso);
+      if (conflict) {
+        throw new ReceiptError(409, batchConflictMessage(conflict.itemName, batchNo, conflict.expiry), 'expiryDate', lineNo);
       }
     }
     lines.push({
@@ -675,36 +712,39 @@ router.post('/:id/confirm', requirePermission('manage_receiving'), async (req: R
         throw new ReceiptError(409, `Receipt ${receiptLabel(existing.receiptNo)} is already confirmed.`);
       }
       await tx.goodsReceiptLine.deleteMany({ where: { receiptId: id } });
-      for (let index = 0; index < header.lines.length; index += 1) {
-        const line = header.lines[index];
-        const saved = await tx.goodsReceiptLine.create({ data: lineData(id, line, index + 1) });
-        const batch = await tx.stockBatch.create({
-          data: {
-            itemId: line.itemId,
-            vendorId: header.vendorId,
-            receiptLineId: saved.id,
-            batchNo: line.batchNo,
-            manufactureDate: line.manufactureDate,
-            expiryDate: line.expiryDate,
-            receivedDate: header.receivedDate,
-            quantityReceived: line.quantityInBase,
-            unitCost: line.unitCostBase,
-          },
-        });
+      const posted = header.lines.map((line, index) => {
         if (line.quantityInBase.lte(0)) throw new ReceiptError(400, 'Quantity must be greater than 0.', 'quantity', index + 1);
-        await tx.itemLedgerEntry.create({
-          data: {
-            itemId: line.itemId,
-            batchId: batch.id,
-            entryType: header.type === 'OPENING' ? 'OPENING' : 'RECEIPT',
-            quantity: line.quantityInBase,
-            unitCost: line.unitCostBase,
-            refType: 'GoodsReceipt',
-            refId: id,
-            userId: req.user!.id,
-          },
-        });
-      }
+        return { line, lineNo: index + 1, lineId: randomUUID(), batchId: randomUUID() };
+      });
+      await tx.goodsReceiptLine.createMany({
+        data: posted.map(({ line, lineNo, lineId }) => ({ id: lineId, ...lineData(id, line, lineNo) })),
+      });
+      await tx.stockBatch.createMany({
+        data: posted.map(({ line, lineId, batchId }) => ({
+          id: batchId,
+          itemId: line.itemId,
+          vendorId: header.vendorId,
+          receiptLineId: lineId,
+          batchNo: line.batchNo,
+          manufactureDate: line.manufactureDate,
+          expiryDate: line.expiryDate,
+          receivedDate: header.receivedDate,
+          quantityReceived: line.quantityInBase,
+          unitCost: line.unitCostBase,
+        })),
+      });
+      await tx.itemLedgerEntry.createMany({
+        data: posted.map(({ line, batchId }) => ({
+          itemId: line.itemId,
+          batchId,
+          entryType: header.type === 'OPENING' ? 'OPENING' as const : 'RECEIPT' as const,
+          quantity: line.quantityInBase,
+          unitCost: line.unitCostBase,
+          refType: 'GoodsReceipt',
+          refId: id,
+          userId: req.user!.id,
+        })),
+      });
       return { header, receiptNo: existing.receiptNo };
     }, transactionOptions);
     const row = await loadReceipt(id);
