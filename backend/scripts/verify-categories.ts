@@ -231,6 +231,7 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
+    await prisma.itemPack.deleteMany({ where: { item: { name: { startsWith: PREFIX } } } });
     await prisma.item.deleteMany({ where: { name: { startsWith: PREFIX } } });
     await prisma.category.deleteMany({ where: { name: { startsWith: PREFIX }, parentId: { not: null } } });
     await prisma.category.deleteMany({ where: { name: { startsWith: PREFIX } } });

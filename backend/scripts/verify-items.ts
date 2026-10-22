@@ -549,6 +549,18 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
+    await prisma.itemPack.deleteMany({
+      where: {
+        item: {
+          OR: [
+            { name: { startsWith: PREFIX } },
+            { sku: { startsWith: PREFIX } },
+            { barcode: { startsWith: PREFIX } },
+            { brand: { startsWith: PREFIX } },
+          ],
+        },
+      },
+    });
     await prisma.item.deleteMany({
       where: {
         OR: [
