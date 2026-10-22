@@ -34,6 +34,8 @@ import SuppliersPage from "@/pages/catalog/SuppliersPage";
 import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
 import ReceiptsPage from "@/pages/finance/ReceiptsPage";
+import ReceiveStockPage from "@/pages/receiving/ReceiveStockPage";
+import ReceiptFormPage from "@/pages/receiving/ReceiptFormPage";
 import CollectionsPage from "@/pages/finance/CollectionsPage";
 import NoAccess from "@/pages/NoAccess";
 import StaffAttendanceTerminal from "@/pages/attendance/StaffAttendanceTerminal";
@@ -108,7 +110,10 @@ function AppShell() {
 
           <Route path="/finance" element={R("legacy_full_access", <FinanceDashboard />)} />
           <Route path="/expenses" element={R("legacy_full_access", <ExpensesPage />)} />
-          <Route path="/receipts" element={R("legacy_full_access", <ReceiptsPage />)} />
+          <Route path="/receipts" element={R("view_receipts", <ReceiveStockPage />)} />
+          <Route path="/receipts/new" element={R("view_receipts", <ReceiptFormPage />)} />
+          <Route path="/receipts/:id" element={R("view_receipts", <ReceiptFormPage />)} />
+          <Route path="/legacy/receipts" element={R("legacy_full_access", <ReceiptsPage />)} />
           <Route path="/collections" element={R("legacy_full_access", <CollectionsPage />)} />
 
           <Route path="/user-profile" element={R("legacy_pos_access", <UserProfile />)} />

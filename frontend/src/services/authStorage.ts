@@ -9,6 +9,9 @@ export type Permission =
   | "manage_prices"
   | "view_suppliers"
   | "manage_suppliers"
+  | "view_stock"
+  | "view_receipts"
+  | "manage_receiving"
   | "legacy_full_access"
   | "legacy_pos_access";
 

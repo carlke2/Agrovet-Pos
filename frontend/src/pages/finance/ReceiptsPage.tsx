@@ -54,6 +54,9 @@ const ReceiptsPage = () => {
 
   return (
     <div className="p-4 md:p-8 bg-background min-h-screen font-sans space-y-6">
+      <div className="rounded-card border border-sand bg-warning-wash px-4 py-3 text-sm font-semibold text-warning-ink">
+        Legacy - removed when the POS is rebuilt
+      </div>
       <div className="bg-primary-700 text-white rounded-card p-6 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2"><Receipt /> POS Receipts</h2>

@@ -8,6 +8,7 @@ import {
   Menu,
   Monitor,
   Package,
+  PackagePlus,
   Tags,
   PieChart,
   Plus,
@@ -54,6 +55,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { name: "Categories", path: "/categories", icon: Tags, permission: "view_catalog" },
       { name: "Items", path: "/items", icon: Package, permission: "view_catalog" },
+      { name: "Receive stock", path: "/receipts", icon: PackagePlus, permission: "view_receipts" },
       { name: "Inventory", path: "/inventory", icon: ClipboardList, permission: "legacy_full_access" },
       { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "view_suppliers" },
     ],
@@ -64,7 +66,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { name: "Finance", path: "/finance", icon: Wallet, permission: "legacy_full_access" },
       { name: "Expenses", path: "/expenses", icon: Receipt, permission: "legacy_full_access" },
-      { name: "Receipts", path: "/receipts", icon: Receipt, permission: "legacy_full_access" },
+      { name: "Receipts", path: "/legacy/receipts", icon: Receipt, permission: "legacy_full_access" },
       { name: "Collections", path: "/collections", icon: PieChart, permission: "legacy_full_access" },
       { name: "Reports", path: "/reports", icon: ClipboardList, permission: "legacy_full_access" },
     ],
@@ -122,7 +124,8 @@ function pageMeta(pathname: string) {
   if (pathname.startsWith("/suppliers")) return { title: "Suppliers", subtitle: "Who you buy from" };
   if (pathname.startsWith("/finance")) return { title: "Finance" };
   if (pathname.startsWith("/expenses")) return { title: "Expenses" };
-  if (pathname.startsWith("/receipts")) return { title: "Receipts" };
+  if (pathname.startsWith("/legacy/receipts")) return { title: "Receipts", subtitle: "Legacy sales receipts" };
+  if (pathname.startsWith("/receipts")) return { title: "Receive stock", subtitle: "Goods received" };
   if (pathname.startsWith("/collections")) return { title: "Collections" };
   if (pathname.startsWith("/reports")) return { title: "Reports" };
   if (pathname.startsWith("/staffs")) return { title: "Staff" };

@@ -24,6 +24,9 @@ const PERMISSION_OPTIONS: { key: Permission; label: string }[] = [
   { key: "manage_prices", label: "Manage prices" },
   { key: "view_suppliers", label: "View suppliers" },
   { key: "manage_suppliers", label: "Manage suppliers" },
+  { key: "view_stock", label: "View stock" },
+  { key: "view_receipts", label: "View receipts" },
+  { key: "manage_receiving", label: "Receive stock" },
   { key: "legacy_full_access", label: "Back office (menu, inventory, finance, reports)" },
   { key: "legacy_pos_access", label: "Point of sale" },
 ];
