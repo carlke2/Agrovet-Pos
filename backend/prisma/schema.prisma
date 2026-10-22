@@ -300,6 +300,26 @@ model Item {
   @@map("items")
 }
 
+// Catalog suppliers. The bakery Supplier model and suppliers table stay separate.
+model Vendor {
+  id            String   @id @default(cuid())
+  name          String
+  nameKey       String   @unique
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  taxPin        String?
+  paymentTerms  String?
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([name])
+  @@map("vendors")
+}
+
 // Single app settings row. Stored in Supabase, not a local file.
 model SystemSetting {
   id          String   @id @default("app")
