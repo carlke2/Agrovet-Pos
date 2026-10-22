@@ -6,6 +6,7 @@ import { logAuditEvent } from '@/services/audit';
 import { toBaseQuantity } from '@/lib/packs';
 
 const router = Router();
+const transactionOptions = { maxWait: 10000, timeout: 20000 };
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
@@ -450,7 +451,7 @@ async function previewLine(body: Record<string, unknown>, tx: Tx) {
 
 router.post('/lines/preview', requirePermission('manage_receiving'), async (req: Request, res: Response): Promise<void> => {
   try {
-    const line = await prisma.$transaction((tx) => previewLine((req.body || {}) as Record<string, unknown>, tx));
+    const line = await prisma.$transaction((tx) => previewLine((req.body || {}) as Record<string, unknown>, tx), transactionOptions);
     res.json({
       quantityInBase: fixed(line.quantityInBase, 3),
       baseUnit: line.baseUnit,
@@ -560,7 +561,7 @@ router.post('/', requirePermission('manage_receiving'), async (req: Request, res
         data: header.lines.map((line, index) => lineData(receipt.id, line, index + 1)),
       });
       return { id: receipt.id, header, receiptNo: receipt.receiptNo };
-    });
+    }, transactionOptions);
     const row = await loadReceipt(created.id);
     const label = receiptLabel(created.receiptNo);
     const from = created.header.vendorName ? ` from ${quote(created.header.vendorName)}` : '';
@@ -605,7 +606,7 @@ router.put('/:id', requirePermission('manage_receiving'), async (req: Request, r
       await tx.goodsReceiptLine.createMany({ data: header.lines.map((line, index) => lineData(id, line, index + 1)) });
       const current = await tx.goodsReceipt.findUnique({ where: { id }, select: { receiptNo: true } });
       return { header, receiptNo: current!.receiptNo };
-    });
+    }, transactionOptions);
     const row = await loadReceipt(id);
     await record(req, 'update', `Updated draft receipt ${receiptLabel(saved.receiptNo)}`, { receiptId: id });
     res.json(present(row!, showCost(req), true));
@@ -625,7 +626,7 @@ router.post('/:id/cancel', requirePermission('manage_receiving'), async (req: Re
         throw new ReceiptError(409, 'Only a draft receipt can be cancelled.');
       }
       return tx.goodsReceipt.findUnique({ where: { id }, select: { receiptNo: true } });
-    });
+    }, transactionOptions);
     const row = await loadReceipt(id);
     await record(req, 'cancel', `Cancelled draft receipt ${receiptLabel(cancelled!.receiptNo)}`, { receiptId: id });
     res.json(present(row!, showCost(req), true));
@@ -705,7 +706,7 @@ router.post('/:id/confirm', requirePermission('manage_receiving'), async (req: R
         });
       }
       return { header, receiptNo: existing.receiptNo };
-    });
+    }, transactionOptions);
     const row = await loadReceipt(id);
     await record(req, 'confirm', confirmDescription(receiptLabel(confirmed.receiptNo), confirmed.header), { receiptId: id });
     res.json(present(row!, showCost(req), true));
