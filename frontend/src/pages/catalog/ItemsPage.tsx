@@ -51,6 +51,17 @@ type ItemRow = {
   isActive: boolean;
   needsPrice: boolean;
   imageUrl: string | null;
+  activeIngredient: string | null;
+  strength: string | null;
+  isRegulated: boolean;
+  packCount: number;
+};
+
+type Pack = {
+  id: string;
+  name: string;
+  quantityInBase: number;
+  isActive: boolean;
 };
 
 type ItemList = {
@@ -80,6 +91,9 @@ type ItemForm = {
   cost: string;
   markup: string;
   selling: string;
+  activeIngredient: string;
+  strength: string;
+  isRegulated: boolean;
 };
 
 const EMPTY_FORM: ItemForm = {
@@ -95,6 +109,9 @@ const EMPTY_FORM: ItemForm = {
   cost: "",
   markup: "",
   selling: "",
+  activeIngredient: "",
+  strength: "",
+  isRegulated: false,
 };
 
 const TAX_OPTIONS: { value: ItemRow["taxType"]; label: string }[] = [
@@ -150,6 +167,7 @@ export default function ItemsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState("active");
   const [needsPrice, setNeedsPrice] = useState(false);
+  const [regulatedOnly, setRegulatedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [total, setTotal] = useState(0);
@@ -176,6 +194,12 @@ export default function ItemsPage() {
   const [confirmMove, setConfirmMove] = useState(false);
   const [moving, setMoving] = useState(false);
   const [moveError, setMoveError] = useState("");
+  const [packs, setPacks] = useState<Pack[]>([]);
+  const [packForm, setPackForm] = useState({ id: "", name: "", quantity: "" });
+  const [packErrors, setPackErrors] = useState<Record<string, string>>({});
+  const [packSaving, setPackSaving] = useState(false);
+  const [pendingPack, setPendingPack] = useState<Pack | null>(null);
+  const [packStatusId, setPackStatusId] = useState<string | null>(null);
 
   const [unitsOpen, setUnitsOpen] = useState(false);
   const [unitName, setUnitName] = useState("");
@@ -214,6 +238,7 @@ export default function ItemsPage() {
       if (categoryId) params.set("categoryId", categoryId);
       params.set("status", status);
       if (needsPrice) params.set("needsPrice", "true");
+      if (regulatedOnly) params.set("regulated", "true");
       params.set("page", String(page));
       params.set("pageSize", "25");
       const { data } = await API.get<ItemList>(`/items?${params.toString()}`);
@@ -227,7 +252,7 @@ export default function ItemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, status, needsPrice, page]);
+  }, [query, categoryId, status, needsPrice, regulatedOnly, page]);
 
   useEffect(() => {
     void load();
@@ -268,6 +293,9 @@ export default function ItemsPage() {
     setSellingDirty(false);
     setFieldErrors({});
     setPreview(null);
+    setPacks([]);
+    setPackForm({ id: "", name: "", quantity: "" });
+    setPackErrors({});
     setFormOpen(true);
     try {
       await Promise.all([loadCategories(), loadUnits(false)]);
@@ -293,13 +321,20 @@ export default function ItemsPage() {
       cost,
       markup,
       selling: inputDecimal(row.sellingPrice, 2),
+      activeIngredient: row.activeIngredient || "",
+      strength: row.strength || "",
+      isRegulated: row.isRegulated,
     });
     setOriginalCost(cost);
     setOriginalMarkup(markup);
     setSellingDirty(false);
     setFieldErrors({});
+    setPackForm({ id: "", name: "", quantity: "" });
+    setPackErrors({});
     setFormOpen(true);
     try {
+      const { data } = await API.get<ItemRow & { packs?: Pack[] }>(`/items/${row.id}`);
+      setPacks(data.packs || []);
       await Promise.all([loadCategories(), loadUnits(true)]);
     } catch (err) {
       toast.error("Could not load the form", apiProblem(err).message);
@@ -329,6 +364,9 @@ export default function ItemsPage() {
       tracksExpiry: form.tracksExpiry,
       reorderLevel: form.reorderLevel.trim() === "" ? "0" : form.reorderLevel.trim(),
       taxType: form.taxType,
+      activeIngredient: form.activeIngredient.trim() === "" ? null : form.activeIngredient.trim(),
+      strength: form.strength.trim() === "" ? null : form.strength.trim(),
+      isRegulated: form.isRegulated,
     };
     if (canPrice) {
       payload.costPrice = form.cost.trim() === "" ? null : form.cost.trim();
@@ -439,7 +477,49 @@ export default function ItemsPage() {
     }
   };
 
-  const filtersOn = query !== "" || categoryId !== "" || status !== "active" || needsPrice;
+  const filtersOn = query !== "" || categoryId !== "" || status !== "active" || needsPrice || regulatedOnly;
+
+  const reloadPacks = async (itemId: string) => {
+    const { data } = await API.get<ItemRow & { packs?: Pack[] }>(`/items/${itemId}`);
+    setPacks(data.packs || []);
+  };
+
+  const savePack = async () => {
+    if (!editing) return;
+    setPackSaving(true);
+    setPackErrors({});
+    const payload = { name: packForm.name, quantityInBase: packForm.quantity.trim() };
+    try {
+      if (packForm.id) await API.put(`/items/${editing.id}/packs/${packForm.id}`, payload);
+      else await API.post(`/items/${editing.id}/packs`, payload);
+      toast.success(packForm.id ? "Pack updated" : "Pack added");
+      setPackForm({ id: "", name: "", quantity: "" });
+      await reloadPacks(editing.id);
+      await load();
+    } catch (err) {
+      const problem = apiProblem(err);
+      if (problem.field) setPackErrors({ [problem.field]: problem.message });
+      else toast.error("Could not save pack", problem.message);
+    } finally {
+      setPackSaving(false);
+    }
+  };
+
+  const deactivatePack = async (pack: Pack) => {
+    if (!editing) return;
+    setPackStatusId(pack.id);
+    try {
+      await API.patch(`/items/${editing.id}/packs/${pack.id}/status`, { isActive: false });
+      toast.success("Pack deactivated");
+      setPendingPack(null);
+      await reloadPacks(editing.id);
+      await load();
+    } catch (err) {
+      toast.error("Could not deactivate pack", apiProblem(err).message);
+    } finally {
+      setPackStatusId(null);
+    }
+  };
   const pricingChanged = form.cost !== originalCost || form.markup !== originalMarkup;
   const showOverride =
     form.selling.trim() !== "" &&
@@ -457,7 +537,10 @@ export default function ItemsPage() {
         header: "Name",
         render: (row) => (
           <span>
-            <span className="block font-semibold text-ink">{row.name}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="font-semibold text-ink">{row.name}</span>
+              {row.isRegulated ? <StatusBadge variant="warning">Regulated</StatusBadge> : null}
+            </span>
             <span className="block text-xs text-muted">
               {row.brand ? `${row.brand} · ${row.effectiveSku}` : row.effectiveSku}
             </span>
@@ -508,11 +591,11 @@ export default function ItemsPage() {
         ),
       },
     );
-    if (canManage) {
-      base.push({
-        key: "actions",
-        header: "Actions",
-        render: (row) => (
+    base.push({
+      key: "actions",
+      header: "Actions",
+      render: (row) =>
+        canManage ? (
           <span className="flex flex-wrap gap-2">
             <Button size="sm" variant="secondary" onClick={() => void openEdit(row)} disabled={statusId === row.id}>
               Edit
@@ -527,9 +610,12 @@ export default function ItemsPage() {
               </Button>
             )}
           </span>
+        ) : (
+          <Button size="sm" variant="secondary" onClick={() => void openEdit(row)}>
+            View
+          </Button>
         ),
-      });
-    }
+    });
     return base;
   }, [canManage, canViewCost, statusId, load]);
 
@@ -587,7 +673,7 @@ export default function ItemsPage() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <SearchInput
           label="Search items"
-          placeholder="Search name, brand, SKU, or barcode"
+          placeholder="Search name, brand, SKU, barcode, or active ingredient"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className="w-full lg:max-w-sm"
@@ -631,6 +717,17 @@ export default function ItemsPage() {
             label="Needs price"
           />
           <span className="text-sm font-medium text-ink">Needs price</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Switch
+            checked={regulatedOnly}
+            onCheckedChange={(checked) => {
+              setRegulatedOnly(checked);
+              setPage(1);
+            }}
+            label="Regulated"
+          />
+          <span className="text-sm font-medium text-ink">Regulated</span>
         </div>
       </div>
 
@@ -778,6 +875,116 @@ export default function ItemsPage() {
             </FormField>
           </section>
 
+          <section className="space-y-3">
+            <h3 className="text-sm font-bold text-ink">Product details</h3>
+            <FormField label="Active ingredient" htmlFor="item-ingredient" error={fieldErrors.activeIngredient}>
+              <Input
+                id="item-ingredient"
+                value={form.activeIngredient}
+                onChange={(event) => setForm({ ...form, activeIngredient: event.target.value })}
+              />
+            </FormField>
+            <FormField
+              label="Strength or formulation"
+              htmlFor="item-strength"
+              hint="For example: 20% w/v, 500ml bottle"
+              error={fieldErrors.strength}
+            >
+              <Input id="item-strength" value={form.strength} onChange={(event) => setForm({ ...form, strength: event.target.value })} />
+            </FormField>
+            <FormField label="Regulated product" hint="Veterinary medicines and pesticides that need extra care">
+              <Switch
+                checked={form.isRegulated}
+                onCheckedChange={(isRegulated) => setForm({ ...form, isRegulated })}
+                label="Regulated product"
+              />
+            </FormField>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="text-sm font-bold text-ink">Also sold as</h3>
+            {editing ? (
+              <>
+                <ul className="space-y-2">
+                  {packs.length === 0 ? <li className="text-sm text-muted">No pack sizes yet.</li> : null}
+                  {packs.map((pack) => {
+                    const unit = units.find((row) => row.id === form.unitId);
+                    const abbreviation = unit?.abbreviation || editing.unitAbbreviation;
+                    return (
+                      <li key={pack.id} className="flex flex-wrap items-center justify-between gap-2 rounded-control border border-sand px-3 py-2">
+                        <span>
+                          <span className="block text-sm font-semibold text-ink">{pack.name}</span>
+                          <span className="block text-sm text-ink">{`1 ${pack.name} = ${pack.quantityInBase} ${abbreviation}`}</span>
+                        </span>
+                        <span className="flex flex-wrap items-center gap-2">
+                          <StatusBadge variant={pack.isActive ? "success" : "inactive"}>{pack.isActive ? "Active" : "Inactive"}</StatusBadge>
+                          {canManage ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => {
+                                  setPackErrors({});
+                                  setPackForm({ id: pack.id, name: pack.name, quantity: String(pack.quantityInBase) });
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              {pack.isActive ? (
+                                <Button size="sm" variant="danger" onClick={() => setPendingPack(pack)} disabled={packStatusId === pack.id}>
+                                  Deactivate
+                                </Button>
+                              ) : null}
+                            </>
+                          ) : null}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {canManage ? (
+                  <div className="space-y-3 rounded-control border border-sand p-3">
+                    <FormField label="Name" htmlFor="pack-name" error={packErrors.name}>
+                      <Input
+                        id="pack-name"
+                        value={packForm.name}
+                        onChange={(event) => setPackForm({ ...packForm, name: event.target.value })}
+                      />
+                    </FormField>
+                    <FormField
+                      label={`How many ${units.find((row) => row.id === form.unitId)?.abbreviation || editing.unitAbbreviation} in one pack?`}
+                      htmlFor="pack-quantity"
+                      error={packErrors.quantityInBase}
+                    >
+                      <Input
+                        id="pack-quantity"
+                        inputMode="decimal"
+                        value={packForm.quantity}
+                        onChange={(event) => setPackForm({ ...packForm, quantity: event.target.value })}
+                      />
+                    </FormField>
+                    <div className="flex justify-end gap-2">
+                      {packForm.id ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setPackForm({ id: "", name: "", quantity: "" })}
+                          disabled={packSaving}
+                        >
+                          Cancel
+                        </Button>
+                      ) : null}
+                      <Button loading={packSaving} onClick={() => void savePack()}>
+                        {packForm.id ? "Save pack" : "Add pack"}
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <p className="text-sm text-ink">Save the item first, then add pack sizes.</p>
+            )}
+          </section>
+
           {canPrice ? (
             <section className="space-y-3">
               <h3 className="text-sm font-bold text-ink">Pricing</h3>
@@ -841,11 +1048,13 @@ export default function ItemsPage() {
 
           <div className="flex justify-end gap-2 border-t border-sand pt-4">
             <Button variant="ghost" onClick={() => setFormOpen(false)} disabled={saving}>
-              Cancel
+              {canManage ? "Cancel" : "Close"}
             </Button>
-            <Button loading={saving} onClick={() => void save(false)}>
-              Save
-            </Button>
+            {canManage ? (
+              <Button loading={saving} onClick={() => void save(false)}>
+                Save
+              </Button>
+            ) : null}
           </div>
         </div>
       </Drawer>
@@ -939,6 +1148,21 @@ export default function ItemsPage() {
           if (!moving) setConfirmMove(false);
         }}
         onConfirm={() => void moveCategory()}
+      />
+
+      <ConfirmDialog
+        open={pendingPack != null}
+        title="Deactivate this pack?"
+        message={pendingPack ? `"${pendingPack.name}" will be hidden from active pack lists.` : ""}
+        confirmLabel="Deactivate"
+        danger
+        loading={packStatusId != null}
+        onCancel={() => {
+          if (!packStatusId) setPendingPack(null);
+        }}
+        onConfirm={() => {
+          if (pendingPack) void deactivatePack(pendingPack);
+        }}
       />
 
       <ConfirmDialog
