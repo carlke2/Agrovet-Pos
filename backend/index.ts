@@ -21,6 +21,8 @@ import categoryRoutes from '@/routes/categories';
 import unitRoutes from '@/routes/units';
 import itemRoutes from '@/routes/items';
 import supplierRoutes from '@/routes/suppliers';
+import receiptRoutes from '@/routes/receipts';
+import stockRoutes from '@/routes/stock';
 import { isSupabaseConfigured } from '@/services/supabase';
 import { checkDatabase, connectDatabase } from '@/services/prisma';
 
@@ -120,6 +122,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/receipts', receiptRoutes);
+app.use('/api/stock', stockRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
