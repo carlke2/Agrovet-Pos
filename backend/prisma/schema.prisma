@@ -463,6 +463,26 @@ model ItemLedgerEntry {
   @@map("item_ledger_entries")
 }
 
+// Shop customers. The system Walk-in row is created only by npm run db:create-walkin.
+model Customer {
+  id          String   @id @default(cuid())
+  customerNo  Int      @unique @default(autoincrement())
+  name        String
+  phone       String?
+  phoneKey    String?  @unique
+  email       String?
+  notes       String?
+  creditLimit Decimal  @default(0) @db.Decimal(12, 2)
+  isSystem    Boolean  @default(false)
+  systemKey   String?  @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@map("customers")
+}
+
 // Single app settings row. Stored in Supabase, not a local file.
 model SystemSetting {
   id          String   @id @default("app")
