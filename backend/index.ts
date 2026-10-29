@@ -21,6 +21,7 @@ import categoryRoutes from '@/routes/categories';
 import unitRoutes from '@/routes/units';
 import itemRoutes from '@/routes/items';
 import supplierRoutes from '@/routes/suppliers';
+import customerRoutes from '@/routes/customers';
 import receiptRoutes from '@/routes/receipts';
 import stockRoutes from '@/routes/stock';
 import { isSupabaseConfigured } from '@/services/supabase';
@@ -122,6 +123,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/customers', customerRoutes);
 app.use('/api/receipts', receiptRoutes);
 app.use('/api/stock', stockRoutes);
 
