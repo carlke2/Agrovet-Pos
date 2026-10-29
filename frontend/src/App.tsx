@@ -31,6 +31,7 @@ import LegacySuppliersPage from "@/pages/pos/SuppliersPage";
 import CategoriesPage from "@/pages/catalog/CategoriesPage";
 import ItemsPage from "@/pages/catalog/ItemsPage";
 import SuppliersPage from "@/pages/catalog/SuppliersPage";
+import CustomersPage from "@/pages/customers/CustomersPage";
 import FinanceDashboard from "@/pages/finance/FinanceDashboard";
 import ExpensesPage from "@/pages/finance/ExpensesPage";
 import ReceiptsPage from "@/pages/finance/ReceiptsPage";
@@ -105,6 +106,7 @@ function AppShell() {
           <Route path="/items" element={R("view_catalog", <ItemsPage />)} />
           <Route path="/inventory" element={R("legacy_full_access", <InventoryPage />)} />
           <Route path="/suppliers" element={R("view_suppliers", <SuppliersPage />)} />
+          <Route path="/customers" element={R("view_customers", <CustomersPage />)} />
           <Route path="/legacy/suppliers" element={R("legacy_full_access", <LegacySuppliersPage />)} />
           <Route path="/my-attendance" element={R("legacy_pos_access", <StaffAttendanceReport />)} />
 

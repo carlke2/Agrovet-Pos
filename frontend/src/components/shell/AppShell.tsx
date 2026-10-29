@@ -3,6 +3,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  Contact,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -60,7 +61,10 @@ const GROUPS: NavGroup[] = [
       { name: "Suppliers", path: "/suppliers", icon: Truck, permission: "view_suppliers" },
     ],
   },
-  { label: "Customers", items: [] },
+  {
+    label: "Customers",
+    items: [{ name: "Customers", path: "/customers", icon: Contact, permission: "view_customers" }],
+  },
   {
     label: "Finance",
     items: [
@@ -122,6 +126,7 @@ function pageMeta(pathname: string) {
   if (pathname.startsWith("/inventory")) return { title: "Inventory", subtitle: "Stock on hand" };
   if (pathname.startsWith("/legacy/suppliers")) return { title: "Suppliers", subtitle: "Legacy bakery suppliers" };
   if (pathname.startsWith("/suppliers")) return { title: "Suppliers", subtitle: "Who you buy from" };
+  if (pathname.startsWith("/customers")) return { title: "Customers", subtitle: "People you sell to" };
   if (pathname.startsWith("/finance")) return { title: "Finance" };
   if (pathname.startsWith("/expenses")) return { title: "Expenses" };
   if (pathname.startsWith("/legacy/receipts")) return { title: "Receipts", subtitle: "Legacy sales receipts" };

@@ -17,6 +17,7 @@ export const APP_PAGES: AppPage[] = [
   { name: "Menu", path: "/menu-management", permission: "legacy_full_access" },
   { name: "Inventory", path: "/inventory", permission: "legacy_full_access" },
   { name: "Suppliers", path: "/suppliers", permission: "view_suppliers" },
+  { name: "Customers", path: "/customers", permission: "view_customers" },
   { name: "Finance Dashboard", path: "/finance", permission: "legacy_full_access" },
   { name: "Expenses", path: "/expenses", permission: "legacy_full_access" },
   { name: "Receive stock", path: "/receipts", permission: "view_receipts" },

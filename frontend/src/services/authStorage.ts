@@ -9,6 +9,8 @@ export type Permission =
   | "manage_prices"
   | "view_suppliers"
   | "manage_suppliers"
+  | "view_customers"
+  | "manage_customers"
   | "view_stock"
   | "view_receipts"
   | "manage_receiving"
